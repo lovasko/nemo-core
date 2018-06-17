@@ -4,8 +4,8 @@
 // Distributed under the terms of the 2-clause BSD License. The full
 // license is in the file LICENSE, distributed as part of this software.
 
-#ifndef NEMO_LOG_H
-#define NEMO_LOG_H
+#ifndef NEMO_UTIL_LOG_H
+#define NEMO_UTIL_LOG_H
 
 #include <stdbool.h>
 #include <stdint.h>

@@ -17,6 +17,9 @@
 
 #include "log.h"
 
+// Logging settings.
+uint8_t log_lvl; ///< Minimal logging level.
+bool    log_col; ///< Coloring policy.
 
 // Maximal length of a logging line.
 #define NEMO_LOG_MAX_LENGTH 128

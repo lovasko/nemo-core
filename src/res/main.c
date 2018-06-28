@@ -132,7 +132,7 @@ parse_arguments(int argc, char* argv[])
   op_ipv6 = false;
 
   // Loop through available options.
-  while ((opt = getopt(argc, argv, "46ehk:np:r:w:v")) != -1) {
+  while ((opt = getopt(argc, argv, "46ehk:np:r:t:w:v")) != -1) {
     switch (opt) {
 
       // IPv4-only mode.
@@ -164,6 +164,12 @@ parse_arguments(int argc, char* argv[])
       // Read buffer memory size.
       case 'r':
         if (parse_scalar(&op_rbuf, optarg, "b", parse_memory_unit) == 0)
+          return false;
+        break;
+
+      // Set IP Time-To-Live value.
+      case 't':
+        if (parse_uint64(&op_ttl, optarg, 1, 255) == 0)
           return false;
         break;
 

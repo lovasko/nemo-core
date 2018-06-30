@@ -320,7 +320,7 @@ create_socket6(void)
   // Create a UDP socket.
   sock6 = socket(AF_INET6, SOCK_DGRAM, 0);
   if (sock6 < 0) {
-    log_(LL_WARN, true, "unable to create the UDP/IPv6 socket"); 
+    log_(LL_WARN, true, "unable to initialize the UDP/IPv6 socket"); 
     return false;
   }
 
@@ -391,6 +391,9 @@ receive_datagram(struct sockaddr_storage* addr, payload* pl, int sock)
   struct iovec data;
   ssize_t n;
 
+  log_(LL_DEBUG, false, "receiving datagram on UDP/IPv%d socket",
+       sock == sock4 ? 4 : 6);
+
   // Prepare payload data.
   data.iov_base = pl;
   data.iov_len  = sizeof(*pl);
@@ -443,6 +446,8 @@ update_payload(payload* pl)
   struct timespec rts;
   int ret;
 
+  log_(LL_DEBUG, false, "updating payload");
+
   // Change the message type.
   pl->pl_type = NEMO_PAYLOAD_TYPE_RESPONSE;
 
@@ -480,6 +485,8 @@ send_datagram(int sock, payload* pl, struct sockaddr_storage* addr)
   ssize_t n;
   struct msghdr msg;
   struct iovec data;
+
+  log_(LL_DEBUG, false, "sending datagram");
 
   // Prepare payload data.
   data.iov_base = pl;
@@ -522,6 +529,8 @@ respond_loop(void)
   int ret;
   fd_set rfd;
   struct sockaddr_storage addr;
+
+  log_(LL_INFO, false, "starting the response loop");
 
   // Add sockets to the event list.
   if (op_ipv4)

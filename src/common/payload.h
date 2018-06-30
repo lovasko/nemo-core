@@ -25,9 +25,10 @@ typedef struct _payload {
   uint8_t  pl_fver;   ///< Format version.
   uint8_t  pl_type;   ///< Message type.
   uint16_t pl_port;   ///< UDP port.
-  uint8_t  pl_ttl1;   ///< Time-To-Live in requester.
-  uint8_t  pl_ttl2;   ///< Time-To-Live in responder.
-  uint8_t  pl_pad[6]; ///< Padding (unused).
+  uint8_t  pl_ttl1;   ///< Time-To-Live when sent from requester.
+  uint8_t  pl_ttl2;   ///< Time-To-Live when received by responder.
+  uint8_t  pl_ttl3;   ///< Time-To-Live when sent from responder.
+  uint8_t  pl_pad[5]; ///< Padding (unused).
   uint64_t pl_snum;   ///< Sequence iteration number.
   uint64_t pl_slen;   ///< Sequence length.
   uint64_t pl_laddr;  ///< IP address - low-bits.

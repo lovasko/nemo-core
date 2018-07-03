@@ -153,6 +153,7 @@ parse_arguments(int argc, char* argv[])
       // Usage information.
       case 'h':
         print_usage();
+        _exit(EXIT_FAILURE);
         return true;
 
       // Key of the current run.

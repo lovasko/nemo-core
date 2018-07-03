@@ -530,15 +530,58 @@ send_datagram(int sock, payload* pl, struct sockaddr_storage* addr)
   return true;
 }
 
+/// Handle the event of an incoming datagram.
+/// @return success/failure indication
+///
+/// @param[in] sock socket
+/// @param[in] ipv  IP version
+static bool
+handle_event(int sock, const char* ipv)
+{
+  bool retb;
+  struct sockaddr_storage addr;
+  payload pl;
+
+  // Receive a request.
+  retb = receive_datagram(&addr, &pl, sock);
+  if (retb == false) {
+    log_(LL_WARN, false, "unable to receive datagram on the %s socket", ipv);
+
+    // We do not continue with the response, given the receiving of the
+    // request has failed. If the op_err option was selected, all network
+    // transmission errors should be treated as fatal. In order to propagate
+    // error, we need to return 'false', if op_err was 'true'. The same applies
+    // in the opposite case.
+    return !op_err;
+  }
+
+  // Update payload.
+  retb = update_payload(&pl);
+  if (retb == false) {
+    log_(LL_WARN, false, "unable to update the payload");
+    return false;
+  }
+
+  // Send a response back.
+  retb = send_datagram(sock4, &pl, &addr);
+  if (retb == false) {
+    log_(LL_WARN, false, "unable to send datagram on IPv4 socket");
+
+    // Following the same logic as above in the receive stage.
+    return !op_err;
+  }
+
+  return true;
+}
+
 /// Start responding to requests on both IPv4 and IPv6 sockets.
 /// @return success/failure indication
 static bool
 respond_loop(void)
 {
-  payload pl;
-  int ret;
+  int reti;
+  bool retb;
   fd_set rfd;
-  struct sockaddr_storage addr;
 
   log_(LL_INFO, false, "starting the response loop");
 
@@ -550,8 +593,8 @@ respond_loop(void)
 
   while (true) {
     // Wait for incoming datagram events.
-    ret = pselect(5, &rfd, NULL, NULL, NULL, NULL);
-    if (ret == -1) {
+    reti = pselect(5, &rfd, NULL, NULL, NULL, NULL);
+    if (reti == -1) {
       // Check for interrupt (possibly due to a signal).
       if (errno == EINTR) {
         if (sint)
@@ -568,46 +611,16 @@ respond_loop(void)
 
     // Handle incoming IPv4 datagrams.
     if (FD_ISSET(sock4, &rfd)) {
-      if (!receive_datagram(&addr, &pl, sock4)) {
-        log_(LL_WARN, false, "unable to receive datagram on IPv4 socket");
-
-        if (op_err)
-          return false;
-      }
-
-      if (!update_payload(&pl)) {
-        log_(LL_WARN, false, "unable to update the payload");
+      retb = handle_event(sock4, "IPv4");
+      if (retb == false)
         return false;
-      }
-
-      if (!send_datagram(sock4, &pl, &addr)) {
-        log_(LL_WARN, false, "unable to send datagram on IPv4 socket");
-
-        if (op_err)
-          return false;
-      }
     }
 
     // Handle incoming IPv6 datagrams.
     if (FD_ISSET(sock6, &rfd)) {
-      if (!receive_datagram(&addr, &pl, sock6)) {
-        log_(LL_WARN, false, "unable to receive datagram on IPv6 socket");
-
-        if (op_err)
-          return false;
-      }
-
-      if (!update_payload(&pl)) {
-        log_(LL_WARN, false, "unable to update the payload");
+      retb = handle_event(sock6, "IPv6");
+      if (retb == false)
         return false;
-      }
-
-      if (!send_datagram(sock6, &pl, &addr)) {
-        log_(LL_WARN, false, "unable to send datagram on IPv6 socket");
-
-        if (op_err)
-          return false;
-      }
     }
   }
 

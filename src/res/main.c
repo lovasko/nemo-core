@@ -28,18 +28,18 @@
 
 
 // Default values.
-#define DEF_READ_BUFFER_SIZE  2000000
-#define DEF_WRITE_BUFFER_SIZE 2000000
-#define DEF_EXIT_ON_ERROR     false
-#define DEF_UDP_PORT          23000
-#define DEF_LOG_LEVEL         LL_INFO
-#define DEF_LOG_COLOR         true
-#define DEF_TIME_TO_LIVE      64
+#define DEF_RECEIVE_BUFFER_SIZE 2000000
+#define DEF_SEND_BUFFER_SIZE    2000000
+#define DEF_EXIT_ON_ERROR       false
+#define DEF_UDP_PORT            23000
+#define DEF_LOG_LEVEL           LL_INFO
+#define DEF_LOG_COLOR           true
+#define DEF_TIME_TO_LIVE        64
 
 // Command-line options.
 static uint64_t op_port; ///< UDP port number.
-static uint64_t op_rbuf; ///< Socket read buffer size.
-static uint64_t op_wbuf; ///< Socket write buffer size.
+static uint64_t op_rbuf; ///< Socket receive buffer size.
+static uint64_t op_sbuf; ///< Socket send buffer size.
 static uint64_t op_key;  ///< Unique key.
 static uint64_t op_ttl;  ///< Time-To-Live for outgoing IP packets.
 static bool     op_err;  ///< Early exit on first network error.
@@ -96,10 +96,10 @@ print_usage(void)
     "  -k KEY  Key for the current run. (def=random)\n"
     "  -n      Turn off coloring in the logging output.\n"
     "  -p NUM  UDP port to use for all endpoints. (def=%d)\n"
-    "  -r BSZ  Socket read memory buffer size. (def=2m)\n"
+    "  -r BSZ  Socket receive memory buffer size. (def=2m)\n"
+    "  -s BSZ  Socket send memory buffer size. (def=2m)\n"
     "  -t TTL  Outgoing IP Time-To-Live value. (def=%d)\n"
-    "  -v      Increase the verbosity of the logging output.\n"
-    "  -w BSZ  Socket write memory buffer size. (def=2m)\n",
+    "  -v      Increase the verbosity of the logging output.\n",
     NEMO_VERSION_MAJOR,
     NEMO_VERSION_MINOR,
     NEMO_VERSION_PATCH,
@@ -120,8 +120,8 @@ parse_arguments(int argc, char* argv[])
   log_(LL_INFO, false, "parse command-line arguments");
 
   // Set optional arguments to sensible defaults.
-  op_rbuf = DEF_READ_BUFFER_SIZE;
-  op_wbuf = DEF_WRITE_BUFFER_SIZE;
+  op_rbuf = DEF_RECEIVE_BUFFER_SIZE;
+  op_sbuf = DEF_SEND_BUFFER_SIZE;
   op_err  = DEF_EXIT_ON_ERROR;
   op_port = DEF_UDP_PORT;
   op_ttl  = DEF_TIME_TO_LIVE;
@@ -132,7 +132,7 @@ parse_arguments(int argc, char* argv[])
   op_ipv6 = false;
 
   // Loop through available options.
-  while ((opt = getopt(argc, argv, "46ehk:np:r:t:w:v")) != -1) {
+  while ((opt = getopt(argc, argv, "46ehk:np:r:s:t:v")) != -1) {
     switch (opt) {
 
       // IPv4-only mode.
@@ -162,9 +162,15 @@ parse_arguments(int argc, char* argv[])
           return false;
         break;
 
-      // Read buffer memory size.
+      // Receive buffer memory size.
       case 'r':
         if (parse_scalar(&op_rbuf, optarg, "b", parse_memory_unit) == 0)
+          return false;
+        break;
+
+      // Send buffer memory size.
+      case 's':
+        if (parse_scalar(&op_sbuf, optarg, "b", parse_memory_unit) == 0)
           return false;
         break;
 
@@ -174,11 +180,6 @@ parse_arguments(int argc, char* argv[])
           return false;
         break;
 
-      // Write buffer memory size.
-      case 'w':
-        if (parse_scalar(&op_wbuf, optarg, "b", parse_memory_unit) == 0)
-          return false;
-        break;
     }
   }
 
@@ -276,7 +277,7 @@ create_socket4(void)
     return false;
   }
 
-  // Set the socket read buffer size.
+  // Set the socket receive buffer size.
   val = (int)op_rbuf;
   ret = setsockopt(sock4, SOL_SOCKET, SO_RCVBUF, &val, sizeof(val));
   if (ret == -1) {
@@ -284,8 +285,8 @@ create_socket4(void)
     return false;
   }
 
-  // Set the socket write buffer size.
-  val = (int)op_wbuf;
+  // Set the socket send buffer size.
+  val = (int)op_sbuf;
   ret = setsockopt(sock4, SOL_SOCKET, SO_SNDBUF, &val, sizeof(val));
   if (ret == -1) {
     log_(LL_WARN, true, "unable to set the socket send buffer size to %d", val);
@@ -351,7 +352,7 @@ create_socket6(void)
     return false;
   }
 
-  // Set the socket read buffer size.
+  // Set the socket receive buffer size.
   val = (int)op_rbuf;
   ret = setsockopt(sock6, SOL_SOCKET, SO_RCVBUF, &val, sizeof(val));
   if (ret == -1) {
@@ -359,8 +360,8 @@ create_socket6(void)
     return false;
   }
 
-  // Set the socket write buffer size.
-  val = (int)op_wbuf;
+  // Set the socket send buffer size.
+  val = (int)op_sbuf;
   ret = setsockopt(sock6, SOL_SOCKET, SO_SNDBUF, &val, sizeof(val));
   if (ret == -1) {
     log_(LL_WARN, true, "unable to set the socket send buffer size to %d", val);

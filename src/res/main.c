@@ -106,8 +106,8 @@ print_usage(void)
     NEMO_VERSION_MINOR,
     NEMO_VERSION_PATCH,
     NEMO_PAYLOAD_VERSION,
-    DEF_TIME_TO_LIVE,
-    DEF_UDP_PORT);
+    DEF_UDP_PORT,
+    DEF_TIME_TO_LIVE);
 }
 
 /// Parse command-line arguments.

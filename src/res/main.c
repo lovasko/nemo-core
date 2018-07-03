@@ -82,11 +82,13 @@ static void
 print_usage(void)
 {
   printf(
-    "Unicast heartbeat responder - v%d.%d.%d\n"
-    "Respond to all well-formed datagrams.\n\n"
+    "About:\n"
+    "  Unicast heartbeat responder.\n"
+    "  Program version: %d.%d.%d\n"
+    "  Payload version: %d\n\n"
 
     "Usage:\n"
-    "  nres [OPTIONS]\n\n"
+    "  nres [-46ehnv] [-k KEY] [-p NUM] [-r RBS] [-s SBS] [-t TTL]\n\n"
 
     "Options:\n"
     "  -4      Use only the IPv4 protocol.\n"
@@ -96,13 +98,14 @@ print_usage(void)
     "  -k KEY  Key for the current run. (def=random)\n"
     "  -n      Turn off coloring in the logging output.\n"
     "  -p NUM  UDP port to use for all endpoints. (def=%d)\n"
-    "  -r BSZ  Socket receive memory buffer size. (def=2m)\n"
-    "  -s BSZ  Socket send memory buffer size. (def=2m)\n"
+    "  -r RBS  Socket receive memory buffer size. (def=2m)\n"
+    "  -s SBS  Socket send memory buffer size. (def=2m)\n"
     "  -t TTL  Outgoing IP Time-To-Live value. (def=%d)\n"
     "  -v      Increase the verbosity of the logging output.\n",
     NEMO_VERSION_MAJOR,
     NEMO_VERSION_MINOR,
     NEMO_VERSION_PATCH,
+    NEMO_PAYLOAD_VERSION,
     DEF_TIME_TO_LIVE,
     DEF_UDP_PORT);
 }

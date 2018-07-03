@@ -180,6 +180,11 @@ parse_arguments(int argc, char* argv[])
           return false;
         break;
 
+      // Increase the logging verbosity.
+      case 'v':
+	if (op_llvl != LL_DEBUG)
+	  op_llvl++;
+	return true;
     }
   }
 

@@ -188,6 +188,17 @@ parse_arguments(int argc, char* argv[])
 	if (op_llvl != LL_DEBUG)
 	  op_llvl++;
 	return true;
+
+      // Unknown option.
+      case '?':
+        print_usage();
+        log_(LL_WARN, "unknown option %c", optopt);
+        return false;
+
+      // Unknown situation.
+      default:
+        print_usage();
+        return false;
     }
   }
 

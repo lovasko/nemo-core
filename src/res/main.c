@@ -618,32 +618,39 @@ respond_loop(void)
 int
 main(int argc, char* argv[])
 {
+  bool retb;
+
   // Parse command-line arguments.
-  if (!parse_arguments(argc, argv)) {
+  retb = parse_arguments(argc, argv);
+  if (retb == false) {
     log_(LL_ERROR, false, "unable to parse command-line arguments");
     return EXIT_FAILURE;
   }
 
   // Install the signal handlers.
-  if (!install_signal_handlers()) {
+  retb = install_signal_handlers();
+  if (retb == false) {
     log_(LL_ERROR, false, "unable to install signal handlers");
     return EXIT_FAILURE;
   }
 
   // Create the IPv4 socket.
-  if (!create_socket4()) {
+  retb = create_socket4();
+  if (retb == false) {
     log_(LL_ERROR, false, "unable to create UDP/IPv4 socket");
     return EXIT_FAILURE;
   }
 
   // Create the IPv6 socket.
-  if (!create_socket6()) {
+  retb = create_socket6();
+  if (retb == false) {
     log_(LL_ERROR, false, "unable to create UDP/IPv6 socket");
     return EXIT_FAILURE;
   }
 
   // Start the main responding loop.
-  if (!respond_loop()) {
+  retb = respond_loop();
+  if (retb == false) {
     log_(LL_ERROR, false, "responding loop has finished");
     return EXIT_FAILURE;
   }

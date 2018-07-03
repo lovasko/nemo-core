@@ -99,7 +99,7 @@ print_usage(void)
     "  -r BSZ  Socket read memory buffer size. (def=2m)\n"
     "  -t TTL  Outgoing IP Time-To-Live value. (def=%d)\n"
     "  -v      Increase the verbosity of the logging output.\n"
-    "  -w RSZ  Socket write memory buffer size. (def=2m)\n",
+    "  -w BSZ  Socket write memory buffer size. (def=2m)\n",
     NEMO_VERSION_MAJOR,
     NEMO_VERSION_MINOR,
     NEMO_VERSION_PATCH,

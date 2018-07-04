@@ -237,6 +237,7 @@ static bool
 install_signal_handlers(void)
 {
   struct sigaction sa;
+  int reti;
 
   log_(LL_INFO, false, "installing signal handler for %s", "SIGINT");
 
@@ -248,7 +249,8 @@ install_signal_handlers(void)
   sa.sa_handler = signal_handler;
 
   // Install signal handler for SIGINT.
-  if (sigaction(SIGINT, &sa, NULL) < 0) {
+  reti = sigaction(SIGINT, &sa, NULL);
+  if (reti == -1) {
     log_(LL_WARN, true, "unable to add signal handler for %s", "SIGINT");
     return false;
   }

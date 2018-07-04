@@ -165,6 +165,12 @@ parse_arguments(int argc, char* argv[])
           return false;
         break;
 
+      // UDP port to use.
+      case 'p':
+	if (parse_uint64(&op_port, optarg, 1, 65535) == false)
+	  return false;
+	break;
+
       // Receive buffer memory size.
       case 'r':
         if (parse_scalar(&op_rbuf, optarg, "b", parse_memory_unit) == 0)

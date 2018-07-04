@@ -192,7 +192,7 @@ parse_arguments(int argc, char* argv[])
       // Unknown option.
       case '?':
         print_usage();
-        log_(LL_WARN, "unknown option %c", optopt);
+        log_(LL_WARN, false, "unknown option %c", optopt);
         return false;
 
       // Unknown situation.

@@ -150,7 +150,7 @@ parse_arguments(int argc, char* argv[])
 
       // Process exit on transmission error.
       case 'e':
-        op_err = 1;
+        op_err = true;
         break;
 
       // Usage information.

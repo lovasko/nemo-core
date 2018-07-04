@@ -581,7 +581,7 @@ handle_event(int sock, const char* ipv)
   // Send a response back.
   retb = send_datagram(sock4, &pl, &addr);
   if (retb == false) {
-    log_(LL_WARN, false, "unable to send datagram on IPv4 socket");
+    log_(LL_WARN, false, "unable to send datagram on the %s socket", ipv);
 
     // Following the same logic as above in the receive stage.
     return !op_err;

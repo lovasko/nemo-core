@@ -271,12 +271,12 @@ create_socket4(void)
   if (!op_ipv4)
     return true;
 
-  log_(LL_INFO, false, "creating UDP/IPv4 socket");
+  log_(LL_INFO, false, "creating %s socket", "IPv4");
   
   // Create a UDP socket.
   sock4 = socket(AF_INET, SOCK_DGRAM, 0);
   if (sock4 < 0) {
-    log_(LL_WARN, true, "unable to create the IPv4 socket"); 
+    log_(LL_WARN, true, "unable to initialise the %s socket", "IPv4"); 
     return false;
   }
 
@@ -284,7 +284,7 @@ create_socket4(void)
   val = 1;
   ret = setsockopt(sock4, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val));
   if (ret == -1) {
-    log_(LL_WARN, true, "unable to set the socket address reusable");
+    log_(LL_WARN, true, "unable to set the %s socket address reusable", "IPv4");
     return false;
   }
 
@@ -294,7 +294,7 @@ create_socket4(void)
   addr.sin_addr.s_addr = INADDR_ANY;
   ret = bind(sock4, (struct sockaddr*)&addr, sizeof(addr));
   if (ret < 0) {
-    log_(LL_WARN, true, "unable to bind the IPv4 socket");
+    log_(LL_WARN, true, "unable to bind the %s socket", "IPv4");
     return false;
   }
 
@@ -302,7 +302,8 @@ create_socket4(void)
   val = (int)op_rbuf;
   ret = setsockopt(sock4, SOL_SOCKET, SO_RCVBUF, &val, sizeof(val));
   if (ret == -1) {
-    log_(LL_WARN, true, "unable to set the read socket buffer size to %d", val);
+    log_(LL_WARN, true, "unable to set the %s socket receive buffer size to %d",
+         "IPv4", val);
     return false;
   }
 
@@ -310,7 +311,8 @@ create_socket4(void)
   val = (int)op_sbuf;
   ret = setsockopt(sock4, SOL_SOCKET, SO_SNDBUF, &val, sizeof(val));
   if (ret == -1) {
-    log_(LL_WARN, true, "unable to set the socket send buffer size to %d", val);
+    log_(LL_WARN, true, "unable to set the %s socket send buffer size to %d",\
+         "IPv4", val);
     return false;
   }
 
@@ -318,7 +320,8 @@ create_socket4(void)
   val = (int)op_ttl;
   ret = setsockopt(sock4, IPPROTO_IP, IP_TTL, &val, sizeof(val));
   if (ret == -1) {
-    log_(LL_WARN, true, "unable to set time-to-live to %d", val);
+    log_(LL_WARN, true, "unable to set the %s socket time-to-live to %d",
+         "IPv4", val);
     return false;
   }
 
@@ -338,12 +341,12 @@ create_socket6(void)
   if (!op_ipv6)
     return true;
 
-  log_(LL_INFO, false, "creating UDP/IPv6 socket");
+  log_(LL_INFO, false, "creating %s socket", "IPv6");
   
   // Create a UDP socket.
   sock6 = socket(AF_INET6, SOCK_DGRAM, 0);
   if (sock6 < 0) {
-    log_(LL_WARN, true, "unable to initialize the UDP/IPv6 socket"); 
+    log_(LL_WARN, true, "unable to initialize the %s socket", "IPv6"); 
     return false;
   }
 
@@ -351,7 +354,7 @@ create_socket6(void)
   val = 1;
   ret = setsockopt(sock6, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val));
   if (ret == -1) {
-    log_(LL_WARN, true, "unable to set the socket address reusable");
+    log_(LL_WARN, true, "unable to set the %s socket address reusable", "IPv6");
     return false;
   }
 
@@ -359,7 +362,7 @@ create_socket6(void)
   val = 1;
   ret = setsockopt(sock6, IPPROTO_IPV6, IPV6_V6ONLY, &val, sizeof(val));
   if (ret == -1) {
-    log_(LL_WARN, true, "unable to disable IPv4 traffic on IPv6 socket");
+    log_(LL_WARN, true, "unable to disable IPv4 traffic on %s socket", "IPv6");
     return false;
   }
 
@@ -369,7 +372,7 @@ create_socket6(void)
   addr.sin6_addr   = in6addr_any;
   ret = bind(sock6, (struct sockaddr*)&addr, sizeof(addr));
   if (ret < 0) {
-    log_(LL_WARN, true, "unable to bind the IPv6 socket");
+    log_(LL_WARN, true, "unable to bind the %s socket", "IPv6");
     return false;
   }
 
@@ -414,8 +417,8 @@ receive_datagram(struct sockaddr_storage* addr, payload* pl, int sock)
   struct iovec data;
   ssize_t n;
 
-  log_(LL_DEBUG, false, "receiving datagram on UDP/IPv%d socket",
-       sock == sock4 ? 4 : 6);
+  log_(LL_DEBUG, false, "receiving datagram on %s%d socket",
+       "IPv", sock == sock4 ? 4 : 6);
 
   // Prepare payload data.
   data.iov_base = pl;
@@ -663,14 +666,14 @@ main(int argc, char* argv[])
   // Create the IPv4 socket.
   retb = create_socket4();
   if (retb == false) {
-    log_(LL_ERROR, false, "unable to create UDP/IPv4 socket");
+    log_(LL_ERROR, false, "unable to create %s socket", "IPv4");
     return EXIT_FAILURE;
   }
 
   // Create the IPv6 socket.
   retb = create_socket6();
   if (retb == false) {
-    log_(LL_ERROR, false, "unable to create UDP/IPv6 socket");
+    log_(LL_ERROR, false, "unable to create %s socket", "IPv6");
     return EXIT_FAILURE;
   }
 

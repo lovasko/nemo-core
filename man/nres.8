@@ -1,0 +1,198 @@
+.\" Copyright (c) 2018 Daniel Lovasko.
+.\" All Rights Reserved
+.\"
+.\" Distributed under the terms of the 2-clause BSD License. The full
+.\" license is in the file LICENSE, distributed as part of this software.
+.Dd Jul 06, 2018
+.Dt NEMO 8
+.Os UNIX
+.Sh NAME
+.Nm nres 
+.Nd unicast heartbeat responder 
+.Sh SYNOPSIS
+.Nm
+.Op Fl 4
+.Op Fl 6
+.Op Fl e
+.Op Fl h
+.Op Fl k Ar key
+.Op Fl l
+.Op Fl n
+.Op Fl p Ar num
+.Op Fl r Ar rbs
+.Op Fl s Ar sbs
+.Op Fl t Ar ttl
+.Op Fl v
+.
+.Sh DESCRIPTION
+The
+.Nm
+utility awaits for incoming unicast UDP datagrams and issues replies accordingly. It can
+be used in conjunction with the
+.Xr nreq 8
+utility to test, debug and verify network configurations.
+.Sh OPTIONS
+The utility accepts the following command-line options:
+.Bl -tag -width Ds
+.It Fl 4
+The network communication will only use the IP version 4. This option is mutually exclusive with
+.Fl 6 .
+.
+.It Fl 6
+The network communication will only use the IP version 6. This option is mutually exclusive with
+.Fl 4 .
+.
+.It Fl e
+The process will terminate when the first network-related error is encountered.
+If not specified, the process will only print the relevant error message.
+.
+.It Fl h
+Prints the usage message.
+.
+.It Fl k Ar key
+Sets the key of each outgoing nemo payload (see FLOW IDENTIFICATION). If not
+specified, a random value is generated.
+.
+.It Fl n
+Disables the usage of colors in the logging output (see LOGGING).
+.
+.It Fl p Ar num
+Specify the UDP port of all created endpoints. The default value is
+.Em 23000 .
+.
+.It Fl r Ar rbs
+Sets the socket receive memory buffer to the specified size (see MEMORY SIZE FORMAT).
+The default value is
+.Em 2mb .
+.
+.It Fl s Ar sbs
+Sets the socket send memory buffer to the specified size (see MEMORY SIZE FORMAT).
+.Em 2mb .
+.
+.It Fl t Ar ttl
+Sets the Time-To-Live property of each outgoing datagram.
+If not specified, the value defaults to
+. Em 64 .
+.
+.It Fl v
+Enables more verbose logging. Repeating this flag will turn on more
+detailed levels of logging messages (see LOGGING).
+.El
+.
+.Sh FLOW IDENTIFICATION
+In order to support multiple simultaneous runs of the tool, the publisher can
+stamp the payload with a key - a 64-bit unsigned integer - that identifies the
+set of outgoing packets. Similarly the subscriber utility is able to filter out
+everything but a given key.
+.
+.Sh MEMORY SIZE FORMAT
+The memory size has to be specified by an unsigned integer, followed by a
+memory unit. An example of a valid memory size is
+.Em 1KB .
+Supported units are:
+.Em B ,
+.Em KB ,
+.Em K ,
+.Em MB ,
+.Em M ,
+.Em GB ,
+.Em G .
+All units are accepted case-insensitive. Zero memory size is allowed, e.g.
+.Em 0B .
+.
+.Sh DURATION FORMAT
+The time duration has to be specified by an unsigned integer, followed by a
+time unit. An example of a valid duration is
+.Em 1s .
+Supported units are:
+.Em ns ,
+.Em us ,
+.Em ms ,
+.Em s ,
+.Em m ,
+.Em h ,
+.Em d .
+Zero duration is allowed, e.g.
+.Em 0ms .
+.
+.Sh PAYLOAD FORMAT
+The format of the payload is binary. All numeric fields are unsigned
+integers in network byte order, while the 64-bit unsigned integers are split
+into high and low 32-bits, with both parts encoded in the network byte order.
+The total payload size is
+.Em 96 
+bytes. All valid payloads must start with a magic number
+.Em 0x6e656d6f 
+in network byte order, which is the equivalent of four ASCII letters
+.Qq nemo .
+The current format version is
+.Em 1 .
+Each payload contains the following fields in order:
+.Pp
+.Bl -dash -compact -offset indent 
+.It
+magic identifiers (4 bytes)
+.It
+format version number (1 byte)
+.It
+message type (1 byte)
+.It
+UDP port number (2 bytes)
+.It
+TTL value when sent from requester (1 byte)
+.It
+TTL value when received by responder (1 byte)
+.It
+TTL value when sent from responder (1 byte)
+.It
+padding - unused (5 bytes)
+.It
+sequence interation counter (8 bytes)
+.It
+sequence length (8 bytes)
+.It
+IP address - low bits (8 bytes)
+.It
+IP address - high bits (8 bytes)
+.It
+requester key (8 bytes)
+.It
+responder key (8 bytes)
+.It
+time of departure from requester, nanoseconds system time (8 bytes)
+.It
+time of departure from requester, nanoseconds steady time (8 bytes)
+.It
+time of departure from responder, nanoseconds system time (8 bytes)
+.It
+time of departure from responder, nanoseconds steady time (8 bytes)
+.El
+.
+.Sh LOGGING
+The program outputs logging information to the standard error stream. Each log line contains 4 parts: time, severity, textual description, and an optional error description, obtained based on the
+.Em errno
+mechanism. There are 4 severity levels, abbreviated and color-coded: 
+.Bl -tag -width Ds
+.It ERROR
+Emitted exactly one per failed process execution, denoting the high-level reason for the failure. The color is red.
+.It WARN
+Emitted each time a task did not succeed, with a detailed description of the situation. The color is yellow.
+.It INFO
+Consists mainly of general high-level view to what task the process is performing. The color is green.
+.It DEBUG
+Contains detailed information about the variable values and sub-tasks. The color is blue.
+.El
+.
+.Sh EXIT CODE 
+The process returns
+.Em 0
+on success,
+. Em 1
+on failure.
+.Sh AUTHORS
+.An Daniel Lovasko Aq Mt daniel.lovasko@gmail.com
+.Sh SEE ALSO
+.Xr nreq 8 ,
+.Xr socket 2 ,
+.Xr send 2 ,
+.Xr select 2

@@ -533,7 +533,7 @@ send_datagram(int sock, payload* pl, struct sockaddr_storage* addr)
   msg.msg_controllen = 0;
 
   // Send the datagram.
-  n = sendmsg(sock, &msg, 0);
+  n = sendmsg(sock, &msg, MSG_DONTWAIT);
   if (n < 0) {
     log_(LL_WARN, true, "unable to send datagram");
 

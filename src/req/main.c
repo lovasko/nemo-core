@@ -569,7 +569,21 @@ send_all_datagrams(int sock, const uint64_t snum)
     pl.pl_haddr = tgs[i].tg_haddr;
 
     // Send the datagram.
-    n = sendmsg(sock, &msg, 0);
+    n = sendmsg(sock, &msg, MSG_DONTWAIT);
+    if (n == -1) {
+      log_(LL_WARN, true, "unable to send datagram");
+
+      if (op_err == false)
+        return false;
+    }
+
+    // Verify the number of sent bytes.
+    if ((size_t)n != sizeof(pl)) {
+      log_(LL_WARN, false, "unable to send all data");
+
+      if (op_err == true)
+        return false;
+    }
   }
 }
 

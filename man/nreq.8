@@ -28,18 +28,22 @@ target
 .Sh DESCRIPTION
 The
 .Nm
-utility periodically issues UDP datagram requests to a set of network targets, while also awaiting and reporting on replies from a responder process. It can be used in conjunction with the
+utility periodically issues UDP datagram requests to a set of network targets,
+while also awaiting and reporting on replies from a responder process. It can
+be used in conjunction with the
 .Xr nres 8
 utility to test, debug and verify network configurations.
 .Sh OPTIONS
 The utility accepts the following command-line options:
 .Bl -tag -width Ds
 .It Fl 4
-The network communication will only use the IP version 4. This option is mutually exclusive with
+The network communication will only use the IP version 4. This option is
+mutually exclusive with
 .Fl 6 .
 .
 .It Fl 6
-The network communication will only use the IP version 6. This option is mutually exclusive with
+The network communication will only use the IP version 6. This option is
+mutually exclusive with
 .Fl 4 .
 .
 .It Fl c Ar cnt
@@ -65,22 +69,23 @@ Specify the UDP port of all created endpoints. The default value is
 .Em 23000 .
 .
 .It Fl r Ar rbs
-Sets the socket receive memory buffer to the specified size (see MEMORY SIZE FORMAT).
-The default value is
+Sets the socket receive memory buffer to the specified size (see MEMORY SIZE
+FORMAT).  The default value is
 .Em 2mb .
 .
 .It Fl s Ar sbs
-Sets the socket send memory buffer to the specified size (see MEMORY SIZE FORMAT).
+Sets the socket send memory buffer to the specified size (see MEMORY SIZE
+FORMAT).
 .Em 2mb .
 .
 .It Fl t Ar ttl
-Sets the Time-To-Live property of each outgoing datagram.
-If not specified, the value defaults to
+Sets the Time-To-Live property of each outgoing datagram.  If not specified,
+the value defaults to
 . Em 64 .
 .
 .It Fl v
-Enables more verbose logging. Repeating this flag will turn on more
-detailed levels of logging messages (see LOGGING).
+Enables more verbose logging. Repeating this flag will turn on more detailed
+levels of logging messages (see LOGGING).
 .El
 .
 .Sh FLOW IDENTIFICATION
@@ -173,18 +178,24 @@ time of departure from responder, nanoseconds steady time (8 bytes)
 .El
 .
 .Sh LOGGING
-The program outputs logging information to the standard error stream. Each log line contains 4 parts: time, severity, textual description, and an optional error description, obtained based on the
+The program outputs logging information to the standard error stream. Each log
+line contains 4 parts: time, severity, textual description, and an optional
+error description, obtained based on the
 .Em errno
 mechanism. There are 4 severity levels, abbreviated and color-coded: 
 .Bl -tag -width Ds
 .It ERROR
-Emitted exactly one per failed process execution, denoting the high-level reason for the failure. The color is red.
+Emitted exactly one per failed process execution, denoting the high-level
+reason for the failure. The color is red.
 .It WARN
-Emitted each time a task did not succeed, with a detailed description of the situation. The color is yellow.
+Emitted each time a task did not succeed, with a detailed description of the
+situation. The color is yellow.
 .It INFO
-Consists mainly of general high-level view to what task the process is performing. The color is green.
+Consists mainly of general high-level view to what task the process is
+performing. The color is green.
 .It DEBUG
-Contains detailed information about the variable values and sub-tasks. The color is blue.
+Contains detailed information about the variable values and sub-tasks. The
+color is blue.
 .El
 .
 .Sh EXIT CODE 

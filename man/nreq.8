@@ -16,6 +16,7 @@
 .Op Fl c Ar cnt
 .Op Fl e
 .Op Fl h
+.Op Fl i Ar dur
 .Op Fl k Ar key
 .Op Fl n
 .Op Fl p Ar num
@@ -56,6 +57,11 @@ If not specified, the process will only print the relevant error message.
 .
 .It Fl h
 Prints the usage message.
+.
+.It Fl i Ar dur
+Sets the duration between each round of issued payloads (see DURATION FORMAT).
+The default value is
+.Em 1s .
 .
 .It Fl k Ar key
 Sets the key of each outgoing nemo payload (see FLOW IDENTIFICATION). If not

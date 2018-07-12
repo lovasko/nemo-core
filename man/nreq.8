@@ -13,6 +13,7 @@
 .Nm
 .Op Fl 4
 .Op Fl 6
+.Op Fl c Ar cnt
 .Op Fl e
 .Op Fl h
 .Op Fl k Ar key
@@ -40,6 +41,10 @@ The network communication will only use the IP version 4. This option is mutuall
 .It Fl 6
 The network communication will only use the IP version 6. This option is mutually exclusive with
 .Fl 4 .
+.
+.It Fl c Ar cnt
+Sets the number of requests the program will issue. The default value is
+.Em 60 .
 .
 .It Fl e
 The process will terminate when the first network-related error is encountered.

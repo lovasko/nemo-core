@@ -98,7 +98,7 @@ log_(const uint8_t lvl, const bool perr, const char* fmt, ...)
   char hfmt[NEMO_LOG_MAX_LENGTH];
   char msg[NEMO_LOG_MAX_LENGTH];
   char errmsg[NEMO_LOG_MAX_LENGTH];
-  struct tm* tfmt;
+  struct tm tfmt;
   struct timespec tspec;
   va_list args;
   int save;
@@ -115,8 +115,8 @@ log_(const uint8_t lvl, const bool perr, const char* fmt, ...)
 
   // Obtain and format the current time in GMT.
   clock_gettime(CLOCK_REALTIME, &tspec);
-  tfmt = gmtime(&tspec.tv_sec);
-  strftime(tstr, sizeof(tstr), "%T", tfmt);
+  (void)gmtime_r(&tspec.tv_sec, &tfmt);
+  strftime(tstr, sizeof(tstr), "%T", &tfmt);
 
   // Prepare highlights for the message variables.
   memset(hfmt, '\0', sizeof(hfmt));

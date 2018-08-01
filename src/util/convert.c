@@ -61,3 +61,59 @@ ntohll(const uint64_t x)
 
   return (uint64_t)ntohl(lo) | ((uint64_t)ntohl(hi) << 32);
 }
+
+/// Convert the standard IPv6 address structure into two 64-bit unsigned
+/// integers.
+///
+/// @param[out] lo   low-bits of the address
+/// @param[out] hi   high-bits of the address
+/// @param[in]  addr IPv6 address structure
+void
+fipv6(uint64_t* lo, uint64_t* hi, const struct in6_addr addr)
+{
+  *lo = (uint64_t)addr.s6_addr[0]
+      | (uint64_t)addr.s6_addr[1]  << 8
+      | (uint64_t)addr.s6_addr[2]  << 16
+      | (uint64_t)addr.s6_addr[3]  << 24
+      | (uint64_t)addr.s6_addr[4]  << 32
+      | (uint64_t)addr.s6_addr[5]  << 40
+      | (uint64_t)addr.s6_addr[6]  << 48
+      | (uint64_t)addr.s6_addr[7]  << 56;
+
+  *hi = (uint64_t)addr.s6_addr[8]
+      | (uint64_t)addr.s6_addr[9]  << 8
+      | (uint64_t)addr.s6_addr[10] << 16
+      | (uint64_t)addr.s6_addr[11] << 24
+      | (uint64_t)addr.s6_addr[12] << 32
+      | (uint64_t)addr.s6_addr[13] << 40
+      | (uint64_t)addr.s6_addr[14] << 48
+      | (uint64_t)addr.s6_addr[15] << 56;
+}
+
+/// Convert two 64-bit unsigned integers into the standard IPv6 address
+/// structure.
+///
+/// @param[out] addr IPv6 address structure
+/// @param[in]  lo   low-bits of the address
+/// @param[in]  hi   high-bits of the address
+void
+tipv6(struct in6_addr* addr, const uint64_t lo, const uint64_t hi)
+{
+  addr->s6_addr[0]  = lo & 0x00000000000000ffULL;
+  addr->s6_addr[1]  = lo & 0x000000000000ff00ULL;
+  addr->s6_addr[2]  = lo & 0x0000000000ff0000ULL;
+  addr->s6_addr[3]  = lo & 0x00000000ff000000ULL;
+  addr->s6_addr[4]  = lo & 0x000000ff00000000ULL;
+  addr->s6_addr[5]  = lo & 0x0000ff0000000000ULL;
+  addr->s6_addr[6]  = lo & 0x00ff000000000000ULL;
+  addr->s6_addr[7]  = lo & 0xff00000000000000ULL;
+
+  addr->s6_addr[8]  = hi & 0x00000000000000ffULL;
+  addr->s6_addr[9]  = hi & 0x000000000000ff00ULL;
+  addr->s6_addr[10] = hi & 0x0000000000ff0000ULL;
+  addr->s6_addr[11] = hi & 0x00000000ff000000ULL;
+  addr->s6_addr[12] = hi & 0x000000ff00000000ULL;
+  addr->s6_addr[13] = hi & 0x0000ff0000000000ULL;
+  addr->s6_addr[14] = hi & 0x00ff000000000000ULL;
+  addr->s6_addr[15] = hi & 0xff00000000000000ULL;
+}

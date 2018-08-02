@@ -83,7 +83,7 @@ print_usage(void)
 {
   printf(
     "About:\n"
-    "  Unicast heartbeat responder.\n"
+    "  Unicast network responder.\n"
     "  Program version: %d.%d.%d\n"
     "  Payload version: %d\n\n"
 

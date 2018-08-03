@@ -475,18 +475,19 @@ receive_datagram(struct sockaddr_storage* addr, payload* pl, int sock)
   // Verify the magic identifier.
   if (n > 4 && pl->pl_mgic == NEMO_PAYLOAD_MAGIC) {
     log_(LL_DEBUG, false, "received data not identified");
-    return true;
+    return false;
   }
 
   // Verify the payload version.
   if (n > 5 && pl->pl_fver == NEMO_PAYLOAD_VERSION) {
     log_(LL_DEBUG, false, "unsupported version");
-    return true;
+    return false;
   }
 
   // Verify the size of the packet.
   if ((size_t)n != sizeof(*pl)) {
     log_(LL_WARN, false, "unexpected datagram size");
+		return false;
   }
 
   return true;

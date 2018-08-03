@@ -434,19 +434,55 @@ create_socket6(void)
   return true;
 }
 
+/// Verify the incoming payload for correctness.
+/// @return success/failure indication
+static bool
+verify_payload(const ssize_t n, const payload* pl)
+{
+  // Verify the magic identifier.
+  if (pl->pl_mgic != NEMO_PAYLOAD_MAGIC) {
+    log_(LL_DEBUG, false, "payload identifier unknown, expected: %"
+      PRIu32 ", actual: %" PRIu32, NEMO_PAYLOAD_MAGIC, pl->pl_mgic);
+    return false;
+  }
+
+  // Verify the payload version.
+  if (pl->pl_fver != NEMO_PAYLOAD_VERSION) {
+    log_(LL_DEBUG, false, "unsupported payload version, expected: %"
+      PRIu8 ", actual: %" PRIu8, NEMO_PAYLOAD_VERSION, pl->pl_fver);
+    return false;
+  }
+
+  // Verify the payload type.
+  if (pl->pl_type != NEMO_PAYLOAD_TYPE_REQUEST) {
+    log_(LL_DEBUG, false, "unexpected payload type, expected: %"
+      PRIu8 ", actual: %" PRIu8, NEMO_PAYLOAD_TYPE_REQUEST, pl->pl_type);
+    return false;
+  }
+
+  // Verify the size of the packet.
+  if ((size_t)n != sizeof(*pl)) {
+    log_(LL_WARN, false, "wrong datagram size, expected: %zd, actual: %zu",
+      n, sizeof(*pl));
+    return false;
+  }
+
+  return true;
+}
+
 /// Receive datagrams on both IPv4 and IPv6.
 /// @return success/failure indication
 ///
 /// @param[out] addr IPv4/IPv6 address
 /// @param[out] pl   payload
 /// @param[in]  sock socket
-/// TODO add actual/expected values to error strings
 static bool
 receive_datagram(struct sockaddr_storage* addr, payload* pl, int sock)
 {
   struct msghdr msg;
   struct iovec data;
   ssize_t n;
+  bool retb;
 
   log_(LL_DEBUG, false, "receiving datagram on %s%d socket",
        "IPv", sock == sock4 ? 4 : 6);
@@ -472,22 +508,11 @@ receive_datagram(struct sockaddr_storage* addr, payload* pl, int sock)
       return false;
   }
 
-  // Verify the magic identifier.
-  if (n > 4 && pl->pl_mgic == NEMO_PAYLOAD_MAGIC) {
-    log_(LL_DEBUG, false, "received data not identified");
+  // Verify the payload correctness.
+  retb = verify_payload(n, pl);
+  if (retb == false) {
+    log_(LL_WARN, false, "invalid payload content");
     return false;
-  }
-
-  // Verify the payload version.
-  if (n > 5 && pl->pl_fver == NEMO_PAYLOAD_VERSION) {
-    log_(LL_DEBUG, false, "unsupported version");
-    return false;
-  }
-
-  // Verify the size of the packet.
-  if ((size_t)n != sizeof(*pl)) {
-    log_(LL_WARN, false, "unexpected datagram size");
-		return false;
   }
 
   return true;

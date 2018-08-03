@@ -589,6 +589,9 @@ handle_event(int sock, const char* ipv)
   struct sockaddr_storage addr;
   payload pl;
 
+	log_(LL_DEBUG, false, "handling event on %s socket",
+	  sock == sock4 ? "IPv4" : "IPv6");
+
   // Receive a request.
   retb = receive_datagram(&addr, &pl, sock);
   if (retb == false) {

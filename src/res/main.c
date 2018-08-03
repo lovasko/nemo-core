@@ -19,6 +19,7 @@
 #include <stdbool.h>
 #include <signal.h>
 #include <time.h>
+#include <inttypes.h>
 
 #include "common/payload.h"
 #include "common/version.h"
@@ -221,6 +222,20 @@ parse_arguments(int argc, char* argv[])
   }
 
   return true;
+}
+
+/// Use the logging framework to output the selected option values used
+/// throughout the run of the program.
+static void
+log_options(void)
+{
+	log_(LL_DEBUG, false, "selected UDP port: %" PRIu64, op_port);
+	log_(LL_DEBUG, false, "selected unique key: %" PRIu64, op_key);
+	log_(LL_DEBUG, false, "selected Time-To-Live: %" PRIu64, op_ttl);
+	log_(LL_DEBUG, false, "selected receive buffer size: %" PRIu64 " bytes",
+	  op_rbuf);
+	log_(LL_DEBUG, false, "selected send buffer size: %" PRIu64 " bytes",
+	  op_sbuf);
 }
 
 /// Signal handler for the SIGINT signal.
@@ -606,6 +621,7 @@ respond_loop(void)
   fd_set rfd;
 
   log_(LL_INFO, false, "starting the response loop");
+	log_options();
 
   // Add sockets to the event list.
   if (op_ipv4)

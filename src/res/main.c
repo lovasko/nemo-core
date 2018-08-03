@@ -168,9 +168,9 @@ parse_arguments(int argc, char* argv[])
 
       // UDP port to use.
       case 'p':
-	if (parse_uint64(&op_port, optarg, 1, 65535) == false)
-	  return false;
-	break;
+        if (parse_uint64(&op_port, optarg, 1, 65535) == false)
+          return false;
+        break;
 
       // Receive buffer memory size.
       case 'r':
@@ -234,13 +234,13 @@ parse_arguments(int argc, char* argv[])
 static void
 log_options(void)
 {
-	log_(LL_DEBUG, false, "selected UDP port: %" PRIu64, op_port);
-	log_(LL_DEBUG, false, "selected unique key: %" PRIu64, op_key);
-	log_(LL_DEBUG, false, "selected Time-To-Live: %" PRIu64, op_ttl);
-	log_(LL_DEBUG, false, "selected receive buffer size: %" PRIu64 " bytes",
-	  op_rbuf);
-	log_(LL_DEBUG, false, "selected send buffer size: %" PRIu64 " bytes",
-	  op_sbuf);
+  log_(LL_DEBUG, false, "selected UDP port: %" PRIu64, op_port);
+  log_(LL_DEBUG, false, "selected unique key: %" PRIu64, op_key);
+  log_(LL_DEBUG, false, "selected Time-To-Live: %" PRIu64, op_ttl);
+  log_(LL_DEBUG, false, "selected receive buffer size: %" PRIu64 " bytes",
+    op_rbuf);
+  log_(LL_DEBUG, false, "selected send buffer size: %" PRIu64 " bytes",
+    op_sbuf);
 }
 
 /// Signal handler for the SIGINT signal.
@@ -626,7 +626,7 @@ respond_loop(void)
   fd_set rfd;
 
   log_(LL_INFO, false, "starting the response loop");
-	log_options();
+  log_options();
 
   // Add sockets to the event list.
   if (op_ipv4)

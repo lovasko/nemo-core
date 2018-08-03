@@ -221,6 +221,10 @@ parse_arguments(int argc, char* argv[])
     op_ipv6 = true;
   }
 
+  // Assign the logging settings.
+  log_lvl = op_llvl;
+  log_col = op_lcol;
+
   return true;
 }
 

@@ -166,6 +166,11 @@ parse_arguments(int argc, char* argv[])
           return false;
         break;
 
+      // Disable coloring and highlighting of logging output.
+      case 'n':
+        op_lcol = false;
+        break;
+
       // UDP port to use.
       case 'p':
         if (parse_uint64(&op_port, optarg, 1, 65535) == false)

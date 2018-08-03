@@ -114,33 +114,33 @@ log_(const uint8_t lvl, const bool perr, const char* fmt, ...)
   save = errno;
 
   // Obtain and format the current time in GMT.
-  clock_gettime(CLOCK_REALTIME, &tspec);
+  (void)clock_gettime(CLOCK_REALTIME, &tspec);
   (void)gmtime_r(&tspec.tv_sec, &tfmt);
-  strftime(tstr, sizeof(tstr), "%T", &tfmt);
+  (void)strftime(tstr, sizeof(tstr), "%T", &tfmt);
 
   // Prepare highlights for the message variables.
-  memset(hfmt, '\0', sizeof(hfmt));
+  (void)memset(hfmt, '\0', sizeof(hfmt));
   if (log_col)
     highlight(hfmt, fmt);
   else
-    memcpy(hfmt, fmt, strlen(fmt));
+    (void)memcpy(hfmt, fmt, strlen(fmt));
 
   // Fill in the passed message.
   va_start(args, fmt);
-  vsprintf(msg, hfmt, args);
+  (void)vsprintf(msg, hfmt, args);
   va_end(args);
 
   // Obtain the errno message.
-  memset(errmsg, '\0', sizeof(errmsg));
+  (void)memset(errmsg, '\0', sizeof(errmsg));
   if (perr)
-    sprintf(errmsg, ": %s", strerror(save));
+    (void)sprintf(errmsg, ": %s", strerror(save));
 
   // Format the level name.
-  memset(lstr, '\0', sizeof(lstr));
+  (void)memset(lstr, '\0', sizeof(lstr));
   if (log_col)
-    sprintf(lstr, "\x1b[%dm%s\x1b[0m", lcol[lvl], lname[lvl]);
+    (void)sprintf(lstr, "\x1b[%dm%s\x1b[0m", lcol[lvl], lname[lvl]);
   else
-    memcpy(lstr, lname[lvl], strlen(lname[lvl]));
+    (void)memcpy(lstr, lname[lvl], strlen(lname[lvl]));
 
   // Print the final log line.
   (void)fprintf(stderr, "[%s.%03" PRIu32 "] %s - %s%s\n",

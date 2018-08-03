@@ -32,7 +32,7 @@
 #define DEF_SEND_BUFFER_SIZE    2000000
 #define DEF_EXIT_ON_ERROR       false
 #define DEF_UDP_PORT            23000
-#define DEF_LOG_LEVEL           LL_INFO
+#define DEF_LOG_LEVEL           LL_WARN
 #define DEF_LOG_COLOR           true
 #define DEF_TIME_TO_LIVE        64
 

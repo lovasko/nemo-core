@@ -197,6 +197,7 @@ parse_arguments(int argc, char* argv[])
 
       // Increase the logging verbosity.
       case 'v':
+        if (op_llvl == LL_DEBUG) op_llvl = LL_TRACE;
         if (op_llvl == LL_INFO)  op_llvl = LL_DEBUG;
         if (op_llvl == LL_WARN)  op_llvl = LL_INFO;
         if (op_llvl == LL_ERROR) op_llvl = LL_WARN;

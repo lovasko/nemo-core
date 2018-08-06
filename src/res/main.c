@@ -443,7 +443,7 @@ verify_payload(const ssize_t n, const payload* pl)
   // Verify the magic identifier.
   if (pl->pl_mgic != NEMO_PAYLOAD_MAGIC) {
     log_(LL_DEBUG, false, "payload identifier unknown, expected: %"
-      PRIu32 ", actual: %" PRIu32, NEMO_PAYLOAD_MAGIC, pl->pl_mgic);
+      PRIx32 ", actual: %" PRIx32, NEMO_PAYLOAD_MAGIC, pl->pl_mgic);
     return false;
   }
 

@@ -36,6 +36,7 @@
 #define DEF_LOG_LEVEL           LL_WARN
 #define DEF_LOG_COLOR           true
 #define DEF_TIME_TO_LIVE        64
+#define DEF_MONOLOGUE           false
 
 // Command-line options.
 static uint64_t op_port; ///< UDP port number.
@@ -48,6 +49,7 @@ static bool     op_ipv4; ///< IPv4-only traffic.
 static bool     op_ipv6; ///< IPv6-only traffic.
 static uint8_t  op_llvl; ///< Minimal log level.
 static bool     op_lcol; ///< Log coloring policy.
+static bool     op_mono; ///< Monologue mode (no responses).
 
 // Global state.
 static int sock4; ///< UDP/IPv4 socket.
@@ -89,7 +91,7 @@ print_usage(void)
     "  Payload version: %d\n\n"
 
     "Usage:\n"
-    "  nres [-46ehnv] [-k KEY] [-p NUM] [-r RBS] [-s SBS] [-t TTL]\n\n"
+    "  nres [-46ehmnv] [-k KEY] [-p NUM] [-r RBS] [-s SBS] [-t TTL]\n\n"
 
     "Options:\n"
     "  -4      Use only the IPv4 protocol.\n"
@@ -97,6 +99,7 @@ print_usage(void)
     "  -e      Stop the process on first transmission error.\n"
     "  -h      Print this help message.\n"
     "  -k KEY  Key for the current run. (def=random)\n"
+		"  -m      Disable responding (monologue mode).\n"
     "  -n      Turn off coloring in the logging output.\n"
     "  -p NUM  UDP port to use for all endpoints. (def=%d)\n"
     "  -r RBS  Socket receive memory buffer size. (def=2m)\n"
@@ -129,6 +132,7 @@ parse_arguments(int argc, char* argv[])
   op_err  = DEF_EXIT_ON_ERROR;
   op_port = DEF_UDP_PORT;
   op_ttl  = DEF_TIME_TO_LIVE;
+	op_mono = DEF_MONOLOGUE;
   op_llvl = (log_lvl = DEF_LOG_LEVEL);
   op_lcol = (log_col = DEF_LOG_COLOR);
   op_key  = generate_key();
@@ -136,7 +140,7 @@ parse_arguments(int argc, char* argv[])
   op_ipv6 = false;
 
   // Loop through available options.
-  while ((opt = getopt(argc, argv, "46ehk:np:r:s:t:v")) != -1) {
+  while ((opt = getopt(argc, argv, "46ehk:mnp:r:s:t:v")) != -1) {
     switch (opt) {
 
       // IPv4-only mode.
@@ -164,6 +168,11 @@ parse_arguments(int argc, char* argv[])
       case 'k':
         if (parse_uint64(&op_key, optarg, 1, UINT64_MAX) == 0)
           return false;
+        break;
+
+      // Disable responding to payloads (monologue mode).
+      case 'm':
+        op_mono = true;
         break;
 
       // Disable coloring and highlighting of logging output.
@@ -247,6 +256,8 @@ log_options(void)
     op_rbuf);
   log_(LL_DEBUG, false, "selected send buffer size: %" PRIu64 " bytes",
     op_sbuf);
+  log_(LL_DEBUG, false, "selected monologue mode: %s",
+    op_mono == true ? "on" : "off");
 }
 
 /// Signal handler for the SIGINT signal.
@@ -644,6 +655,10 @@ handle_event(int sock, const char* ipv)
     log_(LL_WARN, false, "unable to update the payload");
     return false;
   }
+
+  // Do not respond if the monologue mode is turned on.
+  if (op_mono == true)
+		return true;
 
   // Send a response back.
   retb = send_datagram(sock4, &pl, &addr);

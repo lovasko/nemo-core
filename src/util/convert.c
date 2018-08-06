@@ -117,3 +117,47 @@ tipv6(struct in6_addr* addr, const uint64_t lo, const uint64_t hi)
   addr->s6_addr[14] = hi & 0x00ff000000000000ULL;
   addr->s6_addr[15] = hi & 0xff00000000000000ULL;
 }
+
+/// Encode the payload to the on-wire format. This function only deals with the
+/// multi-byte fields, as all single-byte fields are correctly interpreted on
+/// all endian encodings.
+///
+/// @param[out] pl payload
+void
+encode_payload(payload* pl)
+{
+  pl->pl_mgic  = htonl(pl->pl_mgic);
+  pl->pl_port  = htons(pl->pl_port);
+  pl->pl_snum  = htonll(pl->pl_snum);
+  pl->pl_slen  = htonll(pl->pl_slen);
+  pl->pl_laddr = htonll(pl->pl_laddr);
+  pl->pl_haddr = htonll(pl->pl_haddr);
+  pl->pl_reqk  = htonll(pl->pl_reqk);
+  pl->pl_resk  = htonll(pl->pl_resk);
+  pl->pl_mtm1  = htonll(pl->pl_mtm1);
+  pl->pl_rtm1  = htonll(pl->pl_rtm1);
+  pl->pl_mtm2  = htonll(pl->pl_mtm2);
+  pl->pl_rtm2  = htonll(pl->pl_rtm2);
+}
+
+/// Decode the on-wire format of the payload. This function only deals with the
+/// multi-byte fields, as all single-byte fields are correctly interpreted on
+/// all endian encodings.
+///
+/// @param[out] pl payload
+void
+decode_payload(payload* pl)
+{
+  pl->pl_mgic  = ntohl(pl->pl_mgic);
+  pl->pl_port  = ntohs(pl->pl_port);
+  pl->pl_snum  = ntohll(pl->pl_snum);
+  pl->pl_slen  = ntohll(pl->pl_slen);
+  pl->pl_laddr = ntohll(pl->pl_laddr);
+  pl->pl_haddr = ntohll(pl->pl_haddr);
+  pl->pl_reqk  = ntohll(pl->pl_reqk);
+  pl->pl_resk  = ntohll(pl->pl_resk);
+  pl->pl_mtm1  = ntohll(pl->pl_mtm1);
+  pl->pl_rtm1  = ntohll(pl->pl_rtm1);
+  pl->pl_mtm2  = ntohll(pl->pl_mtm2);
+  pl->pl_rtm2  = ntohll(pl->pl_rtm2);
+}

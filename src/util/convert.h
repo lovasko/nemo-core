@@ -12,6 +12,8 @@
 #include <stdint.h>
 #include <time.h>
 
+#include "common/payload.h"
+
 
 // Nanosecond conversion.
 void fnanos(struct timespec* ts, const uint64_t ns);
@@ -24,5 +26,9 @@ uint64_t ntohll(const uint64_t x);
 // IPv6 address conversion.
 void fipv6(uint64_t* lo, uint64_t* hi, const struct in6_addr addr);
 void tipv6(struct in6_addr* addr, const uint64_t lo, const uint64_t hi);
+
+// Payload on-wire format conversions.
+void encode_payload(payload* pl);
+void decode_payload(payload* pl);
 
 #endif

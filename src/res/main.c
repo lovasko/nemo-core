@@ -509,6 +509,9 @@ receive_datagram(struct sockaddr_storage* addr, payload* pl, int sock)
       return false;
   }
 
+  // Convert the payload from its on-wire format.
+  decode_payload(pl);
+
   // Verify the payload correctness.
   retb = verify_payload(n, pl);
   if (retb == false) {
@@ -583,6 +586,9 @@ send_datagram(int sock, payload* pl, struct sockaddr_storage* addr)
   msg.msg_iovlen     = 1;
   msg.msg_control    = NULL;
   msg.msg_controllen = 0;
+
+	// Convert the payload to its on-wire format.
+	encode_payload(pl);
 
   // Send the datagram.
   n = sendmsg(sock, &msg, MSG_DONTWAIT);

@@ -52,9 +52,10 @@ static bool     op_lcol; ///< Log coloring policy.
 static bool     op_mono; ///< Monologue mode (no responses).
 
 // Global state.
-static int sock4; ///< UDP/IPv4 socket.
-static int sock6; ///< UDP/IPv6 socket.
-static bool sint; ///< Signal interrupt indicator.
+static int sock4;  ///< UDP/IPv4 socket.
+static int sock6;  ///< UDP/IPv6 socket.
+static bool sint;  ///< Signal interrupt indicator.
+static bool sterm; ///< Signal termination indicator.
 
 /// Generate a random key.
 /// @return random 64-bit unsigned integer (non-zero)
@@ -270,8 +271,8 @@ log_options(void)
 static void
 signal_handler(int sig)
 {
-  if (sig == SIGINT)
-    sint = true;
+  if (sig == SIGINT)  sint  = true;
+  if (sig == SIGTERM) sterm = true;
 }
 
 /// Install signal handler for the SIGINT signal.
@@ -282,10 +283,11 @@ install_signal_handlers(void)
   struct sigaction sa;
   int reti;
 
-  log_(LL_INFO, false, "installing signal handler for %s", "SIGINT");
+  log_(LL_INFO, false, "installing signal handlers");
 
   // Reset the signal indicator.
-  sint = false;
+  sint  = false;
+  sterm = false;
 
   // Initialise the handler settings.
   (void)memset(&sa, 0, sizeof(sa));
@@ -295,6 +297,13 @@ install_signal_handlers(void)
   reti = sigaction(SIGINT, &sa, NULL);
   if (reti == -1) {
     log_(LL_WARN, true, "unable to add signal handler for %s", "SIGINT");
+    return false;
+  }
+
+  // Install signal handler for SIGTERM.
+  reti = sigaction(SIGTERM, &sa, NULL);
+  if (reti == -1) {
+    log_(LL_WARN, true, "unable to add signal handler for %s", "SIGTERM");
     return false;
   }
 
@@ -703,6 +712,8 @@ respond_loop(void)
       if (errno == EINTR) {
         if (sint)
           log_(LL_WARN, false, "received the %s signal", "SIGINT");
+        else if (sterm)
+          log_(LL_WARN, false, "received the %s signal", "SIGTERM");
         else
           log_(LL_WARN, false, "unknown event queue interrupt");
 

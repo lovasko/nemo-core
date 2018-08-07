@@ -454,6 +454,8 @@ create_socket6(void)
 static bool
 verify_payload(const ssize_t n, const payload* pl)
 {
+  log_(LL_TRACE, false, "verifying payload");
+
   // Verify the magic identifier.
   if (pl->pl_mgic != NEMO_PAYLOAD_MAGIC) {
     log_(LL_DEBUG, false, "payload identifier unknown, expected: %"
@@ -499,7 +501,7 @@ receive_datagram(struct sockaddr_storage* addr, payload* pl, int sock)
   ssize_t n;
   bool retb;
 
-  log_(LL_DEBUG, false, "receiving datagram on %s%d socket",
+  log_(LL_TRACE, false, "receiving datagram on %s%d socket",
        "IPv", sock == sock4 ? 4 : 6);
 
   // Prepare payload data.
@@ -547,7 +549,7 @@ update_payload(payload* pl)
   struct timespec rts;
   int ret;
 
-  log_(LL_DEBUG, false, "updating payload");
+  log_(LL_TRACE, false, "updating payload");
 
   // Change the message type.
   pl->pl_type = NEMO_PAYLOAD_TYPE_RESPONSE;
@@ -587,7 +589,7 @@ send_datagram(int sock, payload* pl, struct sockaddr_storage* addr)
   struct msghdr msg;
   struct iovec data;
 
-  log_(LL_DEBUG, false, "sending datagram");
+  log_(LL_TRACE, false, "sending datagram");
 
   // Prepare payload data.
   data.iov_base = pl;

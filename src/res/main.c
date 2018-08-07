@@ -320,7 +320,7 @@ create_socket4(void)
   int val;
 
   // Early exit if IPv4 is not selected.
-  if (!op_ipv4)
+  if (op_ipv4 == false)
     return true;
 
   log_(LL_INFO, false, "creating %s socket", "IPv4");
@@ -390,7 +390,7 @@ create_socket6(void)
   int val;
 
   // Early exit if IPv6 is not selected.
-  if (!op_ipv6)
+  if (op_ipv6 == false)
     return true;
 
   log_(LL_INFO, false, "creating %s socket", "IPv6");
@@ -699,10 +699,8 @@ respond_loop(void)
   log_options();
 
   // Add sockets to the event list.
-  if (op_ipv4)
-    FD_SET(sock4, &rfd);
-  if (op_ipv6)
-    FD_SET(sock6, &rfd);
+  if (op_ipv4 == true) FD_SET(sock4, &rfd);
+  if (op_ipv6 == true) FD_SET(sock6, &rfd);
 
   while (true) {
     // Wait for incoming datagram events.
@@ -710,9 +708,9 @@ respond_loop(void)
     if (reti == -1) {
       // Check for interrupt (possibly due to a signal).
       if (errno == EINTR) {
-        if (sint)
+        if (sint == true)
           log_(LL_WARN, false, "received the %s signal", "SIGINT");
-        else if (sterm)
+        else if (sterm == true)
           log_(LL_WARN, false, "received the %s signal", "SIGTERM");
         else
           log_(LL_WARN, false, "unknown event queue interrupt");
@@ -725,14 +723,16 @@ respond_loop(void)
     }
 
     // Handle incoming IPv4 datagrams.
-    if (FD_ISSET(sock4, &rfd)) {
+    reti = FD_ISSET(sock4, &rfd);
+    if (reti > 0) {
       retb = handle_event(sock4, "IPv4");
       if (retb == false)
         return false;
     }
 
     // Handle incoming IPv6 datagrams.
-    if (FD_ISSET(sock6, &rfd)) {
+    reti = FD_ISSET(sock6, &rfd);
+    if (reti > 0) {
       retb = handle_event(sock6, "IPv6");
       if (retb == false)
         return false;

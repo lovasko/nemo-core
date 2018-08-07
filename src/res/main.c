@@ -281,6 +281,7 @@ static bool
 install_signal_handlers(void)
 {
   struct sigaction sa;
+  sigset_t ss;
   int reti;
 
   log_(LL_INFO, false, "installing signal handlers");
@@ -288,6 +289,13 @@ install_signal_handlers(void)
   // Reset the signal indicator.
   sint  = false;
   sterm = false;
+
+  // Create and apply a set of blocked signals. We exclude the two recognised
+  // signals from this set.
+  (void)sigfillset(&ss);
+  (void)sigdelset(&ss, SIGINT);
+  (void)sigdelset(&ss, SIGTERM);
+  (void)sigprocmask(SIG_SETMASK, &ss, NULL);
 
   // Initialise the handler settings.
   (void)memset(&sa, 0, sizeof(sa));

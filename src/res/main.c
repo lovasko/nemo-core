@@ -448,6 +448,9 @@ create_socket6(void)
 
 /// Verify the incoming payload for correctness.
 /// @return success/failure indication
+///
+/// @param[in] n  length of the received data
+/// @param[in] pl payload
 static bool
 verify_payload(const ssize_t n, const payload* pl)
 {

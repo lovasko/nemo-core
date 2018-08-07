@@ -261,7 +261,7 @@ log_options(void)
     op_mono == true ? "on" : "off");
 }
 
-/// Signal handler for the SIGINT signal.
+/// Signal handler for the SIGINT and SIGTERM signals.
 ///
 /// This handler does not perform any action, just toggles the indicator
 /// for the signal. The actual signal handling is done by the respond_loop

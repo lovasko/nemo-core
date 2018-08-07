@@ -126,7 +126,7 @@ parse_options(int argc, char* argv[])
   int opt;
   bool retb;
 
-  log_(LL_INFO, false, "parse command-line arguments");
+  log_(LL_INFO, false, "parse command-line options");
 
   // Set optional arguments to sensible defaults.
   op_rbuf = DEF_RECEIVE_BUFFER_SIZE;

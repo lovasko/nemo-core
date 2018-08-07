@@ -124,6 +124,7 @@ static bool
 parse_options(int argc, char* argv[])
 {
   int opt;
+  bool retb;
 
   log_(LL_INFO, false, "parse command-line arguments");
 
@@ -167,7 +168,8 @@ parse_options(int argc, char* argv[])
 
       // Key of the current run.
       case 'k':
-        if (parse_uint64(&op_key, optarg, 1, UINT64_MAX) == 0)
+        retb = parse_uint64(&op_key, optarg, 1, UINT64_MAX);
+        if (retb == false)
           return false;
         break;
 
@@ -183,25 +185,29 @@ parse_options(int argc, char* argv[])
 
       // UDP port to use.
       case 'p':
-        if (parse_uint64(&op_port, optarg, 1, 65535) == false)
+        retb = parse_uint64(&op_port, optarg, 1, 65535);
+        if (retb == false)
           return false;
         break;
 
       // Receive buffer memory size.
       case 'r':
-        if (parse_scalar(&op_rbuf, optarg, "b", parse_memory_unit) == 0)
+        retb = parse_scalar(&op_rbuf, optarg, "b", parse_memory_unit);
+        if (retb == false)
           return false;
         break;
 
       // Send buffer memory size.
       case 's':
-        if (parse_scalar(&op_sbuf, optarg, "b", parse_memory_unit) == 0)
+        retb = parse_scalar(&op_sbuf, optarg, "b", parse_memory_unit);
+        if (retb == false)
           return false;
         break;
 
       // Set IP Time-To-Live value.
       case 't':
-        if (parse_uint64(&op_ttl, optarg, 1, 255) == 0)
+        retb = parse_uint64(&op_ttl, optarg, 1, 255);
+        if (retb == false)
           return false;
         break;
 

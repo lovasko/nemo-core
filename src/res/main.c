@@ -510,8 +510,8 @@ receive_datagram(struct sockaddr_storage* addr, payload* pl, int sock)
   ssize_t n;
   bool retb;
 
-  log_(LL_TRACE, false, "receiving datagram on %s%d socket",
-       "IPv", sock == sock4 ? 4 : 6);
+  log_(LL_TRACE, false, "receiving datagram on %s socket",
+    sock == sock4 ? "IPv4" : "IPv6");
 
   // Prepare payload data.
   data.iov_base = pl;

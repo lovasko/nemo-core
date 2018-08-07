@@ -99,7 +99,7 @@ print_usage(void)
     "  -e      Stop the process on first transmission error.\n"
     "  -h      Print this help message.\n"
     "  -k KEY  Key for the current run. (def=random)\n"
-		"  -m      Disable responding (monologue mode).\n"
+    "  -m      Disable responding (monologue mode).\n"
     "  -n      Turn off coloring in the logging output.\n"
     "  -p NUM  UDP port to use for all endpoints. (def=%d)\n"
     "  -r RBS  Socket receive memory buffer size. (def=2m)\n"
@@ -132,7 +132,7 @@ parse_arguments(int argc, char* argv[])
   op_err  = DEF_EXIT_ON_ERROR;
   op_port = DEF_UDP_PORT;
   op_ttl  = DEF_TIME_TO_LIVE;
-	op_mono = DEF_MONOLOGUE;
+  op_mono = DEF_MONOLOGUE;
   op_llvl = (log_lvl = DEF_LOG_LEVEL);
   op_lcol = (log_col = DEF_LOG_COLOR);
   op_key  = generate_key();
@@ -598,8 +598,8 @@ send_datagram(int sock, payload* pl, struct sockaddr_storage* addr)
   msg.msg_control    = NULL;
   msg.msg_controllen = 0;
 
-	// Convert the payload to its on-wire format.
-	encode_payload(pl);
+  // Convert the payload to its on-wire format.
+  encode_payload(pl);
 
   // Send the datagram.
   n = sendmsg(sock, &msg, MSG_DONTWAIT);
@@ -633,8 +633,8 @@ handle_event(int sock, const char* ipv)
   struct sockaddr_storage addr;
   payload pl;
 
-	log_(LL_DEBUG, false, "handling event on %s socket",
-	  sock == sock4 ? "IPv4" : "IPv6");
+  log_(LL_DEBUG, false, "handling event on %s socket",
+    sock == sock4 ? "IPv4" : "IPv6");
 
   // Receive a request.
   retb = receive_datagram(&addr, &pl, sock);
@@ -658,7 +658,7 @@ handle_event(int sock, const char* ipv)
 
   // Do not respond if the monologue mode is turned on.
   if (op_mono == true)
-		return true;
+    return true;
 
   // Send a response back.
   retb = send_datagram(sock4, &pl, &addr);

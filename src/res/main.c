@@ -227,13 +227,13 @@ parse_arguments(int argc, char* argv[])
   }
 
   // Check whether two exclusive modes were selected.
-  if (op_ipv4 && op_ipv6) {
+  if (op_ipv4 == true && op_ipv6 == true) {
     log_(LL_WARN, false, "options -4 and -6 are mutually exclusive");
     return false;
   }
 
   // If no restrictions on the IP version were set, enable both versions.
-  if (!op_ipv4 && !op_ipv6) {
+  if (op_ipv4 == false && op_ipv6 == false) {
     op_ipv4 = true;
     op_ipv6 = true;
   }
@@ -530,7 +530,7 @@ receive_datagram(struct sockaddr_storage* addr, payload* pl, int sock)
   if (n < 0) {
     log_(LL_WARN, true, "receiving has failed");
 
-    if (op_err)
+    if (op_err == true)
       return false;
   }
 
@@ -620,7 +620,7 @@ send_datagram(int sock, payload* pl, struct sockaddr_storage* addr)
   if (n < 0) {
     log_(LL_WARN, true, "unable to send datagram");
 
-    if (op_err)
+    if (op_err == true)
       return false;
   }
 
@@ -628,7 +628,7 @@ send_datagram(int sock, payload* pl, struct sockaddr_storage* addr)
   if ((size_t)n != sizeof(*pl)) {
     log_(LL_WARN, false, "wrong sent payload size");
     
-    if (op_err)
+    if (op_err == true)
       return false;
   }
 

@@ -115,13 +115,13 @@ print_usage(void)
     DEF_TIME_TO_LIVE);
 }
 
-/// Parse command-line arguments.
+/// Parse command-line options.
 /// @return success/failure indication
 ///
 /// @param[in] argc argument count
 /// @param[in] argv argument vector
 static bool
-parse_arguments(int argc, char* argv[])
+parse_options(int argc, char* argv[])
 {
   int opt;
 
@@ -756,10 +756,10 @@ main(int argc, char* argv[])
 {
   bool retb;
 
-  // Parse command-line arguments.
-  retb = parse_arguments(argc, argv);
+  // Parse command-line options.
+  retb = parse_options(argc, argv);
   if (retb == false) {
-    log_(LL_ERROR, false, "unable to parse command-line arguments");
+    log_(LL_ERROR, false, "unable to parse command-line options");
     return EXIT_FAILURE;
   }
 

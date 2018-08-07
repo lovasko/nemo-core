@@ -465,6 +465,13 @@ verify_payload(const ssize_t n, const payload* pl)
 {
   log_(LL_TRACE, false, "verifying payload");
 
+  // Verify the size of the datagram.
+  if ((size_t)n != sizeof(*pl)) {
+    log_(LL_WARN, false, "wrong datagram size, expected: %zd, actual: %zu",
+      n, sizeof(*pl));
+    return false;
+  }
+
   // Verify the magic identifier.
   if (pl->pl_mgic != NEMO_PAYLOAD_MAGIC) {
     log_(LL_DEBUG, false, "payload identifier unknown, expected: %"
@@ -483,13 +490,6 @@ verify_payload(const ssize_t n, const payload* pl)
   if (pl->pl_type != NEMO_PAYLOAD_TYPE_REQUEST) {
     log_(LL_DEBUG, false, "unexpected payload type, expected: %"
       PRIu8 ", actual: %" PRIu8, NEMO_PAYLOAD_TYPE_REQUEST, pl->pl_type);
-    return false;
-  }
-
-  // Verify the size of the packet.
-  if ((size_t)n != sizeof(*pl)) {
-    log_(LL_WARN, false, "wrong datagram size, expected: %zd, actual: %zu",
-      n, sizeof(*pl));
     return false;
   }
 

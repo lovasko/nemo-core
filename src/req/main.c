@@ -904,7 +904,6 @@ request_loop(void)
   return true;
 }
 
-
 /// Unicast network requester.
 int
 main(int argc, char* argv[])

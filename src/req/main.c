@@ -397,7 +397,7 @@ signal_handler(int sig)
 /// Install signal handlers.
 /// @return status code
 static bool
-install_signal_handler(void)
+install_signal_handlers(void)
 {
   struct sigaction sa;
   int reti;
@@ -927,7 +927,7 @@ main(int argc, char* argv[])
   }
 
   // Install signal handlers.
-  retb = install_signal_handler();
+  retb = install_signal_handlers();
   if (retb == false) {
     log_(LL_ERROR, false, "unable to install signal handlers");
     return EXIT_FAILURE;

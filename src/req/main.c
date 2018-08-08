@@ -338,9 +338,6 @@ parse_targets(int idx, int argc, char* argv[])
   struct in_addr addr4;
   struct in6_addr addr6;
   uint64_t tidx;
-  char str[64];
-
-  memset(str, '\0', sizeof(str));
   
   tidx = 0;
   for (i = idx; i < argc; i++) {

@@ -305,7 +305,7 @@ parse_options(int* pidx, int argc, char* argv[])
     op_ipv6 = true;
   }
 
-	*pidx = optind;
+  *pidx = optind;
 
   return true;
 }
@@ -338,9 +338,9 @@ parse_targets(int idx, int argc, char* argv[])
   struct in_addr addr4;
   struct in6_addr addr6;
   uint64_t tidx;
-	char str[64];
+  char str[64];
 
-	memset(str, '\0', sizeof(str));
+  memset(str, '\0', sizeof(str));
   
   tidx = 0;
   for (i = idx; i < argc; i++) {
@@ -354,7 +354,7 @@ parse_targets(int idx, int argc, char* argv[])
       tgs[tidx].tg_laddr = (uint64_t)addr4.s_addr;
       tgs[tidx].tg_haddr = (uint64_t)0;
 
-			log_(LL_INFO, false, "parsed %s target: %s", "IPv4", argv[i]);
+      log_(LL_INFO, false, "parsed %s target: %s", "IPv4", argv[i]);
       ntgs++;
       continue;
     }
@@ -366,7 +366,7 @@ parse_targets(int idx, int argc, char* argv[])
       tgs[tidx].tg_laddr = make_address_part(&addr6.s6_addr[0]);
       tgs[tidx].tg_haddr = make_address_part(&addr6.s6_addr[7]);
 
-			log_(LL_INFO, false, "parsed %s target: %s", "IPv6", argv[i]);
+      log_(LL_INFO, false, "parsed %s target: %s", "IPv6", argv[i]);
       ntgs++;
       continue;
     }
@@ -395,7 +395,7 @@ signal_handler(int sig)
     sint = true;
 
   if (sig == SIGUSR1)
-		susr1 = true;
+    susr1 = true;
 }
 
 /// Install signal handlers.
@@ -422,7 +422,7 @@ install_signal_handler(void)
   sa.sa_handler = signal_handler;
 
   // Install signal handler for SIGINT.
-	log_(LL_INFO, false, "installing signal handler for %s", "SIGINT");
+  log_(LL_INFO, false, "installing signal handler for %s", "SIGINT");
   reti = sigaction(SIGINT, &sa, NULL);
   if (reti == -1) {
     log_(LL_WARN, true, "unable to add signal handler for %s", "SIGINT");
@@ -430,7 +430,7 @@ install_signal_handler(void)
   }
 
   // Install signal handler for SIGUSR1.
-	log_(LL_INFO, false, "installing signal handler for %s", "SIGUSR1");
+  log_(LL_INFO, false, "installing signal handler for %s", "SIGUSR1");
   reti = sigaction(SIGUSR1, &sa, NULL);
   if (reti == -1) {
     log_(LL_WARN, true, "unable to add signal handler for %s", "SIGUSR1");
@@ -593,21 +593,21 @@ static void
 set_target_address(struct sockaddr_storage* ss, const target tg)
 {
   struct sockaddr_in sin;
-	struct sockaddr_in6 sin6;
+  struct sockaddr_in6 sin6;
 
-	if (tg.tg_type == NEMO_TARGET_TYPE_IPV4) {
-		sin.sin_family      = AF_INET;
-		sin.sin_port        = htons((uint16_t)op_port);
-		sin.sin_addr.s_addr = (uint32_t)tg.tg_laddr;
+  if (tg.tg_type == NEMO_TARGET_TYPE_IPV4) {
+    sin.sin_family      = AF_INET;
+    sin.sin_port        = htons((uint16_t)op_port);
+    sin.sin_addr.s_addr = (uint32_t)tg.tg_laddr;
     (void)memcpy(ss, &sin, sizeof(sin));
-	}
+  }
 
-	if (tg.tg_type == NEMO_TARGET_TYPE_IPV6) {
-		sin6.sin6_family = AF_INET6;
-		sin6.sin6_port   = htons((uint16_t)op_port);
-		tipv6(&sin6.sin6_addr, tg.tg_laddr, tg.tg_haddr);
-		(void)memcpy(ss, &sin6, sizeof(sin6));		
-	}
+  if (tg.tg_type == NEMO_TARGET_TYPE_IPV6) {
+    sin6.sin6_family = AF_INET6;
+    sin6.sin6_port   = htons((uint16_t)op_port);
+    tipv6(&sin6.sin6_addr, tg.tg_laddr, tg.tg_haddr);
+    (void)memcpy(ss, &sin6, sizeof(sin6));
+  }
 }
 
 /// Fill the payload with default and selected data.
@@ -669,8 +669,8 @@ send_all_datagrams(int sock, const uint64_t snum)
   msg.msg_controllen = 0;
 
   for (i = 0; i < ntgs; i++) {
-	  // Assigning the correct address used by the target. This has to be called
-		// before the encode_.
+    // Assigning the correct address used by the target. This has to be called
+    // before the encode_payload.
     set_target_address(&addr, tgs[i]);
 
     // Prepare payload.
@@ -697,7 +697,7 @@ send_all_datagrams(int sock, const uint64_t snum)
     }
   }
 
-	return true;
+  return true;
 }
 
 /// Thread that sends requests to targets on a specified socket.
@@ -710,13 +710,13 @@ send_worker(void* arg)
   int sock;
   uint64_t i;
   int reti;
-	bool retb;
+  bool retb;
   struct timespec dur;
 
   // Resolve the argument to a socket.
   sock = *(int*)arg;
-	log_(LL_INFO, false, "starting sender thread for %s",
-	  sock == sock4 ? "IPv4" : "IPv6");
+  log_(LL_INFO, false, "starting sender thread for %s",
+    sock == sock4 ? "IPv4" : "IPv6");
 
   // Convert the interval duration.
   fnanos(&dur, op_int);
@@ -773,15 +773,15 @@ recv_worker(void* arg)
 {
   int sock;
   ssize_t retss;
-	payload pl;
+  payload pl;
   struct msghdr msg;
   struct iovec iov;
-	struct sockaddr_storage addr;
+  struct sockaddr_storage addr;
 
   // Resolve the argument to a socket.
   sock = *(int*)arg;
-	log_(LL_INFO, false, "starting receiver thread for %s",
-	  sock == sock4 ? "IPv4" : "IPv6");
+  log_(LL_INFO, false, "starting receiver thread for %s",
+    sock == sock4 ? "IPv4" : "IPv6");
 
   // Prepare payload data.
   iov.iov_base = &pl;
@@ -831,7 +831,7 @@ request_loop(void)
 {
   int reti;
 
-	log_(LL_INFO, false, "starting the request loop");
+  log_(LL_INFO, false, "starting the request loop");
 
   // Start the IPv4 sending/receiving.
   if (op_ipv4 == true) {
@@ -887,7 +887,7 @@ int
 main(int argc, char* argv[])
 {
   bool retb;
-	int pidx;
+  int pidx;
 
   // Parse command-line options.
   retb = parse_options(&pidx, argc, argv);

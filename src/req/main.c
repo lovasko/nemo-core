@@ -77,6 +77,7 @@ static bool     op_ipv6; ///< IPv6-only mode.
 static int sock4;                         ///< IPv4 socket.
 static int sock6;                         ///< IPv6 socket.
 static bool sint;                         ///< SIGINT flag.
+static bool sterm;                        ///< SIGTERM flag.
 static bool susr1;                        ///< SIGUSR1 flag.
 static uint64_t ntgs;                     ///< Number of targets.
 static target tgs[NEMO_TARGET_COUNT_MAX]; ///< Target database.
@@ -388,11 +389,9 @@ parse_targets(int idx, int argc, char* argv[])
 static void
 signal_handler(int sig)
 {
-  if (sig == SIGINT)
-    sint = true;
-
-  if (sig == SIGUSR1)
-    susr1 = true;
+  if (sig == SIGINT)  sint  = true;
+	if (sig == SIGTERM) sterm = true;
+  if (sig == SIGUSR1) susr1 = true;
 }
 
 /// Install signal handlers.
@@ -405,12 +404,14 @@ install_signal_handler(void)
   sigset_t sset;
 
   // Reset the signal indicator.
-  sint = false;
+  sint  = false;
+	sterm = false;
   susr1 = false;
 
   // Create a set of blocked signals.
   (void)sigfillset(&sset);
   (void)sigdelset(&sset, SIGINT);
+	(void)sigdelset(&sset, SIGTERM);
   (void)sigdelset(&sset, SIGUSR1);
   (void)sigprocmask(SIG_SETMASK, &sset, NULL);
 
@@ -423,6 +424,14 @@ install_signal_handler(void)
   reti = sigaction(SIGINT, &sa, NULL);
   if (reti == -1) {
     log_(LL_WARN, true, "unable to add signal handler for %s", "SIGINT");
+    return false;
+  }
+
+  // Install signal handler for SIGTERM.
+  log_(LL_INFO, false, "installing signal handler for %s", "SIGTERM");
+  reti = sigaction(SIGTERM, &sa, NULL);
+  if (reti == -1) {
+    log_(LL_WARN, true, "unable to add signal handler for %s", "SIGTERM");
     return false;
   }
 
@@ -743,6 +752,13 @@ send_worker(void* arg)
         // Check if the sleep was interrupted by a signal.
         if (errno == EINTR) {
           if (sint == true) {
+            log_(LL_WARN, false, "received the %s signal", "SIGINT");
+            kill_other_threads();
+            break;
+          }
+
+          if (sterm == true) {
+            log_(LL_WARN, false, "received the %s signal", "SIGTERM");
             kill_other_threads();
             break;
           }
@@ -800,9 +816,16 @@ recv_worker(void* arg)
       // Check if we were interrupted by a signal delivery.
       if (errno == EINTR) {
         
-        // If the signal was SIGINT, send SIGUSR1 to all other worker threads
-        // to interrupt their system calls.
+				// If the signal was SIGINT or SIGTERM, send SIGUSR1 to all other
+				// worker threads to interrupt their system calls.
         if (sint == true) {
+				  log_(LL_WARN, false, "received the %s signal", "SIGINT");
+          kill_other_threads();
+          break;
+        }
+
+        if (sterm == true) {
+				  log_(LL_WARN, false, "received the %s signal", "SIGTERM");
           kill_other_threads();
           break;
         }
@@ -864,8 +887,11 @@ request_loop(void)
 
   while (true) {
     (void)pause();
+
+		if (sint  == true) log_(LL_WARN, "received the %s signal", "SIGINT");
+		if (sterm == true) log_(LL_WARN, "received the %s signal", "SIGTERM");
     
-    if (sint == true) {
+    if (sint == true || sterm == true) {
       kill_other_threads();
       (void)pthread_join(sender4, NULL);
       (void)pthread_join(recver4, NULL);

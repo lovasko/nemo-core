@@ -16,6 +16,7 @@
 .Op Fl e
 .Op Fl h
 .Op Fl k Ar key
+.Op Fl m
 .Op Fl n
 .Op Fl p Ar num
 .Op Fl r Ar rbs
@@ -51,6 +52,10 @@ Prints the usage message.
 .It Fl k Ar key
 Sets the key of each outgoing nemo payload (see FLOW IDENTIFICATION). If not
 specified, a random value is generated.
+.
+.It Fl m
+Turns on the monologue mode where no responses over the network are issued. All
+action sets that fire when a request is received still get executed.
 .
 .It Fl n
 Disables the usage of colors in the logging output (see LOGGING).

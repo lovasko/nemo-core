@@ -18,6 +18,7 @@
 .Op Fl h
 .Op Fl i Ar dur
 .Op Fl k Ar key
+.Op Fl m
 .Op Fl n
 .Op Fl p Ar num
 .Op Fl r Ar rbs
@@ -66,6 +67,10 @@ The default value is
 .It Fl k Ar key
 Sets the key of each outgoing nemo payload (see FLOW IDENTIFICATION). If not
 specified, a random value is generated.
+.
+.It Fl m
+Turns on the monologue mode where no responses over the network are expected.
+Therefore, no action sets that fire when a response is received get executed.
 .
 .It Fl n
 Disables the usage of colors in the logging output (see LOGGING).

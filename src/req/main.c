@@ -739,23 +739,25 @@ send_worker(void* arg)
     }
 
     // Sleep for the desired interval.
-    reti = nanosleep(&dur, NULL);
-    if (reti == -1) {
+    if (i != op_cnt - 1) {
+      reti = nanosleep(&dur, NULL);
+      if (reti == -1) {
 
-      // Check if the sleep was interrupted by a signal.
-      if (errno == EINTR) {
-        if (sint == true) {
-          kill_other_threads();
-          break;
+        // Check if the sleep was interrupted by a signal.
+        if (errno == EINTR) {
+          if (sint == true) {
+            kill_other_threads();
+            break;
+          }
+
+          if (susr1 == true) {
+            log_(LL_INFO, false, "exitting this thread");
+            break;
+          }
         }
 
-        if (susr1 == true) {
-					log_(LL_INFO, false, "exitting this thread");
-          break;
-				}
+        log_(LL_WARN, true, "unable to sleep");
       }
-
-      log_(LL_WARN, true, "unable to sleep");
     }
   }
 

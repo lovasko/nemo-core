@@ -295,13 +295,13 @@ parse_options(int* pidx, int argc, char* argv[])
   }
 
   // Check whether two exclusive modes were selected.
-  if (op_ipv4 && op_ipv6) {
+  if (op_ipv4 == true && op_ipv6 == true) {
     log_(LL_WARN, false, "options -4 and -6 are mutually exclusive");
     return false;
   }
 
   // If no restrictions on the IP version were set, enable both versions.
-  if (!op_ipv4 && !op_ipv6) {
+  if (op_ipv4 == false && op_ipv6 == false) {
     op_ipv4 = true;
     op_ipv6 = true;
   }
@@ -456,7 +456,7 @@ create_socket4(void)
   int val;
 
   // Early exit if IPv4 is not selected.
-  if (!op_ipv4)
+  if (op_ipv4 == false)
     return true;
 
   log_(LL_INFO, false, "creating %s socket", "IPv4");
@@ -526,7 +526,7 @@ create_socket6(void)
   int val;
 
   // Early exit if IPv6 is not selected.
-  if (!op_ipv6)
+  if (op_ipv6 == false)
     return true;
 
   log_(LL_INFO, false, "creating %s socket", "IPv6");

@@ -121,6 +121,7 @@ kill_other_threads(void)
   }
 }
 
+/// Print the usage information to the standard output stream.
 static void
 print_usage(void)
 {

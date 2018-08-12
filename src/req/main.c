@@ -401,7 +401,7 @@ install_signal_handlers(void)
 {
   struct sigaction sa;
   int reti;
-  sigset_t sset;
+  sigset_t ss;
 
   // Reset the signal indicator.
   sint  = false;
@@ -409,11 +409,11 @@ install_signal_handlers(void)
   susr1 = false;
 
   // Create a set of blocked signals.
-  (void)sigfillset(&sset);
-  (void)sigdelset(&sset, SIGINT);
-	(void)sigdelset(&sset, SIGTERM);
-  (void)sigdelset(&sset, SIGUSR1);
-  (void)sigprocmask(SIG_SETMASK, &sset, NULL);
+  (void)sigfillset(&ss);
+  (void)sigdelset(&ss, SIGINT);
+	(void)sigdelset(&ss, SIGTERM);
+  (void)sigdelset(&ss, SIGUSR1);
+  (void)sigprocmask(SIG_SETMASK, &ss, NULL);
 
   // Initialise the handler settings.
   (void)memset(&sa, 0, sizeof(sa));

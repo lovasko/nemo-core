@@ -890,11 +890,19 @@ request_loop(void)
     // Create the IPv4 receiver thread.
     reti = pthread_create(&recver4, NULL, recv_worker, &sock4);
     if (reti != 0) {
+      errno = reti;
+      log_(LL_WARN, true, "unable to start the %s thread",
+        "IPv4 receiver");
+      return false;
     }
 
     // Create the IPv4 sender thread.
     reti = pthread_create(&sender4, NULL, send_worker, &sock4);
-    if (reti == -1) {
+    if (reti != 0) {
+      errno = reti;
+      log_(LL_WARN, true, "unable to start the %s thread",
+        "IPv4 sender");
+      return false;
     }
   }
 
@@ -902,12 +910,20 @@ request_loop(void)
   if (op_ipv6 == true) {
     // Create the IPv6 receiver thread.
     reti = pthread_create(&recver6, NULL, recv_worker, &sock6);
-    if (reti == -1) {
+    if (reti != 0) {
+      errno = reti;
+      log_(LL_WARN, true, "unable to start the %s thread",
+        "IPv6 receiver");
+      return false;
     }
 
     // Create the IPv6 sender thread.
     reti = pthread_create(&sender6, NULL, send_worker, &sock6);
-    if (reti == -1) {
+    if (reti != 0) {
+      errno = reti;
+      log_(LL_WARN, true, "unable to start the %s thread",
+        "IPv6 sender");
+      return false;
     }
   }
 

@@ -142,9 +142,13 @@ parse_options(int argc, char* argv[])
   op_ipv6 = false;
 
   // Loop through available options.
-  while ((opt = getopt(argc, argv, "46ehk:mnp:r:s:t:v")) != -1) {
-    switch (opt) {
+  while (true) {
+    // Parse the next option.
+    opt = getopt(argc, argv, "46ehk:mnp:r:s:t:v");
+    if (opt == -1)
+      break;
 
+    switch (opt) {
       // IPv4-only mode.
       case '4':
         op_ipv4 = true;

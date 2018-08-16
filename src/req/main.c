@@ -60,6 +60,13 @@ typedef struct _target {
   uint64_t tg_time;                        ///< Time of last name resolution.
 } target;
 
+/// Arguments for a worker thread.
+typedef struct thread_arg {
+  int       ta_socket;   ///< Network socket connection.
+  char      ta_name[16]; ///< Name of the thread.
+  pthread_t ta_friend;   ///< Related thread.
+} thread_arg;
+
 // Program options.
 static uint64_t op_cnt;  ///< Number of emitted payload rounds.
 static uint64_t op_int;  ///< Inter-payload sleep interval.
@@ -87,6 +94,7 @@ static pthread_t sender4;                 ///< IPv4 sender thread.
 static pthread_t recver4;                 ///< IPv4 receiver thread.
 static pthread_t sender6;                 ///< IPv6 sender thread.
 static pthread_t recver6;                 ///< IPv6 receiver thread.
+static pthread_t mainth;                  ///< Thread of the main function.
 
 
 /// Send the SIGUSR1 signal to all other worker threads apart from the calling
@@ -739,16 +747,15 @@ send_all_datagrams(int sock, const uint64_t snum)
 static void*
 send_worker(void* arg)
 {
-  int sock;
   uint64_t i;
   int reti;
   bool retb;
   struct timespec dur;
+  thread_arg ta;
 
-  // Resolve the argument to a socket.
-  sock = *(int*)arg;
-  log_(LL_INFO, false, "starting sender thread for %s",
-    sock == sock4 ? "IPv4" : "IPv6");
+  // Resolve the thread argument.
+  ta = *(thread_arg*)arg;
+  log_(LL_INFO, false, "starting thread %s", ta.ta_name);
 
   // Convert the interval duration.
   fnanos(&dur, op_int);
@@ -760,7 +767,7 @@ send_worker(void* arg)
       i + 1, op_cnt);
 
     // Send all datagrams.
-    retb = send_all_datagrams(sock, i);
+    retb = send_all_datagrams(ta.ta_socket, i);
     if (retb == false) {
       log_(LL_WARN, false, "unable to send all payloads to IPv4 socket");
 
@@ -802,9 +809,13 @@ send_worker(void* arg)
 
   // Final wait before terminating the receiver thread. This allows for the
   // remaining responses to arrive given a length trip time.
-  log_(LL_INFO, false, "Waiting %" PRIu64 "%s for responses", op_wait, "ns");
+  log_(LL_INFO, false, "waiting %" PRIu64 "%s for responses", op_wait, "ns");
   fnanos(&dur, op_wait);
   (void)nanosleep(&dur, NULL);
+
+  // Terminate the relevant receiver thread.
+  (void)pthread_kill(ta.ta_friend, SIGUSR1);
+  log_(LL_INFO, false, "exiting thread %s", ta.ta_name);
 
   return NULL;
 }
@@ -816,17 +827,16 @@ send_worker(void* arg)
 static void*
 recv_worker(void* arg)
 {
-  int sock;
   ssize_t retss;
   payload pl;
   struct msghdr msg;
   struct iovec iov;
   struct sockaddr_storage addr;
+  thread_arg ta;
 
   // Resolve the argument to a socket.
-  sock = *(int*)arg;
-  log_(LL_INFO, false, "starting receiver thread for %s",
-    sock == sock4 ? "IPv4" : "IPv6");
+  ta = *(thread_arg*)arg;
+  log_(LL_INFO, false, "starting thread %s", ta.ta_name);
 
   // Prepare payload data.
   iov.iov_base = &pl;
@@ -842,7 +852,7 @@ recv_worker(void* arg)
 
   // Receive datagrams.
   while (true) {
-    retss = recvmsg(sock, &msg, MSG_TRUNC);
+    retss = recvmsg(ta.ta_socket, &msg, MSG_TRUNC);
 
     if (retss == -1) {
       // Check if we were interrupted by a signal delivery.
@@ -873,6 +883,10 @@ recv_worker(void* arg)
     log_(LL_DEBUG, false, "received message, responder key = %" PRIu64 "!", pl.pl_resk);
   }
 
+  // Send a signal to the main thread so that it wakes up.
+  (void)pthread_kill(ta.ta_friend, SIGUSR1);
+  log_(LL_INFO, false, "exiting thread %s", ta.ta_name);
+
   return NULL;
 }
 
@@ -882,13 +896,21 @@ static bool
 request_loop(void)
 {
   int reti;
+  thread_arg tar4;
+  thread_arg tas4;
+  thread_arg tar6;
+  thread_arg tas6;
 
   log_(LL_INFO, false, "starting the request loop");
 
   // Start the IPv4 sending/receiving.
   if (op_ipv4 == true) {
     // Create the IPv4 receiver thread.
-    reti = pthread_create(&recver4, NULL, recv_worker, &sock4);
+    tar4.ta_socket = sock4;
+    tar4.ta_friend = mainth;
+    (void)memset(tar4.ta_name, '\0', sizeof(tar4.ta_name));
+    (void)strcpy(tar4.ta_name, "rcv4");
+    reti = pthread_create(&recver4, NULL, recv_worker, &tar4);
     if (reti != 0) {
       errno = reti;
       log_(LL_WARN, true, "unable to start the %s thread",
@@ -897,7 +919,11 @@ request_loop(void)
     }
 
     // Create the IPv4 sender thread.
-    reti = pthread_create(&sender4, NULL, send_worker, &sock4);
+    tas4.ta_socket = sock4;
+    tas4.ta_friend = recver4;
+    (void)memset(tas4.ta_name, '\0', sizeof(tas4.ta_name));
+    (void)strcpy(tas4.ta_name, "snd4");
+    reti = pthread_create(&sender4, NULL, send_worker, &tas4);
     if (reti != 0) {
       errno = reti;
       log_(LL_WARN, true, "unable to start the %s thread",
@@ -909,7 +935,11 @@ request_loop(void)
   // Start the IPv6 sending/receiving.
   if (op_ipv6 == true) {
     // Create the IPv6 receiver thread.
-    reti = pthread_create(&recver6, NULL, recv_worker, &sock6);
+    tar6.ta_socket = sock6;
+    tar6.ta_friend = mainth;
+    (void)memset(tar6.ta_name, '\0', sizeof(tar6.ta_name));
+    (void)strcpy(tar6.ta_name, "rcv6");
+    reti = pthread_create(&recver6, NULL, recv_worker, &tar6);
     if (reti != 0) {
       errno = reti;
       log_(LL_WARN, true, "unable to start the %s thread",
@@ -918,7 +948,11 @@ request_loop(void)
     }
 
     // Create the IPv6 sender thread.
-    reti = pthread_create(&sender6, NULL, send_worker, &sock6);
+    tas6.ta_socket = sock6;
+    tas6.ta_friend = recver6;
+    (void)memset(tas6.ta_name, '\0', sizeof(tar6.ta_name));
+    (void)strcpy(tas6.ta_name, "snd6");
+    reti = pthread_create(&sender6, NULL, send_worker, &tas6);
     if (reti != 0) {
       errno = reti;
       log_(LL_WARN, true, "unable to start the %s thread",
@@ -936,20 +970,31 @@ request_loop(void)
   while (true) {
     (void)pause();
 
-		if (sint  == true) log_(LL_WARN, "received the %s signal", "SIGINT");
-		if (sterm == true) log_(LL_WARN, "received the %s signal", "SIGTERM");
+		//if (sint  == true) log_(LL_WARN, "received the %s signal", "SIGINT");
+		//if (sterm == true) log_(LL_WARN, "received the %s signal", "SIGTERM");
     
     if (sint == true || sterm == true) {
       kill_other_threads();
-      (void)pthread_join(sender4, NULL);
-      (void)pthread_join(recver4, NULL);
-      (void)pthread_join(sender6, NULL);
-      (void)pthread_join(recver6, NULL);
+    }
+      
+    if (susr1 == true) {
+      if (op_ipv4 == true) {
+        (void)pthread_join(sender4, NULL);
+        (void)pthread_join(recver4, NULL);
+      }
+
+      if (op_ipv6 == true) {
+        (void)pthread_join(sender6, NULL);
+        (void)pthread_join(recver6, NULL);
+      }
+
+      log_(LL_INFO, false, "request loop has finished");
+
       break;
     }
   }
 
-  return true;
+  return (sterm == false && sint == false);
 }
 
 /// Unicast network requester.
@@ -958,6 +1003,9 @@ main(int argc, char* argv[])
 {
   bool retb;
   int pidx;
+
+  // Obtain the main thread handle.
+  mainth = pthread_self();
 
   // Parse command-line options.
   retb = parse_options(&pidx, argc, argv);

@@ -961,18 +961,17 @@ request_loop(void)
     }
   }
 
-  // Wait for the delivery of the SIGINT signal. Ignore the delivery of any
-  // other signal. Since the delivery of a signal can be dispatched to any
-  // thread, we need to terminate all worker threads. Once we send the USR1
-  // signal to all of them to interrupt the system calls they are  in, we wait
-  // for their orderly finish by joining them to the main thread.
+  // Wait for the delivery of the any signal. This can be either an externally
+  // generated signal, or an internal death signal by either one of the
+  // receiver threads. Since the delivery of the external signal can be
+  // dispatched to any thread, we need to terminate all worker threads.  Once
+  // we send the USR1 signal to all of them to interrupt the system calls they
+  // are in, we wait for their orderly finish by joining them to the main
+  // thread.
 
   while (true) {
     (void)pause();
 
-		//if (sint  == true) log_(LL_WARN, "received the %s signal", "SIGINT");
-		//if (sterm == true) log_(LL_WARN, "received the %s signal", "SIGTERM");
-    
     if (sint == true || sterm == true) {
       kill_other_threads();
     }
@@ -994,6 +993,8 @@ request_loop(void)
     }
   }
 
+  // We only successfully exit if none of the SIGTERM and SIGINT signals
+  // appeared.
   return (sterm == false && sint == false);
 }
 

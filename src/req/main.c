@@ -197,6 +197,7 @@ static bool
 parse_options(int* pidx, int argc, char* argv[])
 {
   int opt;
+  bool retb;
 
   // Set optional arguments to sensible defaults.
   op_rbuf = DEF_RECEIVE_BUFFER_SIZE;
@@ -214,9 +215,13 @@ parse_options(int* pidx, int argc, char* argv[])
   op_ipv6 = false;
 
   // Loop through available options.
-  while ((opt = getopt(argc, argv, "46c:ehi:k:np:r:s:t:vw:")) != -1) {
-    switch (opt) {
+  while (true) {
+    // Parse the next available option.
+    opt = getopt(argc, argv, "46c:ehi:k:np:r:s:t:vw:");
+    if (opt == -1)
+      break;
 
+    switch (opt) {
       // IPv4-only mode.
       case '4':
         op_ipv4 = true;
@@ -229,7 +234,8 @@ parse_options(int* pidx, int argc, char* argv[])
 
       // Number of requests to make.
       case 'c':
-        if (parse_uint64(&op_cnt, optarg, 1, UINT64_MAX) == false)
+        retb = parse_uint64(&op_cnt, optarg, 1, UINT64_MAX);
+        if (retb == false)
           return false;
         break;
 
@@ -246,37 +252,43 @@ parse_options(int* pidx, int argc, char* argv[])
 
       // Time interval between rounds of sent datagrams.
       case 'i':
-        if (parse_scalar(&op_int, optarg, "ns", parse_time_unit) == false)
+        retb = parse_scalar(&op_int, optarg, "ns", parse_time_unit);
+        if (retb == false)
           return false;
         break;
 
       // Key of the current run.
       case 'k':
-        if (parse_uint64(&op_key, optarg, 1, UINT64_MAX) == 0)
+        retb = parse_uint64(&op_key, optarg, 1, UINT64_MAX);
+        if (retb == false)
           return false;
         break;
 
       // UDP port to use.
       case 'p':
-        if (parse_uint64(&op_port, optarg, 1, 65535) == false)
+        retb = parse_uint64(&op_port, optarg, 1, 65535);
+        if (retb == false)
           return false;
         break;
 
       // Socket receive buffer size.
       case 'r':
-        if (parse_scalar(&op_rbuf, optarg, "b", parse_memory_unit) == false)
+        retb = parse_scalar(&op_rbuf, optarg, "b", parse_memory_unit);
+        if (retb == false)
           return false;
         break;
 
       // Socket send buffer size.
       case 's':
-        if (parse_scalar(&op_sbuf, optarg, "b", parse_memory_unit) == false)
+        retb = parse_scalar(&op_sbuf, optarg, "b", parse_memory_unit);
+        if (retb == false)
           return false;
         break;
 
       // Set the outgoing Time-To-Live value.
       case 't':
-        if (parse_uint64(&op_ttl, optarg, 1, 255) == false)
+        retb = parse_uint64(&op_ttl, optarg, 1, 255);
+        if (retb == false)
           return false;
         break;
 
@@ -288,7 +300,8 @@ parse_options(int* pidx, int argc, char* argv[])
 
       // Wait time for responses after last request.
       case 'w':
-        if (parse_scalar(&op_wait, optarg, "ns", parse_time_unit) == false)
+        retb = parse_scalar(&op_wait, optarg, "ns", parse_time_unit);
+        if (retb == false)
           return false;
         break;
 

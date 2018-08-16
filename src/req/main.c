@@ -36,7 +36,7 @@
 #define DEF_WAIT_FOR_RESPONSES  2000000000 // Two second wait time for responses.
 #define DEF_TIME_TO_LIVE        32         // IP Time-To-Live value.
 #define DEF_EXIT_ON_ERROR       false      // Process exit on publishing error.
-#define DEF_LOG_LEVEL           LL_DEBUG    // Log errors and warnings by default.
+#define DEF_LOG_LEVEL           LL_WARN    // Log errors and warnings by default.
 #define DEF_LOG_COLOR           true       // Colors in the notification output.
 #define DEF_UDP_PORT            23000      // UDP port number to use
 #define DEF_RECEIVE_BUFFER_SIZE 2000000    // Socket receive buffer memory size.

@@ -61,7 +61,7 @@ typedef struct _target {
 } target;
 
 /// Arguments for a worker thread.
-typedef struct thread_arg {
+typedef struct _thread_arg {
   int       ta_socket;   ///< Network socket connection.
   char      ta_name[16]; ///< Name of the thread.
   pthread_t ta_friend;   ///< Related thread.

@@ -33,6 +33,7 @@
 // Default values for optional arguments.
 #define DEF_COUNT               5          // Number of published datagrams.
 #define DEF_INTERVAL            1000000000 // One second pause between payloads.
+#define DEF_WAIT_FOR_RESPONSES  2000000000 // Two second wait time for responses.
 #define DEF_TIME_TO_LIVE        32         // IP Time-To-Live value.
 #define DEF_EXIT_ON_ERROR       false      // Process exit on publishing error.
 #define DEF_LOG_LEVEL           LL_DEBUG    // Log errors and warnings by default.
@@ -62,6 +63,7 @@ typedef struct _target {
 // Program options.
 static uint64_t op_cnt;  ///< Number of emitted payload rounds.
 static uint64_t op_int;  ///< Inter-payload sleep interval.
+static uint64_t op_wait; ///< Wait time for responses after last request.
 static uint64_t op_rbuf; ///< Socket receive buffer memory size.
 static uint64_t op_sbuf; ///< Socket send buffer memory size.
 static uint64_t op_ttl;  ///< Time-To-Live for published datagrams.
@@ -150,7 +152,8 @@ print_usage(void)
     "  -s SBS  Send memory buffer size.\n"
     "  -p NUM  UDP port to use for all endpoints. (def=%d)\n"
     "  -t TTL  Set the Time-To-Live for all published datagrams. (def=%d)\n"
-    "  -v      Increase the verbosity of the logging output.\n",
+    "  -v      Increase the verbosity of the logging output.\n"
+    "  -w DUR  Wait time for responses after last request. (def=2s)\n",
     NEMO_VERSION_MAJOR,
     NEMO_VERSION_MINOR,
     NEMO_VERSION_PATCH,
@@ -200,6 +203,7 @@ parse_options(int* pidx, int argc, char* argv[])
   op_sbuf = DEF_SEND_BUFFER_SIZE;
   op_cnt  = DEF_COUNT;
   op_int  = DEF_INTERVAL;
+  op_wait = DEF_WAIT_FOR_RESPONSES;
   op_ttl  = DEF_TIME_TO_LIVE;
   op_err  = DEF_EXIT_ON_ERROR;
   op_port = DEF_UDP_PORT;
@@ -210,7 +214,7 @@ parse_options(int* pidx, int argc, char* argv[])
   op_ipv6 = false;
 
   // Loop through available options.
-  while ((opt = getopt(argc, argv, "46c:ehi:k:np:r:s:t:v")) != -1) {
+  while ((opt = getopt(argc, argv, "46c:ehi:k:np:r:s:t:vw:")) != -1) {
     switch (opt) {
 
       // IPv4-only mode.
@@ -280,6 +284,12 @@ parse_options(int* pidx, int argc, char* argv[])
       case 'v':
         if (op_llvl != LL_DEBUG)
           op_llvl++;
+        break;
+
+      // Wait time for responses after last request.
+      case 'w':
+        if (parse_scalar(&op_wait, optarg, "ns", parse_time_unit) == false)
+          return false;
         break;
 
       // Unknown option.
@@ -774,6 +784,12 @@ send_worker(void* arg)
       }
     }
   }
+
+  // Final wait before terminating the receiver thread. This allows for the
+  // remaining responses to arrive given a length trip time.
+  log_(LL_INFO, false, "Waiting %" PRIu64 "%s for responses", op_wait, "ns");
+  fnanos(&dur, op_wait);
+  (void)nanosleep(&dur, NULL);
 
   return NULL;
 }

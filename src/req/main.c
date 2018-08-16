@@ -988,7 +988,6 @@ request_loop(void)
       }
 
       log_(LL_INFO, false, "request loop has finished");
-
       break;
     }
   }

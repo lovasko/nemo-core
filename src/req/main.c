@@ -38,6 +38,7 @@
 #define DEF_EXIT_ON_ERROR       false      // Process exit on publishing error.
 #define DEF_LOG_LEVEL           LL_WARN    // Log errors and warnings by default.
 #define DEF_LOG_COLOR           true       // Colors in the notification output.
+#define DEF_MONOLOGUE           false      // Responses are recorded by default.
 #define DEF_UDP_PORT            23000      // UDP port number to use
 #define DEF_RECEIVE_BUFFER_SIZE 2000000    // Socket receive buffer memory size.
 #define DEF_SEND_BUFFER_SIZE    2000000    // Socket send buffer memory size.
@@ -79,6 +80,7 @@ static uint64_t op_port; ///< UDP port for all endpoints.
 static uint8_t  op_llvl; ///< Notification verbosity level.
 static bool     op_lcol; ///< Notification coloring policy.
 static bool     op_err;  ///< Process exit policy on publishing error.
+static bool     op_mono; ///< Do not capture responses (monologue mode).
 static bool     op_ipv4; ///< IPv4-only mode.
 static bool     op_ipv6; ///< IPv6-only mode.
 
@@ -155,6 +157,7 @@ print_usage(void)
     "  -h      Print this help message.\n"
     "  -i DUR  Interval duration between published datagram rounds. (def=1s)\n"
     "  -k KEY  Key for the current run. (def=random)\n"
+    "  -m      Do not react to responses (monologue mode).\n"
     "  -n      Turn off colors in logging messages.\n"
     "  -r RBS  Receive memory buffer size.\n"
     "  -s SBS  Send memory buffer size.\n"
@@ -215,6 +218,7 @@ parse_options(int* pidx, int argc, char* argv[])
   op_wait = DEF_WAIT_FOR_RESPONSES;
   op_ttl  = DEF_TIME_TO_LIVE;
   op_err  = DEF_EXIT_ON_ERROR;
+  op_mono = DEF_MONOLOGUE;
   op_port = DEF_UDP_PORT;
   op_llvl = (log_lvl = DEF_LOG_LEVEL);
   op_lcol = (log_col = DEF_LOG_COLOR);
@@ -225,7 +229,7 @@ parse_options(int* pidx, int argc, char* argv[])
   // Loop through available options.
   while (true) {
     // Parse the next available option.
-    opt = getopt(argc, argv, "46c:ehi:k:np:r:s:t:vw:");
+    opt = getopt(argc, argv, "46c:ehi:k:mnp:r:s:t:vw:");
     if (opt == -1)
       break;
 
@@ -270,6 +274,16 @@ parse_options(int* pidx, int argc, char* argv[])
         retb = parse_uint64(&op_key, optarg, 1, UINT64_MAX);
         if (retb == false)
           return false;
+        break;
+
+      // Do not expect responses (monologue mode).
+      case 'm':
+        op_mono = true;
+        break;
+
+      // Turn of colors and highlight in the logging output.
+      case 'n':
+        op_lcol = false;
         break;
 
       // UDP port to use.
@@ -834,6 +848,10 @@ recv_worker(void* arg)
   struct sockaddr_storage addr;
   thread_arg ta;
 
+  // Short-circuit the receiver thread in the monologue mode.
+  if (op_mono == true)
+    return NULL;
+
   // Resolve the argument to a socket.
   ta = *(thread_arg*)arg;
   log_(LL_INFO, false, "starting thread %s", ta.ta_name);
@@ -890,75 +908,77 @@ recv_worker(void* arg)
   return NULL;
 }
 
+/// Initialise and start a thread of execution.
+/// @return success/failure indication
+///
+/// @param[out] thread resulting thread
+/// @param[in]  sock   network socket connection
+/// @param[in]  friend related thread
+/// @param[in]  name   name identifier
+static bool
+start_thread(pthread_t* thread,
+             int sock,
+             void*(*func)(void*),
+             const char* name,
+             pthread_t friend)
+{
+  int reti;
+  thread_arg* ta;
+
+  // Fill the thread arguments.
+  ta = malloc(sizeof(*ta));
+  ta->ta_socket = sock;
+  ta->ta_friend = friend;
+  (void)memset(ta->ta_name, '\0', sizeof(ta->ta_name));
+  (void)strcpy(ta->ta_name, name);
+
+  // Start the thread.
+  reti = pthread_create(thread, NULL, func, ta);
+  if (reti != 0) {
+    errno = reti;
+    log_(LL_WARN, true, "unable to start the %s thread", name);
+    return false;
+  }
+
+  return true;
+}
+
 /// Start emitting the network requests.
 /// @return status code
 static bool
 request_loop(void)
 {
-  int reti;
-  thread_arg tar4;
-  thread_arg tas4;
-  thread_arg tar6;
-  thread_arg tas6;
+  bool retb;
 
   log_(LL_INFO, false, "starting the request loop");
 
   // Start the IPv4 sending/receiving.
   if (op_ipv4 == true) {
-    // Create the IPv4 receiver thread.
-    tar4.ta_socket = sock4;
-    tar4.ta_friend = mainth;
-    (void)memset(tar4.ta_name, '\0', sizeof(tar4.ta_name));
-    (void)strcpy(tar4.ta_name, "rcv4");
-    reti = pthread_create(&recver4, NULL, recv_worker, &tar4);
-    if (reti != 0) {
-      errno = reti;
-      log_(LL_WARN, true, "unable to start the %s thread",
-        "IPv4 receiver");
+    retb = start_thread(&recver4, sock4, recv_worker, "rcv4", mainth);
+    if (retb == false)
       return false;
-    }
 
-    // Create the IPv4 sender thread.
-    tas4.ta_socket = sock4;
-    tas4.ta_friend = recver4;
-    (void)memset(tas4.ta_name, '\0', sizeof(tas4.ta_name));
-    (void)strcpy(tas4.ta_name, "snd4");
-    reti = pthread_create(&sender4, NULL, send_worker, &tas4);
-    if (reti != 0) {
-      errno = reti;
-      log_(LL_WARN, true, "unable to start the %s thread",
-        "IPv4 sender");
+    // The friend thread differs in the monologue mode, as once the sender
+    // thread finishes, it needs to inform the main thread directly, waking it
+    // up from the signal-induced sleep and perform the join operations.
+    retb = start_thread(&sender4, sock4, send_worker, "snd4",
+      op_mono == true ? mainth : recver4);
+    if (retb == false)
       return false;
-    }
   }
 
   // Start the IPv6 sending/receiving.
   if (op_ipv6 == true) {
-    // Create the IPv6 receiver thread.
-    tar6.ta_socket = sock6;
-    tar6.ta_friend = mainth;
-    (void)memset(tar6.ta_name, '\0', sizeof(tar6.ta_name));
-    (void)strcpy(tar6.ta_name, "rcv6");
-    reti = pthread_create(&recver6, NULL, recv_worker, &tar6);
-    if (reti != 0) {
-      errno = reti;
-      log_(LL_WARN, true, "unable to start the %s thread",
-        "IPv6 receiver");
+    retb = start_thread(&recver6, sock6, recv_worker, "rcv6", mainth);
+    if (retb == false)
       return false;
-    }
 
-    // Create the IPv6 sender thread.
-    tas6.ta_socket = sock6;
-    tas6.ta_friend = recver6;
-    (void)memset(tas6.ta_name, '\0', sizeof(tar6.ta_name));
-    (void)strcpy(tas6.ta_name, "snd6");
-    reti = pthread_create(&sender6, NULL, send_worker, &tas6);
-    if (reti != 0) {
-      errno = reti;
-      log_(LL_WARN, true, "unable to start the %s thread",
-        "IPv6 sender");
+    // The logic of selecting the friend thread is identical to the IPv4
+    // reasoning above.
+    retb = start_thread(&sender6, sock6, send_worker, "snd6",
+      op_mono == true ? mainth : recver6);
+    if (retb == false)
       return false;
-    }
   }
 
   // Wait for the delivery of the any signal. This can be either an externally

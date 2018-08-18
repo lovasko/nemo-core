@@ -826,10 +826,14 @@ send_worker(void* arg)
   }
 
   // Final wait before terminating the receiver thread. This allows for the
-  // remaining responses to arrive given a length trip time.
-  log_(LL_INFO, false, "waiting %" PRIu64 "%s for responses", op_wait, "ns");
-  fnanos(&dur, op_wait);
-  (void)nanosleep(&dur, NULL);
+  // remaining responses to arrive given a length trip time. The wait is not
+  // performed in the monologue mode, as there are no expected responses to
+  // wait for.
+  if (op_mono == false) {
+    log_(LL_INFO, false, "waiting %" PRIu64 "%s for responses", op_wait, "ns");
+    fnanos(&dur, op_wait);
+    (void)nanosleep(&dur, NULL);
+  }
 
   // Terminate the relevant receiver thread.
   (void)pthread_kill(ta.ta_friend, SIGUSR1);

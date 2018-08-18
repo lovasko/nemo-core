@@ -88,8 +88,8 @@ highlight(char* out, const char* inp)
 /// Issue a log line to the selected back-end service.
 ///
 /// @param[in] lvl  logging level (one of LL_*)
-/// @param[in] perr append the errno string to end of the log line 
-/// @param[in] fmt  message to log 
+/// @param[in] perr append the errno string to end of the log line
+/// @param[in] fmt  message to log
 /// @param[in] ...  arguments for the message
 void
 log_(const uint8_t lvl, const bool perr, const char* fmt, ...)

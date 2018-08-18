@@ -55,7 +55,7 @@
 /// Network endpoint target.
 typedef struct _target {
   uint8_t  tg_type;                        ///< One of NEMO_TARGET_TYPE*.
-  char     tg_name[NEMO_TARGET_COUNT_MAX]; ///< Name service identifier. 
+  char     tg_name[NEMO_TARGET_COUNT_MAX]; ///< Name service identifier.
   uint64_t tg_laddr;                       ///< Low bits of the address.
   uint64_t tg_haddr;                       ///< High bits of the address.
   uint64_t tg_time;                        ///< Time of last name resolution.
@@ -189,7 +189,7 @@ generate_key(void)
   srand48(time(NULL) + getpid());
 
   // Generate a random key and ensure it is not a zero. The zero value
-  // is internally used to represent the state where no filtering of keys 
+  // is internally used to represent the state where no filtering of keys
   // is performed by the subscriber process.
   do {
     key = (uint64_t)lrand48() | ((uint64_t)lrand48() << 32);
@@ -391,14 +391,14 @@ parse_targets(int idx, int argc, char* argv[])
   struct in_addr addr4;
   struct in6_addr addr6;
   uint64_t tidx;
-  
+
   tidx = 0;
   for (i = idx; i < argc; i++) {
     // Prepare the target structure.
     (void)memset(&tgs[tidx], 0, sizeof(tgs[tidx]));
 
     // Try parsing the address as IPv4.
-    reti = inet_pton(AF_INET, argv[i], &addr4); 
+    reti = inet_pton(AF_INET, argv[i], &addr4);
     if (reti == 1) {
       tgs[tidx].tg_type  = NEMO_TARGET_TYPE_IPV4;
       tgs[tidx].tg_laddr = (uint64_t)addr4.s_addr;
@@ -408,7 +408,7 @@ parse_targets(int idx, int argc, char* argv[])
       ntgs++;
       continue;
     }
-    
+
     // Try parsing the address as IPv6.
     reti = inet_pton(AF_INET6, argv[i], &addr6);
     if (reti == 1) {
@@ -512,11 +512,11 @@ create_socket4(void)
     return true;
 
   log_(LL_INFO, false, "creating %s socket", "IPv4");
-  
+
   // Create a UDP socket.
   sock4 = socket(AF_INET, SOCK_DGRAM, 0);
   if (sock4 < 0) {
-    log_(LL_WARN, true, "unable to initialise the %s socket", "IPv4"); 
+    log_(LL_WARN, true, "unable to initialise the %s socket", "IPv4");
     return false;
   }
 
@@ -582,11 +582,11 @@ create_socket6(void)
     return true;
 
   log_(LL_INFO, false, "creating %s socket", "IPv6");
-  
+
   // Create a UDP socket.
   sock6 = socket(AF_INET6, SOCK_DGRAM, 0);
   if (sock6 < 0) {
-    log_(LL_WARN, true, "unable to initialize the %s socket", "IPv6"); 
+    log_(LL_WARN, true, "unable to initialize the %s socket", "IPv6");
     return false;
   }
 
@@ -781,7 +781,7 @@ send_worker(void* arg)
   // Start the sending loop.
   for (i = 0; i < op_cnt; i++) {
 
-    log_(LL_DEBUG, false, "sending datagram round %" PRIu64 "/%" PRIu64, 
+    log_(LL_DEBUG, false, "sending datagram round %" PRIu64 "/%" PRIu64,
       i + 1, op_cnt);
 
     // Send all datagrams.
@@ -883,7 +883,6 @@ recv_worker(void* arg)
     if (retss == -1) {
       // Check if we were interrupted by a signal delivery.
       if (errno == EINTR) {
-        
 				// If the signal was SIGINT or SIGTERM, send SIGUSR1 to all other
 				// worker threads to interrupt their system calls.
         if (sint == true) {
@@ -1003,7 +1002,7 @@ request_loop(void)
     if (sint == true || sterm == true) {
       kill_other_threads();
     }
-      
+
     if (susr1 == true) {
       if (op_ipv4 == true) {
         (void)pthread_join(sender4, NULL);
@@ -1076,6 +1075,6 @@ main(int argc, char* argv[])
     log_(LL_ERROR, false, "the request loop has ended unexpectedly");
     return EXIT_FAILURE;
   }
-    
+
   return EXIT_SUCCESS;
 }

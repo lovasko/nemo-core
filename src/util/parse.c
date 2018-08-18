@@ -89,7 +89,7 @@ parse_memory_unit(uint64_t* mult, const char* unit)
 /// Parse a unit and a scalar from a string.
 /// @return status code
 ///
-/// @param[out] out scalar in the smallest unit 
+/// @param[out] out scalar in the smallest unit
 /// @param[in]  inp input string
 /// @param[in]  sun smallest unit name
 /// @param[in]  upf unit parser function

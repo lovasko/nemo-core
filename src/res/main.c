@@ -72,7 +72,7 @@ generate_key(void)
   srand48(time(NULL) + getpid());
 
   // Generate a random key and ensure it is not a zero. The zero value
-  // is internally used to represent the state where no filtering of keys 
+  // is internally used to represent the state where no filtering of keys
   // is performed by the subscriber process.
   do {
     key = (uint64_t)lrand48() | ((uint64_t)lrand48() << 32);
@@ -342,11 +342,11 @@ create_socket4(void)
     return true;
 
   log_(LL_INFO, false, "creating %s socket", "IPv4");
-  
+
   // Create a UDP socket.
   sock4 = socket(AF_INET, SOCK_DGRAM, 0);
   if (sock4 < 0) {
-    log_(LL_WARN, true, "unable to initialise the %s socket", "IPv4"); 
+    log_(LL_WARN, true, "unable to initialise the %s socket", "IPv4");
     return false;
   }
 
@@ -412,11 +412,11 @@ create_socket6(void)
     return true;
 
   log_(LL_INFO, false, "creating %s socket", "IPv6");
-  
+
   // Create a UDP socket.
   sock6 = socket(AF_INET6, SOCK_DGRAM, 0);
   if (sock6 < 0) {
-    log_(LL_WARN, true, "unable to initialize the %s socket", "IPv6"); 
+    log_(LL_WARN, true, "unable to initialize the %s socket", "IPv6");
     return false;
   }
 
@@ -591,7 +591,7 @@ update_payload(payload* pl)
     return false;
   }
   tnanos(&pl->pl_mtm2, mts);
-   
+
   // Obtain the system (real-time) clock time.
   ret = clock_gettime(CLOCK_REALTIME, &rts);
   if (ret == -1) {
@@ -645,7 +645,7 @@ send_datagram(int sock, payload* pl, struct sockaddr_storage* addr)
   // Verify the size of the sent datagram.
   if ((size_t)n != sizeof(*pl)) {
     log_(LL_WARN, false, "wrong sent payload size");
-    
+
     if (op_err == true)
       return false;
   }

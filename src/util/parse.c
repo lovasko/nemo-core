@@ -38,13 +38,13 @@ parse_uint64(uint64_t* out,
   errno = 0;
   x = strtoumax(str, NULL, 10);
   if (x == 0 && errno != 0) {
-    log_(LL_ERROR, true, "Unable to parse a number from string '%s'", str);
+    log_(LL_ERROR, true, "main", "Unable to parse a number from string '%s'", str);
     return false;
   }
 
   // Verify that the number belongs to the specified range.
   if (x < (uintmax_t)min || x > (uintmax_t)max) {
-    log_(LL_ERROR, false, "Number %ju out of range "
+    log_(LL_ERROR, false, "main", "Number %ju out of range "
            "(%" PRIu64 "..%" PRIu64 ")", x, min, max);
     return false;
   }
@@ -111,18 +111,18 @@ parse_scalar(uint64_t* out,
   // Separate the scalar and the unit of the input string.
   n = sscanf(inp, "%" SCNu64 "%2s%n", &num, unit, &adv);
   if (n == 0) {
-    log_(LL_ERROR, false, "Unable to parse the quantity in '%s'", inp);
+    log_(LL_ERROR, false, "main", "Unable to parse the quantity in '%s'", inp);
     return false;
   }
 
   if (n == 1) {
-    log_(LL_ERROR, false, "No unit specified");
+    log_(LL_ERROR, false, "main", "No unit specified");
     return false;
   }
 
   // Verify that the full input string was parsed.
   if (adv != (int)strlen(inp)) {
-    log_(LL_ERROR, false,
+    log_(LL_ERROR, false, "main",
            "The scalar string '%s' contains excess characters", inp);
     return false;
   }
@@ -138,7 +138,7 @@ parse_scalar(uint64_t* out,
   // Check for overflow of the value in the smallest unit.
   x = num * mult;
   if (x / mult != num) {
-    log_(LL_ERROR, false, "Quantity would overflow, maximum is %" PRIu64
+    log_(LL_ERROR, false, "main", "Quantity would overflow, maximum is %" PRIu64
            " %s", UINT64_MAX, sun);
     return false;
   }

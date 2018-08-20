@@ -374,7 +374,7 @@ make_address_part(const uint8_t* part)
 
   res = 0;
   for (i = 0; i < 8; i++)
-    res |= (part[i] << (i * 8));
+    res |= ((uint64_t)part[i] << (i * 8));
 
   return res;
 }

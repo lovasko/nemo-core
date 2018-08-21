@@ -711,6 +711,7 @@ static bool
 respond_loop(void)
 {
   int reti;
+  int ndfs;
   bool retb;
   fd_set rfd;
 
@@ -721,9 +722,12 @@ respond_loop(void)
   if (op_ipv4 == true) FD_SET(sock4, &rfd);
   if (op_ipv6 == true) FD_SET(sock6, &rfd);
 
+  // Compute the file descriptor count.
+  ndfs = (op_ipv4 == true && op_ipv6 == true) ? 5 : 4;
+
   while (true) {
     // Wait for incoming datagram events.
-    reti = pselect(5, &rfd, NULL, NULL, NULL, NULL);
+    reti = pselect(ndfs, &rfd, NULL, NULL, NULL, NULL);
     if (reti == -1) {
       // Check for interrupt (possibly due to a signal).
       if (errno == EINTR) {

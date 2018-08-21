@@ -828,7 +828,8 @@ send_worker(void* arg)
   // remaining responses to arrive given a length trip time. The wait is not
   // performed in the monologue mode, as there are no expected responses to
   // wait for.
-  if (op_mono == false && op_wait > 0) {
+  if (op_mono == false && op_wait > 0
+   && sint == false && sterm == false && susr1 == false) {
     log_(LL_INFO, false, ta.ta_name, "waiting %" PRIu64 "%s for responses", op_wait, "ns");
     fnanos(&dur, op_wait);
     (void)nanosleep(&dur, NULL);

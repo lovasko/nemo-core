@@ -719,6 +719,7 @@ respond_loop(void)
   log_options();
 
   // Add sockets to the event list.
+  FD_ZERO(&rfd);
   if (op_ipv4 == true) FD_SET(sock4, &rfd);
   if (op_ipv6 == true) FD_SET(sock6, &rfd);
 

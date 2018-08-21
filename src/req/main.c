@@ -363,6 +363,22 @@ parse_options(int* pidx, int argc, char* argv[])
   return true;
 }
 
+/// Use the logging framework to output the selected option values used
+/// throughout the run of the program.
+static void
+log_options(void)
+{
+  log_(LL_DEBUG, false, "main", "selected UDP port: %" PRIu64, op_port);
+  log_(LL_DEBUG, false, "main", "selected unique key: %" PRIu64, op_key);
+  log_(LL_DEBUG, false, "main", "selected Time-To-Live: %" PRIu64, op_ttl);
+  log_(LL_DEBUG, false, "main", "selected receive buffer size: %"
+    PRIu64 " bytes", op_rbuf);
+  log_(LL_DEBUG, false, "main", "selected send buffer size: %" PRIu64 " bytes",
+    op_sbuf);
+  log_(LL_DEBUG, false, "main", "selected monologue mode: %s",
+    op_mono == true ? "on" : "off");
+}
+
 /// Create a part of a IPv6 address by converting array of bytes into a
 /// single integer.
 /// @return status code
@@ -958,6 +974,7 @@ request_loop(void)
   bool retb;
 
   log_(LL_INFO, false, "main", "starting the request loop");
+  log_options();
 
   // Start the IPv4 sending/receiving.
   if (op_ipv4 == true) {

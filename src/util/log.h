@@ -27,10 +27,10 @@ extern uint8_t log_lvl; ///< Minimal level threshold.
 extern bool log_col;    ///< Colouring policy.
 
 // Logging function.
-void log_(const uint8_t lvl,
-          const bool perr,
-          const char* name,
-          const char* msg,
-          ...);
+void log(const uint8_t lvl,
+         const bool perr,
+         const char* name,
+         const char* msg,
+         ...);
 
 #endif

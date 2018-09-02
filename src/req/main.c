@@ -343,7 +343,7 @@ parse_options(int* pidx, int argc, char* argv[])
       // Unknown option.
       case '?':
         print_usage();
-        log_(LL_WARN, false, "main", "unknown option %c", optopt);
+        log(LL_WARN, false, "main", "unknown option %c", optopt);
         return false;
 
       // Unknown situation.
@@ -355,7 +355,7 @@ parse_options(int* pidx, int argc, char* argv[])
 
   // Check whether two exclusive modes were selected.
   if (op_ipv4 == true && op_ipv6 == true) {
-    log_(LL_WARN, false, "main", "options -4 and -6 are mutually exclusive");
+    log(LL_WARN, false, "main", "options -4 and -6 are mutually exclusive");
     return false;
   }
 
@@ -379,14 +379,14 @@ parse_options(int* pidx, int argc, char* argv[])
 static void
 log_options(void)
 {
-  log_(LL_DEBUG, false, "main", "selected UDP port: %" PRIu64, op_port);
-  log_(LL_DEBUG, false, "main", "selected unique key: %" PRIu64, op_key);
-  log_(LL_DEBUG, false, "main", "selected Time-To-Live: %" PRIu64, op_ttl);
-  log_(LL_DEBUG, false, "main", "selected receive buffer size: %"
+  log(LL_DEBUG, false, "main", "selected UDP port: %" PRIu64, op_port);
+  log(LL_DEBUG, false, "main", "selected unique key: %" PRIu64, op_key);
+  log(LL_DEBUG, false, "main", "selected Time-To-Live: %" PRIu64, op_ttl);
+  log(LL_DEBUG, false, "main", "selected receive buffer size: %"
     PRIu64 " bytes", op_rbuf);
-  log_(LL_DEBUG, false, "main", "selected send buffer size: %" PRIu64 " bytes",
+  log(LL_DEBUG, false, "main", "selected send buffer size: %" PRIu64 " bytes",
     op_sbuf);
-  log_(LL_DEBUG, false, "main", "selected monologue mode: %s",
+  log(LL_DEBUG, false, "main", "selected monologue mode: %s",
     op_mono == true ? "on" : "off");
 }
 
@@ -431,7 +431,7 @@ parse_targets(int idx, int argc, char* argv[])
       tgs[tidx].tg_laddr = (uint64_t)addr4.s_addr;
       tgs[tidx].tg_haddr = (uint64_t)0;
 
-      log_(LL_INFO, false, "main", "parsed %s target: %s", "IPv4", argv[i]);
+      log(LL_INFO, false, "main", "parsed %s target: %s", "IPv4", argv[i]);
       ntgs++;
       continue;
     }
@@ -443,14 +443,14 @@ parse_targets(int idx, int argc, char* argv[])
       tgs[tidx].tg_laddr = make_address_part(&addr6.s6_addr[0]);
       tgs[tidx].tg_haddr = make_address_part(&addr6.s6_addr[7]);
 
-      log_(LL_INFO, false, "main", "parsed %s target: %s", "IPv6", argv[i]);
+      log(LL_INFO, false, "main", "parsed %s target: %s", "IPv6", argv[i]);
       ntgs++;
       continue;
     }
 
     // As none of the two address families were applicable, report a problem.
     if (reti == -1) {
-      log_(LL_WARN, false, "main", "unable to parse target %s", argv[i]);
+      log(LL_WARN, false, "main", "unable to parse target %s", argv[i]);
       return false;
     }
   }
@@ -499,26 +499,26 @@ install_signal_handlers(void)
   sa.sa_handler = signal_handler;
 
   // Install signal handler for SIGINT.
-  log_(LL_INFO, false, "main", "installing signal handler for %s", "SIGINT");
+  log(LL_INFO, false, "main", "installing signal handler for %s", "SIGINT");
   reti = sigaction(SIGINT, &sa, NULL);
   if (reti == -1) {
-    log_(LL_WARN, true, "main", "unable to add signal handler for %s", "SIGINT");
+    log(LL_WARN, true, "main", "unable to add signal handler for %s", "SIGINT");
     return false;
   }
 
   // Install signal handler for SIGTERM.
-  log_(LL_INFO, false, "main", "installing signal handler for %s", "SIGTERM");
+  log(LL_INFO, false, "main", "installing signal handler for %s", "SIGTERM");
   reti = sigaction(SIGTERM, &sa, NULL);
   if (reti == -1) {
-    log_(LL_WARN, true, "main", "unable to add signal handler for %s", "SIGTERM");
+    log(LL_WARN, true, "main", "unable to add signal handler for %s", "SIGTERM");
     return false;
   }
 
   // Install signal handler for SIGUSR1.
-  log_(LL_INFO, false, "main", "installing signal handler for %s", "SIGUSR1");
+  log(LL_INFO, false, "main", "installing signal handler for %s", "SIGUSR1");
   reti = sigaction(SIGUSR1, &sa, NULL);
   if (reti == -1) {
-    log_(LL_WARN, true, "main", "unable to add signal handler for %s", "SIGUSR1");
+    log(LL_WARN, true, "main", "unable to add signal handler for %s", "SIGUSR1");
     return false;
   }
 
@@ -538,12 +538,12 @@ create_socket4(void)
   if (op_ipv4 == false)
     return true;
 
-  log_(LL_INFO, false, "main", "creating %s socket", "IPv4");
+  log(LL_INFO, false, "main", "creating %s socket", "IPv4");
 
   // Create a UDP socket.
   sock4 = socket(AF_INET, SOCK_DGRAM, 0);
   if (sock4 < 0) {
-    log_(LL_WARN, true, "main", "unable to initialise the %s socket", "IPv4");
+    log(LL_WARN, true, "main", "unable to initialise the %s socket", "IPv4");
     return false;
   }
 
@@ -551,7 +551,7 @@ create_socket4(void)
   val = 1;
   ret = setsockopt(sock4, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val));
   if (ret == -1) {
-    log_(LL_WARN, true, "main", "unable to set the %s socket address reusable", "IPv4");
+    log(LL_WARN, true, "main", "unable to set the %s socket address reusable", "IPv4");
     return false;
   }
 
@@ -561,7 +561,7 @@ create_socket4(void)
   addr.sin_addr.s_addr = INADDR_ANY;
   ret = bind(sock4, (struct sockaddr*)&addr, sizeof(addr));
   if (ret < 0) {
-    log_(LL_WARN, true, "main", "unable to bind the %s socket", "IPv4");
+    log(LL_WARN, true, "main", "unable to bind the %s socket", "IPv4");
     return false;
   }
 
@@ -569,7 +569,7 @@ create_socket4(void)
   val = (int)op_rbuf;
   ret = setsockopt(sock4, SOL_SOCKET, SO_RCVBUF, &val, sizeof(val));
   if (ret == -1) {
-    log_(LL_WARN, true, "main", "unable to set the %s socket receive buffer size to %d",
+    log(LL_WARN, true, "main", "unable to set the %s socket receive buffer size to %d",
          "IPv4", val);
     return false;
   }
@@ -578,7 +578,7 @@ create_socket4(void)
   val = (int)op_sbuf;
   ret = setsockopt(sock4, SOL_SOCKET, SO_SNDBUF, &val, sizeof(val));
   if (ret == -1) {
-    log_(LL_WARN, true, "main", "unable to set the %s socket send buffer size to %d",\
+    log(LL_WARN, true, "main", "unable to set the %s socket send buffer size to %d",\
          "IPv4", val);
     return false;
   }
@@ -587,7 +587,7 @@ create_socket4(void)
   val = (int)op_ttl;
   ret = setsockopt(sock4, IPPROTO_IP, IP_TTL, &val, sizeof(val));
   if (ret == -1) {
-    log_(LL_WARN, true, "main", "unable to set the %s socket time-to-live to %d",
+    log(LL_WARN, true, "main", "unable to set the %s socket time-to-live to %d",
          "IPv4", val);
     return false;
   }
@@ -608,12 +608,12 @@ create_socket6(void)
   if (op_ipv6 == false)
     return true;
 
-  log_(LL_INFO, false, "main", "creating %s socket", "IPv6");
+  log(LL_INFO, false, "main", "creating %s socket", "IPv6");
 
   // Create a UDP socket.
   sock6 = socket(AF_INET6, SOCK_DGRAM, 0);
   if (sock6 < 0) {
-    log_(LL_WARN, true, "main", "unable to initialize the %s socket", "IPv6");
+    log(LL_WARN, true, "main", "unable to initialize the %s socket", "IPv6");
     return false;
   }
 
@@ -621,7 +621,7 @@ create_socket6(void)
   val = 1;
   ret = setsockopt(sock6, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val));
   if (ret == -1) {
-    log_(LL_WARN, true, "main", "unable to set the %s socket address reusable", "IPv6");
+    log(LL_WARN, true, "main", "unable to set the %s socket address reusable", "IPv6");
     return false;
   }
 
@@ -629,7 +629,7 @@ create_socket6(void)
   val = 1;
   ret = setsockopt(sock6, IPPROTO_IPV6, IPV6_V6ONLY, &val, sizeof(val));
   if (ret == -1) {
-    log_(LL_WARN, true, "main", "unable to disable IPv4 traffic on %s socket", "IPv6");
+    log(LL_WARN, true, "main", "unable to disable IPv4 traffic on %s socket", "IPv6");
     return false;
   }
 
@@ -639,7 +639,7 @@ create_socket6(void)
   addr.sin6_addr   = in6addr_any;
   ret = bind(sock6, (struct sockaddr*)&addr, sizeof(addr));
   if (ret < 0) {
-    log_(LL_WARN, true, "main", "unable to bind the %s socket", "IPv6");
+    log(LL_WARN, true, "main", "unable to bind the %s socket", "IPv6");
     return false;
   }
 
@@ -647,7 +647,7 @@ create_socket6(void)
   val = (int)op_rbuf;
   ret = setsockopt(sock6, SOL_SOCKET, SO_RCVBUF, &val, sizeof(val));
   if (ret == -1) {
-    log_(LL_WARN, true, "main", "unable to set the read socket buffer size to %d", val);
+    log(LL_WARN, true, "main", "unable to set the read socket buffer size to %d", val);
     return false;
   }
 
@@ -655,7 +655,7 @@ create_socket6(void)
   val = (int)op_sbuf;
   ret = setsockopt(sock6, SOL_SOCKET, SO_SNDBUF, &val, sizeof(val));
   if (ret == -1) {
-    log_(LL_WARN, true, "main", "unable to set the socket send buffer size to %d", val);
+    log(LL_WARN, true, "main", "unable to set the socket send buffer size to %d", val);
     return false;
   }
 
@@ -663,7 +663,7 @@ create_socket6(void)
   val = (int)op_ttl;
   ret = setsockopt(sock6, IPPROTO_IPV6, IPV6_UNICAST_HOPS, &val, sizeof(val));
   if (ret == -1) {
-    log_(LL_WARN, true, "main", "unable to set time-to-live to %d", val);
+    log(LL_WARN, true, "main", "unable to set time-to-live to %d", val);
     return false;
   }
 
@@ -768,7 +768,7 @@ send_all_datagrams(int sock, const uint64_t snum, const char* name)
     // Send the datagram.
     n = sendmsg(sock, &msg, MSG_DONTWAIT);
     if (n == -1) {
-      log_(LL_WARN, true, name, "unable to send datagram");
+      log(LL_WARN, true, name, "unable to send datagram");
 
       if (op_err == false)
         return false;
@@ -776,7 +776,7 @@ send_all_datagrams(int sock, const uint64_t snum, const char* name)
 
     // Verify the number of sent bytes.
     if ((size_t)n != sizeof(pl)) {
-      log_(LL_WARN, false, name, "unable to send all data");
+      log(LL_WARN, false, name, "unable to send all data");
 
       if (op_err == true)
         return false;
@@ -801,7 +801,7 @@ send_worker(void* arg)
 
   // Resolve the thread argument.
   ta = *(thread_arg*)arg;
-  log_(LL_INFO, false, ta.ta_name, "starting thread");
+  log(LL_INFO, false, ta.ta_name, "starting thread");
 
   // Convert the interval duration.
   fnanos(&dur, op_int);
@@ -809,13 +809,13 @@ send_worker(void* arg)
   // Start the sending loop.
   for (i = 0; i < op_cnt; i++) {
 
-    log_(LL_DEBUG, false, ta.ta_name, "sending datagram round %" PRIu64 "/%" PRIu64,
+    log(LL_DEBUG, false, ta.ta_name, "sending datagram round %" PRIu64 "/%" PRIu64,
       i + 1, op_cnt);
 
     // Send all datagrams.
     retb = send_all_datagrams(ta.ta_socket, i, ta.ta_name);
     if (retb == false) {
-      log_(LL_WARN, false, ta.ta_name, "unable to send all payloads to IPv4 socket");
+      log(LL_WARN, false, ta.ta_name, "unable to send all payloads to IPv4 socket");
 
       if (op_err == true) {
         kill_other_threads();
@@ -831,13 +831,13 @@ send_worker(void* arg)
         // Check if the sleep was interrupted by a signal.
         if (errno == EINTR) {
           if (sint == true) {
-            log_(LL_WARN, false, ta.ta_name, "received the %s signal", "SIGINT");
+            log(LL_WARN, false, ta.ta_name, "received the %s signal", "SIGINT");
             kill_other_threads();
             break;
           }
 
           if (sterm == true) {
-            log_(LL_WARN, false, ta.ta_name, "received the %s signal", "SIGTERM");
+            log(LL_WARN, false, ta.ta_name, "received the %s signal", "SIGTERM");
             kill_other_threads();
             break;
           }
@@ -846,7 +846,7 @@ send_worker(void* arg)
             break;
         }
 
-        log_(LL_WARN, true, ta.ta_name, "unable to sleep");
+        log(LL_WARN, true, ta.ta_name, "unable to sleep");
       }
     }
   }
@@ -857,14 +857,14 @@ send_worker(void* arg)
   // wait for.
   if (op_mono == false && op_wait > 0
    && sint == false && sterm == false && susr1 == false) {
-    log_(LL_INFO, false, ta.ta_name, "waiting %" PRIu64 "%s for responses", op_wait, "ns");
+    log(LL_INFO, false, ta.ta_name, "waiting %" PRIu64 "%s for responses", op_wait, "ns");
     fnanos(&dur, op_wait);
     (void)nanosleep(&dur, NULL);
   }
 
   // Terminate the relevant receiver thread.
   (void)pthread_kill(ta.ta_friend, SIGUSR1);
-  log_(LL_INFO, false, ta.ta_name, "exiting thread");
+  log(LL_INFO, false, ta.ta_name, "exiting thread");
 
   return NULL;
 }
@@ -889,7 +889,7 @@ recv_worker(void* arg)
 
   // Resolve the argument to a socket.
   ta = *(thread_arg*)arg;
-  log_(LL_INFO, false, ta.ta_name, "starting thread");
+  log(LL_INFO, false, ta.ta_name, "starting thread");
 
   // Prepare payload data.
   iov.iov_base = &pl;
@@ -913,13 +913,13 @@ recv_worker(void* arg)
 				// If the signal was SIGINT or SIGTERM, send SIGUSR1 to all other
 				// worker threads to interrupt their system calls.
         if (sint == true) {
-				  log_(LL_WARN, false, ta.ta_name, "received the %s signal", "SIGINT");
+				  log(LL_WARN, false, ta.ta_name, "received the %s signal", "SIGINT");
           kill_other_threads();
           break;
         }
 
         if (sterm == true) {
-				  log_(LL_WARN, false, ta.ta_name, "received the %s signal", "SIGTERM");
+				  log(LL_WARN, false, ta.ta_name, "received the %s signal", "SIGTERM");
           kill_other_threads();
           break;
         }
@@ -929,15 +929,15 @@ recv_worker(void* arg)
           break;
       }
 
-      log_(LL_WARN, true, ta.ta_name, "unable to receive datagrams");
+      log(LL_WARN, true, ta.ta_name, "unable to receive datagrams");
     }
 
-    log_(LL_DEBUG, false, ta.ta_name, "received message, responder key = %" PRIu64 "!", pl.pl_resk);
+    log(LL_DEBUG, false, ta.ta_name, "received message, responder key = %" PRIu64 "!", pl.pl_resk);
   }
 
   // Send a signal to the main thread so that it wakes up.
   (void)pthread_kill(ta.ta_friend, SIGUSR1);
-  log_(LL_INFO, false, ta.ta_name, "exiting thread");
+  log(LL_INFO, false, ta.ta_name, "exiting thread");
 
   return NULL;
 }
@@ -970,7 +970,7 @@ start_thread(pthread_t* thread,
   reti = pthread_create(thread, NULL, func, ta);
   if (reti != 0) {
     errno = reti;
-    log_(LL_WARN, true, "main", "unable to start the %s thread", name);
+    log(LL_WARN, true, "main", "unable to start the %s thread", name);
     return false;
   }
 
@@ -984,7 +984,7 @@ request_loop(void)
 {
   bool retb;
 
-  log_(LL_INFO, false, "main", "starting the request loop");
+  log(LL_INFO, false, "main", "starting the request loop");
   log_options();
 
   // Start the IPv4 sending/receiving.
@@ -1042,7 +1042,7 @@ request_loop(void)
         (void)pthread_join(recver6, NULL);
       }
 
-      log_(LL_INFO, false, "main", "request loop has finished");
+      log(LL_INFO, false, "main", "request loop has finished");
       break;
     }
   }
@@ -1065,7 +1065,7 @@ main(int argc, char* argv[])
   // Parse command-line options.
   retb = parse_options(&pidx, argc, argv);
   if (retb == false) {
-    log_(LL_ERROR, false, "main", "unable to parse command-line options");
+    log(LL_ERROR, false, "main", "unable to parse command-line options");
     return EXIT_FAILURE;
   }
 
@@ -1073,7 +1073,7 @@ main(int argc, char* argv[])
   if (op_dmon == true) {
     retb = turn_into_daemon();
     if (retb == false) {
-      log_(LL_ERROR, false, "main", "unable to turn process into daemon");
+      log(LL_ERROR, false, "main", "unable to turn process into daemon");
       return EXIT_FAILURE;
     }
   }
@@ -1081,35 +1081,35 @@ main(int argc, char* argv[])
   // Parse network targets.
   retb = parse_targets(pidx, argc, argv);
   if (retb == false) {
-    log_(LL_ERROR, false, "main", "unable to parse network targets");
+    log(LL_ERROR, false, "main", "unable to parse network targets");
     return EXIT_FAILURE;
   }
 
   // Install signal handlers.
   retb = install_signal_handlers();
   if (retb == false) {
-    log_(LL_ERROR, false, "main", "unable to install signal handlers");
+    log(LL_ERROR, false, "main", "unable to install signal handlers");
     return EXIT_FAILURE;
   }
 
   // Create the IPv4 socket.
   retb = create_socket4();
   if (retb == false) {
-    log_(LL_ERROR, false, "main", "unable to create the IPv4 socket");
+    log(LL_ERROR, false, "main", "unable to create the IPv4 socket");
     return EXIT_FAILURE;
   }
 
   // Create the IPv6 socket.
   retb = create_socket6();
   if (retb == false) {
-    log_(LL_ERROR, false, "main", "unable to create the IPv6 socket");
+    log(LL_ERROR, false, "main", "unable to create the IPv6 socket");
     return EXIT_FAILURE;
   }
 
   // Start emitting requests.
   retb = request_loop();
   if (retb == false) {
-    log_(LL_ERROR, false, "main", "the request loop has ended unexpectedly");
+    log(LL_ERROR, false, "main", "the request loop has ended unexpectedly");
     return EXIT_FAILURE;
   }
 

@@ -132,7 +132,7 @@ parse_options(int argc, char* argv[])
   int opt;
   bool retb;
 
-  log_(LL_INFO, false, "main", "parse command-line options");
+  log(LL_INFO, false, "main", "parse command-line options");
 
   // Set optional arguments to sensible defaults.
   op_rbuf = DEF_RECEIVE_BUFFER_SIZE;
@@ -238,7 +238,7 @@ parse_options(int argc, char* argv[])
       // Unknown option.
       case '?':
         print_usage();
-        log_(LL_WARN, false, "main", "unknown option %c", optopt);
+        log(LL_WARN, false, "main", "unknown option %c", optopt);
         return false;
 
       // Unknown situation.
@@ -250,7 +250,7 @@ parse_options(int argc, char* argv[])
 
   // Check whether two exclusive modes were selected.
   if (op_ipv4 == true && op_ipv6 == true) {
-    log_(LL_WARN, false, "main", "options -4 and -6 are mutually exclusive");
+    log(LL_WARN, false, "main", "options -4 and -6 are mutually exclusive");
     return false;
   }
 
@@ -272,14 +272,14 @@ parse_options(int argc, char* argv[])
 static void
 log_options(void)
 {
-  log_(LL_DEBUG, false, "main", "selected UDP port: %" PRIu64, op_port);
-  log_(LL_DEBUG, false, "main", "selected unique key: %" PRIu64, op_key);
-  log_(LL_DEBUG, false, "main", "selected Time-To-Live: %" PRIu64, op_ttl);
-  log_(LL_DEBUG, false, "main", "selected receive buffer size: %"
+  log(LL_DEBUG, false, "main", "selected UDP port: %" PRIu64, op_port);
+  log(LL_DEBUG, false, "main", "selected unique key: %" PRIu64, op_key);
+  log(LL_DEBUG, false, "main", "selected Time-To-Live: %" PRIu64, op_ttl);
+  log(LL_DEBUG, false, "main", "selected receive buffer size: %"
     PRIu64 " bytes", op_rbuf);
-  log_(LL_DEBUG, false, "main", "selected send buffer size: %" PRIu64 " bytes",
+  log(LL_DEBUG, false, "main", "selected send buffer size: %" PRIu64 " bytes",
     op_sbuf);
-  log_(LL_DEBUG, false, "main", "selected monologue mode: %s",
+  log(LL_DEBUG, false, "main", "selected monologue mode: %s",
     op_mono == true ? "on" : "off");
 }
 
@@ -306,7 +306,7 @@ install_signal_handlers(void)
   sigset_t ss;
   int reti;
 
-  log_(LL_INFO, false, "main", "installing signal handlers");
+  log(LL_INFO, false, "main", "installing signal handlers");
 
   // Reset the signal indicator.
   sint  = false;
@@ -326,16 +326,16 @@ install_signal_handlers(void)
   // Install signal handler for SIGINT.
   reti = sigaction(SIGINT, &sa, NULL);
   if (reti == -1) {
-    log_(LL_WARN, true, "main", "unable to add signal handler for %s",
-      "SIGINT");
+    log(LL_WARN, true, "main", "unable to add signal handler for %s",
+        "SIGINT");
     return false;
   }
 
   // Install signal handler for SIGTERM.
   reti = sigaction(SIGTERM, &sa, NULL);
   if (reti == -1) {
-    log_(LL_WARN, true, "main", "unable to add signal handler for %s",
-      "SIGTERM");
+    log(LL_WARN, true, "main", "unable to add signal handler for %s",
+        "SIGTERM");
     return false;
   }
 
@@ -355,12 +355,12 @@ create_socket4(void)
   if (op_ipv4 == false)
     return true;
 
-  log_(LL_INFO, false, "main", "creating %s socket", "IPv4");
+  log(LL_INFO, false, "main", "creating %s socket", "IPv4");
 
   // Create a UDP socket.
   sock4 = socket(AF_INET, SOCK_DGRAM, 0);
   if (sock4 < 0) {
-    log_(LL_WARN, true, "main", "unable to initialise the %s socket", "IPv4");
+    log(LL_WARN, true, "main", "unable to initialise the %s socket", "IPv4");
     return false;
   }
 
@@ -368,8 +368,8 @@ create_socket4(void)
   val = 1;
   ret = setsockopt(sock4, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val));
   if (ret == -1) {
-    log_(LL_WARN, true, "main", "unable to set the %s socket address reusable",
-      "IPv4");
+    log(LL_WARN, true, "main", "unable to set the %s socket address reusable",
+        "IPv4");
     return false;
   }
 
@@ -379,7 +379,7 @@ create_socket4(void)
   addr.sin_addr.s_addr = INADDR_ANY;
   ret = bind(sock4, (struct sockaddr*)&addr, sizeof(addr));
   if (ret < 0) {
-    log_(LL_WARN, true, "main", "unable to bind the %s socket", "IPv4");
+    log(LL_WARN, true, "main", "unable to bind the %s socket", "IPv4");
     return false;
   }
 
@@ -387,14 +387,14 @@ create_socket4(void)
   val = (int)op_rbuf;
   ret = setsockopt(sock4, SOL_SOCKET, SO_RCVBUF, &val, sizeof(val));
   if (ret == -1) {
-    log_(LL_WARN, true, "main", "unable to set the %s socket receive buffer "
+    log(LL_WARN, true, "main", "unable to set the %s socket receive buffer "
       "size to %d", "IPv4", val);
     return false;
   } // Set the socket send buffer size.
   val = (int)op_sbuf;
   ret = setsockopt(sock4, SOL_SOCKET, SO_SNDBUF, &val, sizeof(val));
   if (ret == -1) {
-    log_(LL_WARN, true, "main", "unable to set the %s socket send buffer size "
+    log(LL_WARN, true, "main", "unable to set the %s socket send buffer size "
       "to %d", "IPv4", val);
     return false;
   }
@@ -403,7 +403,7 @@ create_socket4(void)
   val = (int)op_ttl;
   ret = setsockopt(sock4, IPPROTO_IP, IP_TTL, &val, sizeof(val));
   if (ret == -1) {
-    log_(LL_WARN, true, "main", "unable to set the %s socket time-to-live to "
+    log(LL_WARN, true, "main", "unable to set the %s socket time-to-live to "
       "%d", "IPv4", val);
     return false;
   }
@@ -424,12 +424,12 @@ create_socket6(void)
   if (op_ipv6 == false)
     return true;
 
-  log_(LL_INFO, false, "main", "creating %s socket", "IPv6");
+  log(LL_INFO, false, "main", "creating %s socket", "IPv6");
 
   // Create a UDP socket.
   sock6 = socket(AF_INET6, SOCK_DGRAM, 0);
   if (sock6 < 0) {
-    log_(LL_WARN, true, "main", "unable to initialize the %s socket", "IPv6");
+    log(LL_WARN, true, "main", "unable to initialize the %s socket", "IPv6");
     return false;
   }
 
@@ -437,7 +437,7 @@ create_socket6(void)
   val = 1;
   ret = setsockopt(sock6, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val));
   if (ret == -1) {
-    log_(LL_WARN, true, "main", "unable to set the %s socket address reusable", "IPv6");
+    log(LL_WARN, true, "main", "unable to set the %s socket address reusable", "IPv6");
     return false;
   }
 
@@ -445,7 +445,7 @@ create_socket6(void)
   val = 1;
   ret = setsockopt(sock6, IPPROTO_IPV6, IPV6_V6ONLY, &val, sizeof(val));
   if (ret == -1) {
-    log_(LL_WARN, true, "main", "unable to disable IPv4 traffic on %s socket", "IPv6");
+    log(LL_WARN, true, "main", "unable to disable IPv4 traffic on %s socket", "IPv6");
     return false;
   }
 
@@ -455,7 +455,7 @@ create_socket6(void)
   addr.sin6_addr   = in6addr_any;
   ret = bind(sock6, (struct sockaddr*)&addr, sizeof(addr));
   if (ret < 0) {
-    log_(LL_WARN, true, "main", "unable to bind the %s socket", "IPv6");
+    log(LL_WARN, true, "main", "unable to bind the %s socket", "IPv6");
     return false;
   }
 
@@ -463,7 +463,7 @@ create_socket6(void)
   val = (int)op_rbuf;
   ret = setsockopt(sock6, SOL_SOCKET, SO_RCVBUF, &val, sizeof(val));
   if (ret == -1) {
-    log_(LL_WARN, true, "main", "unable to set the read socket buffer size to %d", val);
+    log(LL_WARN, true, "main", "unable to set the read socket buffer size to %d", val);
     return false;
   }
 
@@ -471,7 +471,7 @@ create_socket6(void)
   val = (int)op_sbuf;
   ret = setsockopt(sock6, SOL_SOCKET, SO_SNDBUF, &val, sizeof(val));
   if (ret == -1) {
-    log_(LL_WARN, true, "main", "unable to set the socket send buffer size to %d", val);
+    log(LL_WARN, true, "main", "unable to set the socket send buffer size to %d", val);
     return false;
   }
 
@@ -479,7 +479,7 @@ create_socket6(void)
   val = (int)op_ttl;
   ret = setsockopt(sock6, IPPROTO_IPV6, IPV6_UNICAST_HOPS, &val, sizeof(val));
   if (ret == -1) {
-    log_(LL_WARN, true, "main", "unable to set time-to-live to %d", val);
+    log(LL_WARN, true, "main", "unable to set time-to-live to %d", val);
     return false;
   }
 
@@ -494,33 +494,33 @@ create_socket6(void)
 static bool
 verify_payload(const ssize_t n, const payload* pl)
 {
-  log_(LL_TRACE, false, "main", "verifying payload");
+  log(LL_TRACE, false, "main", "verifying payload");
 
   // Verify the size of the datagram.
   if ((size_t)n != sizeof(*pl)) {
-    log_(LL_WARN, false, "main", "wrong datagram size, expected: %zd, actual: %zu",
-      n, sizeof(*pl));
+    log(LL_WARN, false, "main", "wrong datagram size, expected: %zd, actual: %zu",
+        n, sizeof(*pl));
     return false;
   }
 
   // Verify the magic identifier.
   if (pl->pl_mgic != NEMO_PAYLOAD_MAGIC) {
-    log_(LL_DEBUG, false, "main", "payload identifier unknown, expected: %"
-      PRIx32 ", actual: %" PRIx32, NEMO_PAYLOAD_MAGIC, pl->pl_mgic);
+    log(LL_DEBUG, false, "main", "payload identifier unknown, expected: %"
+        PRIx32 ", actual: %" PRIx32, NEMO_PAYLOAD_MAGIC, pl->pl_mgic);
     return false;
   }
 
   // Verify the payload version.
   if (pl->pl_fver != NEMO_PAYLOAD_VERSION) {
-    log_(LL_DEBUG, false, "main", "unsupported payload version, expected: %"
-      PRIu8 ", actual: %" PRIu8, NEMO_PAYLOAD_VERSION, pl->pl_fver);
+    log(LL_DEBUG, false, "main", "unsupported payload version, expected: %"
+        PRIu8 ", actual: %" PRIu8, NEMO_PAYLOAD_VERSION, pl->pl_fver);
     return false;
   }
 
   // Verify the payload type.
   if (pl->pl_type != NEMO_PAYLOAD_TYPE_REQUEST) {
-    log_(LL_DEBUG, false, "main", "unexpected payload type, expected: %"
-      PRIu8 ", actual: %" PRIu8, NEMO_PAYLOAD_TYPE_REQUEST, pl->pl_type);
+    log(LL_DEBUG, false, "main", "unexpected payload type, expected: %"
+        PRIu8 ", actual: %" PRIu8, NEMO_PAYLOAD_TYPE_REQUEST, pl->pl_type);
     return false;
   }
 
@@ -541,8 +541,8 @@ receive_datagram(struct sockaddr_storage* addr, payload* pl, int sock)
   ssize_t n;
   bool retb;
 
-  log_(LL_TRACE, false, "main", "receiving datagram on %s socket",
-    sock == sock4 ? "IPv4" : "IPv6");
+  log(LL_TRACE, false, "main", "receiving datagram on %s socket",
+      sock == sock4 ? "IPv4" : "IPv6");
 
   // Prepare payload data.
   data.iov_base = pl;
@@ -559,7 +559,7 @@ receive_datagram(struct sockaddr_storage* addr, payload* pl, int sock)
   // Receive the message and handle potential errors.
   n = recvmsg(sock, &msg, MSG_DONTWAIT | MSG_TRUNC);
   if (n < 0) {
-    log_(LL_WARN, true, "main", "receiving has failed");
+    log(LL_WARN, true, "main", "receiving has failed");
 
     if (op_err == true)
       return false;
@@ -571,7 +571,7 @@ receive_datagram(struct sockaddr_storage* addr, payload* pl, int sock)
   // Verify the payload correctness.
   retb = verify_payload(n, pl);
   if (retb == false) {
-    log_(LL_WARN, false, "main", "invalid payload content");
+    log(LL_WARN, false, "main", "invalid payload content");
     return false;
   }
 
@@ -589,7 +589,7 @@ update_payload(payload* pl)
   struct timespec rts;
   int ret;
 
-  log_(LL_TRACE, false, "main", "updating payload");
+  log(LL_TRACE, false, "main", "updating payload");
 
   // Change the message type.
   pl->pl_type = NEMO_PAYLOAD_TYPE_RESPONSE;
@@ -600,7 +600,7 @@ update_payload(payload* pl)
   // Obtain the steady (monotonic) clock time.
   ret = clock_gettime(CLOCK_MONOTONIC, &mts);
   if (ret == -1) {
-    log_(LL_WARN, true, "main", "unable to obtain the steady time");
+    log(LL_WARN, true, "main", "unable to obtain the steady time");
     return false;
   }
   tnanos(&pl->pl_mtm2, mts);
@@ -608,7 +608,7 @@ update_payload(payload* pl)
   // Obtain the system (real-time) clock time.
   ret = clock_gettime(CLOCK_REALTIME, &rts);
   if (ret == -1) {
-    log_(LL_WARN, true, "main", "unable to obtain the system time");
+    log(LL_WARN, true, "main", "unable to obtain the system time");
     return false;
   }
   tnanos(&pl->pl_rtm2, rts);
@@ -629,7 +629,7 @@ send_datagram(int sock, payload* pl, struct sockaddr_storage* addr)
   struct msghdr msg;
   struct iovec data;
 
-  log_(LL_TRACE, false, "main", "sending datagram");
+  log(LL_TRACE, false, "main", "sending datagram");
 
   // Prepare payload data.
   data.iov_base = pl;
@@ -649,7 +649,7 @@ send_datagram(int sock, payload* pl, struct sockaddr_storage* addr)
   // Send the datagram.
   n = sendmsg(sock, &msg, MSG_DONTWAIT);
   if (n < 0) {
-    log_(LL_WARN, true, "main", "unable to send datagram");
+    log(LL_WARN, true, "main", "unable to send datagram");
 
     if (op_err == true)
       return false;
@@ -657,7 +657,7 @@ send_datagram(int sock, payload* pl, struct sockaddr_storage* addr)
 
   // Verify the size of the sent datagram.
   if ((size_t)n != sizeof(*pl)) {
-    log_(LL_WARN, false, "main", "wrong sent payload size");
+    log(LL_WARN, false, "main", "wrong sent payload size");
 
     if (op_err == true)
       return false;
@@ -678,13 +678,13 @@ handle_event(int sock, const char* ipv)
   struct sockaddr_storage addr;
   payload pl;
 
-  log_(LL_DEBUG, false, "main", "handling event on %s socket",
+  log(LL_DEBUG, false, "main", "handling event on %s socket",
     sock == sock4 ? "IPv4" : "IPv6");
 
   // Receive a request.
   retb = receive_datagram(&addr, &pl, sock);
   if (retb == false) {
-    log_(LL_WARN, false, "main", "unable to receive datagram on the %s socket", ipv);
+    log(LL_WARN, false, "main", "unable to receive datagram on the %s socket", ipv);
 
     // We do not continue with the response, given the receiving of the
     // request has failed. If the op_err option was selected, all network
@@ -697,7 +697,7 @@ handle_event(int sock, const char* ipv)
   // Update payload.
   retb = update_payload(&pl);
   if (retb == false) {
-    log_(LL_WARN, false, "main", "unable to update the payload");
+    log(LL_WARN, false, "main", "unable to update the payload");
     return false;
   }
 
@@ -708,7 +708,7 @@ handle_event(int sock, const char* ipv)
   // Send a response back.
   retb = send_datagram(sock4, &pl, &addr);
   if (retb == false) {
-    log_(LL_WARN, false, "main", "unable to send datagram on the %s socket", ipv);
+    log(LL_WARN, false, "main", "unable to send datagram on the %s socket", ipv);
 
     // Following the same logic as above in the receive stage.
     return !op_err;
@@ -727,7 +727,7 @@ respond_loop(void)
   bool retb;
   fd_set rfd;
 
-  log_(LL_INFO, false, "main", "starting the response loop");
+  log(LL_INFO, false, "main", "starting the response loop");
   log_options();
 
   // Add sockets to the event list.
@@ -745,16 +745,16 @@ respond_loop(void)
       // Check for interrupt (possibly due to a signal).
       if (errno == EINTR) {
         if (sint == true)
-          log_(LL_WARN, false, "main", "received the %s signal", "SIGINT");
+          log(LL_WARN, false, "main", "received the %s signal", "SIGINT");
         else if (sterm == true)
-          log_(LL_WARN, false, "main", "received the %s signal", "SIGTERM");
+          log(LL_WARN, false, "main", "received the %s signal", "SIGTERM");
         else
-          log_(LL_WARN, false, "main", "unknown event queue interrupt");
+          log(LL_WARN, false, "main", "unknown event queue interrupt");
 
         return false;
       }
 
-      log_(LL_WARN, true, "main", "waiting for events failed");
+      log(LL_WARN, true, "main", "waiting for events failed");
       return false;
     }
 
@@ -787,7 +787,7 @@ main(int argc, char* argv[])
   // Parse command-line options.
   retb = parse_options(argc, argv);
   if (retb == false) {
-    log_(LL_ERROR, false, "main", "unable to parse command-line options");
+    log(LL_ERROR, false, "main", "unable to parse command-line options");
     return EXIT_FAILURE;
   }
 
@@ -795,7 +795,7 @@ main(int argc, char* argv[])
   if (op_dmon == true) {
     retb = turn_into_daemon();
     if (retb == false) {
-      log_(LL_ERROR, false, "main", "unable to turn process into a daemon");
+      log(LL_ERROR, false, "main", "unable to turn process into a daemon");
       return EXIT_FAILURE;
     }
   }
@@ -803,28 +803,28 @@ main(int argc, char* argv[])
   // Install the signal handlers.
   retb = install_signal_handlers();
   if (retb == false) {
-    log_(LL_ERROR, false, "main", "unable to install signal handlers");
+    log(LL_ERROR, false, "main", "unable to install signal handlers");
     return EXIT_FAILURE;
   }
 
   // Create the IPv4 socket.
   retb = create_socket4();
   if (retb == false) {
-    log_(LL_ERROR, false, "main", "unable to create %s socket", "IPv4");
+    log(LL_ERROR, false, "main", "unable to create %s socket", "IPv4");
     return EXIT_FAILURE;
   }
 
   // Create the IPv6 socket.
   retb = create_socket6();
   if (retb == false) {
-    log_(LL_ERROR, false, "main", "unable to create %s socket", "IPv6");
+    log(LL_ERROR, false, "main", "unable to create %s socket", "IPv6");
     return EXIT_FAILURE;
   }
 
   // Start the main responding loop.
   retb = respond_loop();
   if (retb == false) {
-    log_(LL_ERROR, false, "main", "responding loop has finished");
+    log(LL_ERROR, false, "main", "responding loop has finished");
     return EXIT_FAILURE;
   }
 

@@ -93,11 +93,11 @@ highlight(char* out, const char* inp)
 /// @param[in] fmt  message to log
 /// @param[in] ...  arguments for the message
 void
-log_(const uint8_t lvl,
-     const bool perr,
-     const char* name,
-     const char* fmt,
-     ...)
+log(const uint8_t lvl,
+    const bool perr,
+    const char* name,
+    const char* fmt,
+    ...)
 {
   char tstr[32];
   char hfmt[NEMO_LOG_MAX_LENGTH];

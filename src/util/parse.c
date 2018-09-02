@@ -38,14 +38,14 @@ parse_uint64(uint64_t* out,
   errno = 0;
   x = strtoumax(str, NULL, 10);
   if (x == 0 && errno != 0) {
-    log_(LL_ERROR, true, "main", "Unable to parse a number from string '%s'", str);
+    log(LL_ERROR, true, "main", "Unable to parse a number from string '%s'", str);
     return false;
   }
 
   // Verify that the number belongs to the specified range.
   if (x < (uintmax_t)min || x > (uintmax_t)max) {
-    log_(LL_ERROR, false, "main", "Number %ju out of range "
-           "(%" PRIu64 "..%" PRIu64 ")", x, min, max);
+    log(LL_ERROR, false, "main", "Number %ju out of range "
+        "(%" PRIu64 "..%" PRIu64 ")", x, min, max);
     return false;
   }
 
@@ -111,19 +111,19 @@ parse_scalar(uint64_t* out,
   // Separate the scalar and the unit of the input string.
   n = sscanf(inp, "%" SCNu64 "%2s%n", &num, unit, &adv);
   if (n == 0) {
-    log_(LL_ERROR, false, "main", "Unable to parse the quantity in '%s'", inp);
+    log(LL_ERROR, false, "main", "Unable to parse the quantity in '%s'", inp);
     return false;
   }
 
   if (n == 1) {
-    log_(LL_ERROR, false, "main", "No unit specified");
+    log(LL_ERROR, false, "main", "No unit specified");
     return false;
   }
 
   // Verify that the full input string was parsed.
   if (adv != (int)strlen(inp)) {
-    log_(LL_ERROR, false, "main",
-           "The scalar string '%s' contains excess characters", inp);
+    log(LL_ERROR, false, "main",
+        "The scalar string '%s' contains excess characters", inp);
     return false;
   }
 
@@ -131,15 +131,15 @@ parse_scalar(uint64_t* out,
   mult = 0;
   upf(&mult, unit);
   if (mult == 0) {
-    log_(LL_ERROR, false, "Unknown unit '%2s'", unit);
+    log(LL_ERROR, false, "Unknown unit '%2s'", unit);
     return false;
   }
 
   // Check for overflow of the value in the smallest unit.
   x = num * mult;
   if (x / mult != num) {
-    log_(LL_ERROR, false, "main", "Quantity would overflow, maximum is %" PRIu64
-           " %s", UINT64_MAX, sun);
+    log(LL_ERROR, false, "main", "Quantity would overflow, maximum is %" PRIu64
+        " %s", UINT64_MAX, sun);
     return false;
   }
 

@@ -20,38 +20,38 @@ redirect_streams(void)
   // Close the standard streams. 
   reti = close(STDIN_FILENO);
   if (reti == -1) {
-    log_(LL_WARN, true, "main", "unable to close standard input stream");
+    log(LL_WARN, true, "main", "unable to close standard input stream");
     return false;
   }
 
   reti = close(STDOUT_FILENO);
   if (reti == -1) {
-    log_(LL_WARN, true, "main", "unable to close standard output stream");
+    log(LL_WARN, true, "main", "unable to close standard output stream");
     return false;
   }
 
   reti = close(STDERR_FILENO);
   if (reti == -1) {
-    log_(LL_WARN, true, "main", "unable to close standard error stream");
+    log(LL_WARN, true, "main", "unable to close standard error stream");
     return false;
   }
 
   // Re-open the standard streams as /dev/null files.
   reti = open("/dev/null", O_RDWR);
   if (reti < 0) {
-    log_(LL_WARN, true, "main", "unable to redirect standard input");
+    log(LL_WARN, true, "main", "unable to redirect standard input");
     return false;
   }
 
   reti = open("/dev/null", O_RDWR);
   if (reti < 0) {
-    log_(LL_WARN, true, "main", "unable to redirect standard output");
+    log(LL_WARN, true, "main", "unable to redirect standard output");
     return false;
   }
 
   reti = open("/dev/null", O_RDWR);
   if (reti < 0) {
-    log_(LL_WARN, true, "main", "unable to redirect standard error");
+    log(LL_WARN, true, "main", "unable to redirect standard error");
     return false;
   }
 
@@ -67,7 +67,7 @@ fork_and_exit(void)
 
   pid = fork();
   if (pid == -1) {
-    log_(LL_WARN, true, "main", "unable to fork the process");
+    log(LL_WARN, true, "main", "unable to fork the process");
     return false;
   }
 
@@ -97,7 +97,7 @@ turn_into_daemon(void)
   // leader of it.
   sid = setsid();
   if (sid == -1) {
-    log_(LL_WARN, true, "main", "unable to create a new session");
+    log(LL_WARN, true, "main", "unable to create a new session");
     return false;
   }
 
@@ -111,8 +111,8 @@ turn_into_daemon(void)
   // our process does not prevent unmounting of a particular file system.
   reti = chdir("/");
   if (reti == -1) {
-    log_(LL_WARN, true, "main", "unable to change the working directory to"
-      "root");
+    log(LL_WARN, true, "main", "unable to change the working directory to"
+       "root");
     return false;
   }
 

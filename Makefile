@@ -6,7 +6,7 @@
 
 CC = gcc
 FTM = -D_BSD_SOURCE -D_XOPEN_SOURCE -D_POSIX_C_SOURCE=200809L -D_DEFAULT_SOURCE
-CFLAGS = -std=c99 -Wall -Wextra -Werror $(FTM) -Isrc/ -pthread
+CFLAGS = -fno-builtin -std=c99 -Wall -Wextra -Werror $(FTM) -Isrc/ -pthread
 LDFLAGS = -lrt -lpthread
 
 all: bin/nreq bin/nres

@@ -26,6 +26,7 @@
 #include "common/version.h"
 #include "common/payload.h"
 #include "util/convert.h"
+#include "util/daemon.h"
 #include "util/log.h"
 #include "util/parse.h"
 
@@ -39,6 +40,7 @@
 #define DEF_LOG_LEVEL           LL_WARN    // Log errors and warnings by default.
 #define DEF_LOG_COLOR           true       // Colors in the notification output.
 #define DEF_MONOLOGUE           false      // Responses are recorded by default.
+#define DEF_DAEMON              false      // Process stays within the terminal.
 #define DEF_UDP_PORT            23000      // UDP port number to use
 #define DEF_RECEIVE_BUFFER_SIZE 2000000    // Socket receive buffer memory size.
 #define DEF_SEND_BUFFER_SIZE    2000000    // Socket send buffer memory size.
@@ -81,6 +83,7 @@ static uint8_t  op_llvl; ///< Notification verbosity level.
 static bool     op_lcol; ///< Notification coloring policy.
 static bool     op_err;  ///< Process exit policy on publishing error.
 static bool     op_mono; ///< Do not capture responses (monologue mode).
+static bool     op_dmon; ///< Daemon process.
 static bool     op_ipv4; ///< IPv4-only mode.
 static bool     op_ipv6; ///< IPv6-only mode.
 
@@ -153,6 +156,7 @@ print_usage(void)
     "  -4      Use only the IPv4 protocol.\n"
     "  -6      Use only the IPv6 protocol.\n"
     "  -c CNT  Number of requests to issue. (def=%d)\n"
+    "  -d      Run the process as a daemon.\n"
     "  -e      Stop the process on first network error.\n"
     "  -h      Print this help message.\n"
     "  -i DUR  Interval duration between published datagram rounds. (def=1s)\n"
@@ -219,6 +223,7 @@ parse_options(int* pidx, int argc, char* argv[])
   op_ttl  = DEF_TIME_TO_LIVE;
   op_err  = DEF_EXIT_ON_ERROR;
   op_mono = DEF_MONOLOGUE;
+  op_dmon = DEF_DAEMON;
   op_port = DEF_UDP_PORT;
   op_llvl = (log_lvl = DEF_LOG_LEVEL);
   op_lcol = (log_col = DEF_LOG_COLOR);
@@ -229,7 +234,7 @@ parse_options(int* pidx, int argc, char* argv[])
   // Loop through available options.
   while (true) {
     // Parse the next available option.
-    opt = getopt(argc, argv, "46c:ehi:k:mnp:r:s:t:vw:");
+    opt = getopt(argc, argv, "46c:dehi:k:mnp:r:s:t:vw:");
     if (opt == -1)
       break;
 
@@ -249,6 +254,11 @@ parse_options(int* pidx, int argc, char* argv[])
         retb = parse_uint64(&op_cnt, optarg, 1, UINT64_MAX);
         if (retb == false)
           return false;
+        break;
+
+      // Daemon process.
+      case 'd':
+        op_dmon = true;
         break;
 
       // Process exit on first network error.
@@ -1056,6 +1066,15 @@ main(int argc, char* argv[])
   if (retb == false) {
     log_(LL_ERROR, false, "main", "unable to parse command-line options");
     return EXIT_FAILURE;
+  }
+
+  // Optionally turn the process into a daemon.
+  if (op_dmon == true) {
+    retb = turn_into_daemon();
+    if (retb == false) {
+      log_(LL_ERROR, false, "main", "unable to turn process into daemon");
+      return EXIT_FAILURE;
+    }
   }
 
   // Parse network targets.

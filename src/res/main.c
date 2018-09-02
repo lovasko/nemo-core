@@ -97,7 +97,7 @@ print_usage(void)
     "  Payload version: %d\n\n"
 
     "Usage:\n"
-    "  nres [-46ehmnv] [-k KEY] [-p NUM] [-r RBS] [-s SBS] [-t TTL]\n\n"
+    "  nres [-46dehmnv] [-k KEY] [-p NUM] [-r RBS] [-s SBS] [-t TTL]\n\n"
 
     "Options:\n"
     "  -4      Use only the IPv4 protocol.\n"

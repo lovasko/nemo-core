@@ -147,10 +147,11 @@ print_usage(void)
     "  Payload version: %d\n\n"
 
     "Usage:\n"
-    "  nreq [OPTIONS] target [target]...\n\n"
+    "  nreq [-46dehmnv] [-c CNT] [-i DUR] [-k KEY] [-r RBS] [-s SBS]\n"
+    "       [-p NUM] [-t TTL] [-w DUR] target [target]...\n\n"
 
     "Arguments:\n"
-    "  target - IPv4/IPv6 address\n\n"
+    "  target  IPv4/IPv6 address\n\n"
 
     "Options:\n"
     "  -4      Use only the IPv4 protocol.\n"

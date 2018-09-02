@@ -10,3 +10,22 @@ compiler:
  - gcc
 sudo: required
 script: make
+
+env:
+  global:
+   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+   #   via the "travis encrypt" command using the project repo's public key
+   - secure: "SfvpUq1VwYt2oGhCITNF/xbuhilV2gGmhst1ZonfJ0SVislPay0qdtf+CDyhEpcpTivF30gC0/tc7wvg20mUMc86IeLFYxlPfbnklhyQG8l1FEMTCcFUf+0rwC4ejtH+rGkf8B8jzyEmfRLi6/g8Z9hINUIimu7UyeRv4uaQacsxkx39zDZchi/WdZo33lC4JBlq//CZ8jMhBQifnP7+31HMXV4IKyKaBfAUKkABY5rg/lrQ5mymDlMJ5NbQefeGqlhI+Z2SuskFpzEAROx84DsgIbGhSy9erQ3RWu0PrxdhZPTySip9h5KNUv5et60WEdkUfMUmUoDmBw3/OPyuMO9maBokoq2yHfYz3LTq4bKsH0jpPuCUOkVIlHTszyBVlw5uA0qemGu5jY4N9crxFm7Ihjysc81N5FTPlqp/pbP4ff82bxniKqOQDJwCltFtD+cRIzhAdBhCpj9XYG84cgSsYSKFH3WoUiMXL1ba4W6VwA8xlhiF9zwMTLwztDZhmBO5QD2JwpUph2zZffqyxwIPGAZDI2ScSN3XaKMoh98+IdLhbH9HRd34wKkwLEIJOjvrEQYDqWXGoeygnpzYdjKUBRH3N3gGbRgfTzkEfqxeolAIUWGIXb2V+a/TEYNDIJN6uEg6FivHFEiAMqNA5X5CPUnKyzME6QtLSVAagps="
+
+before_install:
+  - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+
+addons:
+  coverity_scan:
+    project:
+      name: "lovasko/nemo-core"
+      description: "Unicast network monitor"
+    notification_email: daniel.lovasko@gmail.com
+    build_command_prepend: true
+    build_command: make
+    branch_pattern: master

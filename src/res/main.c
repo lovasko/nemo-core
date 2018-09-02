@@ -8,6 +8,7 @@
 #include <netinet/in.h>
 
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <sys/select.h>
 #include <sys/socket.h>
 
@@ -20,10 +21,12 @@
 #include <signal.h>
 #include <time.h>
 #include <inttypes.h>
+#include <fcntl.h>
 
 #include "common/payload.h"
 #include "common/version.h"
 #include "util/convert.h"
+#include "util/daemon.h"
 #include "util/log.h"
 #include "util/parse.h"
 
@@ -37,6 +40,7 @@
 #define DEF_LOG_COLOR           true
 #define DEF_TIME_TO_LIVE        64
 #define DEF_MONOLOGUE           false
+#define DEF_DAEMON              false
 
 // Command-line options.
 static uint64_t op_port; ///< UDP port number.
@@ -50,6 +54,7 @@ static bool     op_ipv6; ///< IPv6-only traffic.
 static uint8_t  op_llvl; ///< Minimal log level.
 static bool     op_lcol; ///< Log coloring policy.
 static bool     op_mono; ///< Monologue mode (no responses).
+static bool     op_dmon; ///< Daemon process.
 
 // Global state.
 static int sock4;  ///< UDP/IPv4 socket.
@@ -97,6 +102,7 @@ print_usage(void)
     "Options:\n"
     "  -4      Use only the IPv4 protocol.\n"
     "  -6      Use only the IPv6 protocol.\n"
+    "  -d      Run the process as a daemon.\n"
     "  -e      Stop the process on first transmission error.\n"
     "  -h      Print this help message.\n"
     "  -k KEY  Key for the current run. (def=random)\n"
@@ -135,6 +141,7 @@ parse_options(int argc, char* argv[])
   op_port = DEF_UDP_PORT;
   op_ttl  = DEF_TIME_TO_LIVE;
   op_mono = DEF_MONOLOGUE;
+  op_dmon = DEF_DAEMON;
   op_llvl = (log_lvl = DEF_LOG_LEVEL);
   op_lcol = (log_col = DEF_LOG_COLOR);
   op_key  = generate_key();
@@ -144,7 +151,7 @@ parse_options(int argc, char* argv[])
   // Loop through available options.
   while (true) {
     // Parse the next option.
-    opt = getopt(argc, argv, "46ehk:mnp:r:s:t:v");
+    opt = getopt(argc, argv, "46dehk:mnp:r:s:t:v");
     if (opt == -1)
       break;
 
@@ -157,6 +164,11 @@ parse_options(int argc, char* argv[])
       // IPv6-only mode.
       case '6':
         op_ipv6 = true;
+        break;
+
+      // Daemon process.
+      case 'd':
+        op_dmon = true;
         break;
 
       // Process exit on transmission error.
@@ -777,6 +789,15 @@ main(int argc, char* argv[])
   if (retb == false) {
     log_(LL_ERROR, false, "main", "unable to parse command-line options");
     return EXIT_FAILURE;
+  }
+
+  // Optionally turn the process into a daemon.
+  if (op_dmon == true) {
+    retb = turn_into_daemon();
+    if (retb == false) {
+      log_(LL_ERROR, false, "main", "unable to turn process into a daemon");
+      return EXIT_FAILURE;
+    }
   }
 
   // Install the signal handlers.

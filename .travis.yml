@@ -1,30 +1,20 @@
-# Copyright (c) 2018 Daniel Lovasko.
-# All Rights Reserved
-#
-# Distributed under the terms of the 2-clause BSD License. The full
-# license is in the file LICENSE, distributed as part of this software.
-
 language: c
 compiler:
- - clang
- - gcc
+- clang
+- gcc
 sudo: required
 script: make
-
 env:
   global:
-   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
-   #   via the "travis encrypt" command using the project repo's public key
-   - secure: "SfvpUq1VwYt2oGhCITNF/xbuhilV2gGmhst1ZonfJ0SVislPay0qdtf+CDyhEpcpTivF30gC0/tc7wvg20mUMc86IeLFYxlPfbnklhyQG8l1FEMTCcFUf+0rwC4ejtH+rGkf8B8jzyEmfRLi6/g8Z9hINUIimu7UyeRv4uaQacsxkx39zDZchi/WdZo33lC4JBlq//CZ8jMhBQifnP7+31HMXV4IKyKaBfAUKkABY5rg/lrQ5mymDlMJ5NbQefeGqlhI+Z2SuskFpzEAROx84DsgIbGhSy9erQ3RWu0PrxdhZPTySip9h5KNUv5et60WEdkUfMUmUoDmBw3/OPyuMO9maBokoq2yHfYz3LTq4bKsH0jpPuCUOkVIlHTszyBVlw5uA0qemGu5jY4N9crxFm7Ihjysc81N5FTPlqp/pbP4ff82bxniKqOQDJwCltFtD+cRIzhAdBhCpj9XYG84cgSsYSKFH3WoUiMXL1ba4W6VwA8xlhiF9zwMTLwztDZhmBO5QD2JwpUph2zZffqyxwIPGAZDI2ScSN3XaKMoh98+IdLhbH9HRd34wKkwLEIJOjvrEQYDqWXGoeygnpzYdjKUBRH3N3gGbRgfTzkEfqxeolAIUWGIXb2V+a/TEYNDIJN6uEg6FivHFEiAMqNA5X5CPUnKyzME6QtLSVAagps="
-
+   - secure: FjVL6HME24GSWyUnvZJUQ2c3/tzRMgmR4EF8k9HN6g8m1Io8nKWpOcz31V7GNV3Ve5J6/jk7jYjlfiavpOs+d4yhDV6QNsTKMvyCVWBwx0FrzyRjvN4yORspBBt2fs42VNTSZ7nFmdUbCL7d4b5Zvv2LHjT/DeZxTPLdItfDK08qVbWhn5C+Qz5UOdzMUYEQf+A4cQyGl/Xs8sVu0XCiVCgb+2pMyc75nBupIHu2HKDvl+3sYh85sxvochVraKOb2OB7wzV5TeNxyBSBJoMIWz5LUIgvY2qsPVZjwgdSK4a6opMJMa1Aufpa+SOR4irOGh4Qx4h4cz4I4cxwH8f5QAZuD3XQnn5FOyN4y9cwa83NIO30ZEZ6CG50AuzBo5xxFseVVTnsHr5l3OpPiIr8kSO+S9sAwUzaBYj4QkGU4w6TluLna0uU3tJheQ1DE/krV6HjwyApt2pQppt7Lf9erp+5UcBwWt1tph3LEYuv/61dHlJB/l263znIZfS40Q3nj/EKpWvNtJX1vd5Ya+5Lzo5Fqd909lzs/GUBKrkjmjBu2n74YaHPkPtQMalJvW3UHLEeZeLkXV50wb7j3JKqVzVWp5S2UkFVMBx4NHVpVL57+PJLYLmTWGyGWY5KokcZ/fNtuxQTgSTI/6I4KdQ9T1X8jLA25hN9bbneB2YgN5A=
 before_install:
-  - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
-
+- echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN
+  CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
 addons:
   coverity_scan:
     project:
-      name: "lovasko/nemo-core"
-      description: "Unicast network monitor"
+      name: lovasko/nemo-core
+      description: Unicast network monitor
     notification_email: daniel.lovasko@gmail.com
     build_command_prepend: true
     build_command: make

@@ -17,7 +17,7 @@ redirect_streams(void)
 {
   int reti;
 
-  // Close the standard streams. 
+  // Close the standard streams.
   reti = close(STDIN_FILENO);
   if (reti == -1) {
     log(LL_WARN, true, "main", "unable to close standard input stream");
@@ -58,7 +58,7 @@ redirect_streams(void)
   return true;
 }
 
-/// 
+///
 /// @return success/failure indication
 static bool
 fork_and_exit(void)
@@ -86,7 +86,7 @@ turn_into_daemon(void)
   bool retb;
   pid_t sid;
 
-  // Exit the process started by the terminal. 
+  // Exit the process started by the terminal.
   // Kill the parent process, so that the terminal that started that process
   // receives a successful exit notification.
   retb = fork_and_exit();

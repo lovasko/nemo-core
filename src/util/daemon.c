@@ -64,7 +64,7 @@ redirect_streams(void)
   return true;
 }
 
-///
+/// Create an copy of the process and terminate the older instance.
 /// @return success/failure indication
 static bool
 fork_and_exit(void)
@@ -77,6 +77,9 @@ fork_and_exit(void)
     return false;
   }
 
+  // If the PID is non-zero, we have received the PID of our newly created
+  // child process. Therefore, we terminate the process, as we only want to
+  // keep the child process.
   if (pid != 0)
     exit(EXIT_SUCCESS);
 
@@ -92,7 +95,6 @@ turn_into_daemon(void)
   bool retb;
   pid_t sid;
 
-  // Exit the process started by the terminal.
   // Kill the parent process, so that the terminal that started that process
   // receives a successful exit notification.
   retb = fork_and_exit();
@@ -108,7 +110,6 @@ turn_into_daemon(void)
   }
 
   // Fork again so that we can't have a tty attached to us later on.
-  // Kill the parent process that started the group.
   retb = fork_and_exit();
   if (retb == false)
     return false;

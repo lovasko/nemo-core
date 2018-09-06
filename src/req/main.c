@@ -482,6 +482,8 @@ install_signal_handlers(void)
   int reti;
   sigset_t ss;
 
+  log(LL_INFO, false, "main", "installing signal handlers");
+
   // Reset the signal indicator.
   sint  = false;
 	sterm = false;
@@ -499,7 +501,6 @@ install_signal_handlers(void)
   sa.sa_handler = signal_handler;
 
   // Install signal handler for SIGINT.
-  log(LL_INFO, false, "main", "installing signal handler for %s", "SIGINT");
   reti = sigaction(SIGINT, &sa, NULL);
   if (reti == -1) {
     log(LL_WARN, true, "main", "unable to add signal handler for %s", "SIGINT");
@@ -507,7 +508,6 @@ install_signal_handlers(void)
   }
 
   // Install signal handler for SIGTERM.
-  log(LL_INFO, false, "main", "installing signal handler for %s", "SIGTERM");
   reti = sigaction(SIGTERM, &sa, NULL);
   if (reti == -1) {
     log(LL_WARN, true, "main", "unable to add signal handler for %s", "SIGTERM");
@@ -515,7 +515,6 @@ install_signal_handlers(void)
   }
 
   // Install signal handler for SIGUSR1.
-  log(LL_INFO, false, "main", "installing signal handler for %s", "SIGUSR1");
   reti = sigaction(SIGUSR1, &sa, NULL);
   if (reti == -1) {
     log(LL_WARN, true, "main", "unable to add signal handler for %s", "SIGUSR1");

@@ -409,7 +409,9 @@ make_address_part(const uint8_t* part)
 /// Parse network targets.
 /// @return status code
 ///
-/// @param[in] idx index in the argument vector
+/// @param[in] idx  index in the argument vector
+/// @param[in] argc command-line argument count
+/// @param[in] argv command-line argument vector
 static bool
 parse_targets(int idx, int argc, char* argv[])
 {

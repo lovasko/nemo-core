@@ -518,7 +518,9 @@ create_socket4(void)
     log(LL_WARN, true, "main", "unable to set the %s socket receive buffer "
       "size to %d", "IPv4", val);
     return false;
-  } // Set the socket send buffer size.
+  }
+
+  // Set the socket send buffer size.
   val = (int)op_sbuf;
   ret = setsockopt(sock4, SOL_SOCKET, SO_SNDBUF, &val, sizeof(val));
   if (ret == -1) {

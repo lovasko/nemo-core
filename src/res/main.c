@@ -22,6 +22,7 @@
 #include <time.h>
 #include <inttypes.h>
 #include <fcntl.h>
+#include <dlfcn.h>
 
 #include "common/payload.h"
 #include "common/version.h"
@@ -62,6 +63,120 @@ static int sock6;  ///< UDP/IPv6 socket.
 static bool sint;  ///< Signal interrupt indicator.
 static bool sterm; ///< Signal termination indicator.
 
+struct action {
+  char* ac_name;
+  void* ac_hndl;
+  bool (*ac_init)(void);
+  bool (*ac_evnt)(uint64_t, uint64_t, uint64_t, uint64_t);
+  bool (*ac_free)(void);
+};
+
+#define NEMO_ACTION_MAX 32
+
+static struct action acs[NEMO_ACTION_MAX]; ///< Actions.
+static uint64_t nacs;                      ///< Number of actions.
+
+/// Dynamically load the shared object and extract all necessary symbols that
+/// define the action from it.
+/// @return success/failure indication
+///
+/// @param[out] ac   action
+/// @param[in]  path file path to the shared object
+static bool
+load_action(struct action* ac, const char* path)
+{
+  char estr[128];
+
+  memset(estr, '\0', sizeof(estr));
+
+  ac->ac_hndl = dlopen(path, RTLD_NOW);
+  if (ac->ac_hndl == NULL) {
+    strncpy(estr, "unable to open %s:", 64);
+    strncat(estr, dlerror(), 64);
+    log(LL_WARN, false, "main", estr, path);
+    return false;
+  }
+
+  ac->ac_name = dlsym(ac->ac_hndl, "nemo_name");
+  if (ac->ac_name == NULL) {
+    strncpy(estr, "unable to load symbol %s:", 64);
+    strncat(estr, dlerror(), 64);
+    log(LL_WARN, false, "main", estr, "nemo_name");
+    return false;
+  }
+
+  ac->ac_init = dlsym(ac->ac_hndl, "nemo_init");
+  if (ac->ac_init == NULL) {
+    strncpy(estr, "unable to load symbol %s:", 64);
+    strncat(estr, dlerror(), 64);
+    log(LL_WARN, false, "main", estr, "nemo_init");
+    return false;
+  }
+
+  ac->ac_evnt = dlsym(ac->ac_hndl, "nemo_evnt");
+  if (ac->ac_evnt == NULL) {
+    strncpy(estr, "unable to load symbol %s:", 64);
+    strncat(estr, dlerror(), 64);
+    log(LL_WARN, false, "main", estr, "nemo_evnt");
+    return false;
+  }
+
+  ac->ac_free = dlsym(ac->ac_hndl, "nemo_free");
+  if (ac->ac_free == NULL) {
+    strncpy(estr, "unable to load symbol %s:", 64);
+    strncat(estr, dlerror(), 64);
+    log(LL_WARN, false, "main", estr, "nemo_free");
+    return false;
+  }
+
+  return true;
+}
+
+static bool
+start_actions(void)
+{
+  uint64_t i;
+  bool retb;
+
+  for (i = 0; i < nacs; i++) {
+    retb = acs[i].ac_init();
+    if (retb == false)
+      return false;
+  }
+
+  return true;
+}
+
+static bool
+trigger_actions(const payload* pl)
+{
+  uint64_t i;
+  bool retb;
+
+  for (i = 0; i < nacs; i++) {
+    retb = acs[i].ac_evnt(pl->pl_resk, pl->pl_reqk, pl->pl_reqk, pl->pl_reqk);
+    if (retb == false)
+      return false;
+  }
+
+  return true;
+}
+
+static bool
+terminate_actions(void)
+{
+  uint64_t i;
+  bool retb;
+
+  for (i = 0; i < nacs; i++) {
+    retb = acs[i].ac_free();
+    if (retb == false)
+      return false;
+  }
+
+  return true;
+}
+
 /// Generate a random key.
 /// @return random 64-bit unsigned integer (non-zero)
 static uint64_t
@@ -97,9 +212,11 @@ print_usage(void)
     "  Payload version: %d\n\n"
 
     "Usage:\n"
-    "  nres [-46dehmnv] [-k KEY] [-p NUM] [-r RBS] [-s SBS] [-t TTL]\n\n"
+    "  nres [-46dehmnv] [-a OBJ] [-k KEY] [-p NUM] [-r RBS] [-s SBS] "
+    "[-t TTL]\n\n"
 
     "Options:\n"
+    "  -a OBJ  Path to shared object file of an action set.\n"
     "  -4      Use only the IPv4 protocol.\n"
     "  -6      Use only the IPv6 protocol.\n"
     "  -d      Run the process as a daemon.\n"
@@ -147,6 +264,7 @@ parse_options(int argc, char* argv[])
   op_key  = generate_key();
   op_ipv4 = false;
   op_ipv6 = false;
+  nacs    = 0;
 
   // Loop through available options.
   while (true) {
@@ -164,6 +282,16 @@ parse_options(int argc, char* argv[])
       // IPv6-only mode.
       case '6':
         op_ipv6 = true;
+        break;
+
+      // Action from a shared object file.
+      case 'a':
+        retb = load_action(&acs[nacs], optarg);
+        if (retb == false) {
+          log(LL_WARN, false, "main", "unable to load action");
+          return false;
+        }
+        nacs++;
         break;
 
       // Daemon process.
@@ -701,6 +829,13 @@ handle_event(int sock, const char* ipv)
     return false;
   }
 
+  // Trigger all associated action sets.
+  retb = trigger_actions(&pl);
+  if (retb == false) {
+    log(LL_WARN, false, "main", "unable to trigger all actions");
+    return false;
+  }
+
   // Do not respond if the monologue mode is turned on.
   if (op_mono == true)
     return true;
@@ -821,10 +956,24 @@ main(int argc, char* argv[])
     return EXIT_FAILURE;
   }
 
+  // Start actions.
+  retb = start_actions();
+  if (retb == false) {
+    log(LL_ERROR, false, "main", "unable to start all actions");
+    return EXIT_FAILURE;
+  }
+
   // Start the main responding loop.
   retb = respond_loop();
   if (retb == false) {
     log(LL_ERROR, false, "main", "responding loop has finished");
+    return EXIT_FAILURE;
+  }
+
+  // Terminate actions.
+  retb = terminate_actions();
+  if (retb == false) {
+    log(LL_ERROR, false, "main", "unable to terminate all actions");
     return EXIT_FAILURE;
   }
 

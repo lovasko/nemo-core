@@ -42,6 +42,7 @@
 #define DEF_TIME_TO_LIVE        64
 #define DEF_MONOLOGUE           false
 #define DEF_DAEMON              false
+#define DEF_SILENT              false
 
 // Command-line options.
 static uint64_t op_port; ///< UDP port number.
@@ -56,6 +57,7 @@ static uint8_t  op_llvl; ///< Minimal log level.
 static bool     op_lcol; ///< Log coloring policy.
 static bool     op_mono; ///< Monologue mode (no responses).
 static bool     op_dmon; ///< Daemon process.
+static bool     op_sil;  ///< Standard output presence.
 
 // Global state.
 static int sock4;  ///< UDP/IPv4 socket.
@@ -212,7 +214,7 @@ print_usage(void)
     "  Payload version: %d\n\n"
 
     "Usage:\n"
-    "  nres [-46dehmnv] [-a OBJ] [-k KEY] [-p NUM] [-r RBS] [-s SBS] "
+    "  nres [-46dehmnqv] [-a OBJ] [-k KEY] [-p NUM] [-r RBS] [-s SBS] "
     "[-t TTL]\n\n"
 
     "Options:\n"
@@ -226,6 +228,7 @@ print_usage(void)
     "  -m      Disable responding (monologue mode).\n"
     "  -n      Turn off coloring in the logging output.\n"
     "  -p NUM  UDP port to use for all endpoints. (def=%d)\n"
+    "  -q      Suppress reporting to standard output.\n"
     "  -r RBS  Socket receive memory buffer size. (def=2m)\n"
     "  -s SBS  Socket send memory buffer size. (def=2m)\n"
     "  -t TTL  Outgoing IP Time-To-Live value. (def=%d)\n"
@@ -259,6 +262,7 @@ parse_options(int argc, char* argv[])
   op_ttl  = DEF_TIME_TO_LIVE;
   op_mono = DEF_MONOLOGUE;
   op_dmon = DEF_DAEMON;
+  op_sil  = DEF_SILENT;
   op_llvl = (log_lvl = DEF_LOG_LEVEL);
   op_lcol = (log_col = DEF_LOG_COLOR);
   op_key  = generate_key();
@@ -269,7 +273,7 @@ parse_options(int argc, char* argv[])
   // Loop through available options.
   while (true) {
     // Parse the next option.
-    opt = getopt(argc, argv, "46dehk:mnp:r:s:t:v");
+    opt = getopt(argc, argv, "46a:dehk:mnp:qr:s:t:v");
     if (opt == -1)
       break;
 
@@ -332,6 +336,11 @@ parse_options(int argc, char* argv[])
         retb = parse_uint64(&op_port, optarg, 1, 65535);
         if (retb == false)
           return false;
+        break;
+
+      // Silent standard output.
+      case 'q':
+        op_sil = true;
         break;
 
       // Receive buffer memory size.
@@ -806,6 +815,10 @@ report_event(const payload* pl)
   struct in_addr a4;
   struct in6_addr a6;
 
+  // No output to be performed if the silent mode was requested.
+  if (op_sil == true)
+    return;
+
   (void)memset(addrstr, '\0', sizeof(addrstr));
 
   // Convert the IP address into a string.
@@ -910,8 +923,9 @@ respond_loop(void)
   log_options();
 
   // Print the CSV header of the standard output.
-  (void)printf("ResKey,ReqKey,SeqNum,SeqLen,Proto,FromAddr,Port,"
-    "DepTimeReal,DepTimeMono,ArrTimeReal,ArrTimeMono\n");
+  if (op_sil == false)
+    (void)printf("ResKey,ReqKey,SeqNum,SeqLen,Proto,FromAddr,Port,"
+      "DepTimeReal,DepTimeMono,ArrTimeReal,ArrTimeMono\n");
 
   // Add sockets to the event list.
   FD_ZERO(&rfd);

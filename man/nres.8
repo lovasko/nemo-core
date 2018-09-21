@@ -21,6 +21,7 @@
 .Op Fl m
 .Op Fl n
 .Op Fl p Ar num
+.Op Fl q
 .Op Fl r Ar rbs
 .Op Fl s Ar sbs
 .Op Fl t Ar ttl
@@ -73,6 +74,9 @@ Disables the usage of colors in the logging output (see LOGGING).
 .It Fl p Ar num
 Specify the UDP port of all created endpoints. The default value is
 .Em 23000 .
+.
+.It Fl q
+Suppress the CSV reporting to the standard output stream.
 .
 .It Fl r Ar rbs
 Sets the socket receive memory buffer to the specified size (see MEMORY SIZE FORMAT).

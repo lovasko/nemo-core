@@ -796,6 +796,45 @@ send_datagram(int sock, payload* pl, struct sockaddr_storage* addr)
   return true;
 }
 
+///
+///
+/// @param[in] pl payload
+static void
+report_event(const payload* pl)
+{
+  char addrstr[128];
+  struct in_addr a4;
+  struct in6_addr a6;
+
+  (void)memset(addrstr, '\0', sizeof(addrstr));
+
+  // Convert the IP address into a string.
+  if (pl->pl_prot == 4) {
+    a4.s_addr = (uint32_t)pl->pl_laddr;
+    inet_ntop(AF_INET, &a4, addrstr, sizeof(addrstr));
+  } else {
+    tipv6(&a6, pl->pl_laddr, pl->pl_haddr);
+    inet_ntop(AF_INET6, &a6, addrstr, sizeof(addrstr));
+  }
+
+  (void)printf("%" PRIu64 ","   // ResKey
+               "%" PRIu64 ","   // ReqKey
+               "%" PRIu64 ","   // SeqNum
+               "%" PRIu64 ","   // SeqLen
+               "%" PRIu8  ","   // Proto
+               "%s,"            // FromAddr
+               "%" PRIu16 ","   // Port
+               "%" PRIu64 ","   // DepTimeReal
+               "%" PRIu64 ","   // DepTimeMono
+               "%" PRIu64 ","   // ArrTimeReal
+               "%" PRIu64 "\n", // ArrTimeMono
+               pl->pl_resk, pl->pl_reqk,
+               pl->pl_snum, pl->pl_slen,
+               pl->pl_prot, addrstr, pl->pl_port,
+               pl->pl_rtm1, pl->pl_mtm1,
+               pl->pl_rtm2, pl->pl_mtm2);
+}
+
 /// Handle the event of an incoming datagram.
 /// @return success/failure indication
 ///
@@ -838,6 +877,9 @@ handle_event(int sock, const char* ipv)
     return false;
   }
 
+  // Report the event as a entry in the CSV output.
+  report_event(&pl);
+
   // Do not respond if the monologue mode is turned on.
   if (op_mono == true)
     return true;
@@ -866,6 +908,10 @@ respond_loop(void)
 
   log(LL_INFO, false, "main", "starting the response loop");
   log_options();
+
+  // Print the CSV header of the standard output.
+  (void)printf("ResKey,ReqKey,SeqNum,SeqLen,Proto,FromAddr,Port,"
+    "DepTimeReal,DepTimeMono,ArrTimeReal,ArrTimeMono\n");
 
   // Add sockets to the event list.
   FD_ZERO(&rfd);

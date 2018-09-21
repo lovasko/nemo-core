@@ -16,7 +16,7 @@
 
 /// Constants.
 #define NEMO_PAYLOAD_MAGIC 0x6e656d6f
-#define NEMO_PAYLOAD_VERSION        1
+#define NEMO_PAYLOAD_VERSION        2
 
 
 // Diagnostic payload.
@@ -28,7 +28,8 @@ typedef struct _payload {
   uint8_t  pl_ttl1;   ///< Time-To-Live when sent from requester.
   uint8_t  pl_ttl2;   ///< Time-To-Live when received by responder.
   uint8_t  pl_ttl3;   ///< Time-To-Live when sent from responder.
-  uint8_t  pl_pad[5]; ///< Padding (unused).
+  uint8_t  pl_prot;   ///< IP protocol.
+  uint8_t  pl_pad[4]; ///< Padding (unused).
   uint64_t pl_snum;   ///< Sequence iteration number.
   uint64_t pl_slen;   ///< Sequence length.
   uint64_t pl_laddr;  ///< IP address - low-bits.

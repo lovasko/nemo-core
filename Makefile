@@ -12,11 +12,11 @@ LDFLAGS = -lrt -lpthread -ldl
 all: bin/nreq bin/nres
 
 # executables
-bin/nreq: obj/req/main.o obj/util/convert.o obj/util/daemon.o obj/util/log.o obj/util/parse.o
-	$(CC) obj/req/main.o obj/util/convert.o obj/util/daemon.o obj/util/log.o obj/util/parse.o -o bin/nreq $(LDFLAGS)
+bin/nreq: obj/req/main.o obj/util/convert.o obj/util/daemon.o obj/util/log.o obj/util/parse.o obj/util/ttl.o
+	$(CC) obj/req/main.o obj/util/convert.o obj/util/daemon.o obj/util/log.o obj/util/parse.o obj/util/ttl.o -o bin/nreq $(LDFLAGS)
 
-bin/nres: obj/res/main.o obj/util/convert.o obj/util/daemon.o obj/util/log.o obj/util/parse.o
-	$(CC) obj/res/main.o obj/util/convert.o obj/util/daemon.o obj/util/log.o obj/util/parse.o -o bin/nres $(LDFLAGS)
+bin/nres: obj/res/main.o obj/util/convert.o obj/util/daemon.o obj/util/log.o obj/util/parse.o obj/util/ttl.o
+	$(CC) obj/res/main.o obj/util/convert.o obj/util/daemon.o obj/util/log.o obj/util/parse.o obj/util/ttl.o -o bin/nres $(LDFLAGS)
 
 # program object files
 obj/req/main.o: src/req/main.c
@@ -38,6 +38,9 @@ obj/util/log.o: src/util/log.c
 obj/util/parse.o: src/util/parse.c
 	$(CC) $(CFLAGS) -c src/util/parse.c -o obj/util/parse.o
 
+obj/util/ttl.o: src/util/ttl.c
+	$(CC) $(CFLAGS) -c src/util/ttl.c -o obj/util/ttl.o
+
 clean:
 	rm -f bin/nreq
 	rm -f bin/nres
@@ -47,3 +50,4 @@ clean:
 	rm -f obj/util/daemon.o
 	rm -f obj/util/log.o
 	rm -f obj/util/parse.o
+	rm -f obj/util/ttl.o

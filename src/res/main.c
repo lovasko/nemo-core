@@ -805,7 +805,8 @@ send_datagram(int sock, payload* pl, struct sockaddr_storage* addr)
   return true;
 }
 
-///
+/// Report the event of the incoming datagram by printing a CSV-formatted line
+/// to the standard output stream.
 ///
 /// @param[in] pl payload
 static void

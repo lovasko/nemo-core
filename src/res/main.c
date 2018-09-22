@@ -975,6 +975,36 @@ respond_loop(void)
   return true;
 }
 
+/// Flush all data written to the standard output to their respective device.
+/// @return success/failure indication
+static bool
+flush_stdout(void)
+{
+  int reti;
+
+  if (op_sil == true)
+    return true;
+
+  log(LL_INFO, false, "main", "flushing standard output stream");
+
+  // First flush all stdio buffers.
+  reti = fflush(stdout);
+  if (reti == -1) {
+    log(LL_WARN, true, "main", "unable to flush the standard output");
+    return false;
+  }
+
+  // Now make sure that all data from the kernel are written to the appropriate
+  // device.
+  reti = fsync(STDOUT_FILENO);
+  if (reti == -1) {
+    log(LL_WARN, true, "main", "unable to synchronize kernel data to device");
+    return false;
+  }
+
+  return true;
+}
+
 /// Unicast network responder.
 int
 main(int argc, char* argv[])
@@ -1037,6 +1067,13 @@ main(int argc, char* argv[])
   if (retb == false) {
     log(LL_ERROR, false, "main", "unable to terminate all actions");
     return EXIT_FAILURE;
+  }
+
+  // Flush the standard output and error streams.
+  retb = flush_stdout();
+  if (retb == false) {
+    log(LL_ERROR, false, "main", "unable to flush standard output stream");
+    return false;
   }
 
   return EXIT_SUCCESS;

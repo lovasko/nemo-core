@@ -189,7 +189,7 @@ time of departure from responder, nanoseconds steady time (8 bytes)
 .Sh LOGGING
 The program outputs logging information to the standard error stream. Each log line contains 4 parts: time, severity, textual description, and an optional error description, obtained based on the
 .Em errno
-mechanism. There are 4 severity levels, abbreviated and color-coded: 
+mechanism. There are 5 severity levels, abbreviated and color-coded:
 .Bl -tag -width Ds
 .It ERROR
 Emitted exactly one per failed process execution, denoting the high-level reason for the failure. The color is red.
@@ -199,6 +199,8 @@ Emitted each time a task did not succeed, with a detailed description of the sit
 Consists mainly of general high-level view to what task the process is performing. The color is green.
 .It DEBUG
 Contains detailed information about the variable values and sub-tasks. The color is blue.
+.It TRACE
+In-depth listing of subtasks performed by the process. The color is purple.
 .El
 .
 .Sh EXIT CODE 

@@ -133,6 +133,43 @@ Supported units are:
 Zero duration is allowed, e.g.
 .Em 0ms .
 .
+.Sh OUTPUT REPORTING FORMAT
+The output format is a CSV complaint with the RFC 4810. Each event of a
+received packet is reported as a CSV entry line printed to the standard output
+stream. At the program start-up, the CSV header line is printed. The columns
+described below are in the exact order as they appear in the output:
+.Bl -tag -width 8n
+.It Em ResKey
+The unique key of the responder presented in the decimal form.
+.It Em ReqKey
+The unique key of the requester that made the request presented in the decimal
+form.
+.It Em SeqNum
+0-indexed sequence number of the payload.
+.It Em SeqLen
+Length of the sequence emitted by the requester.
+.It Em IPVer
+IP protocol number, either 4 or 6.
+.It Em Addr
+IP protocol address. In case of IPv4, the address is presented as the standard
+dotted quad, in case of IPv6, the standard (possibly abbreviated)
+colon-separated groups of hexadecimal digits.
+.It Em Port
+UDP port number.
+.It Em DepTTL
+IP Time-To-Live value of the packet upon departure from the requester.
+.It Em ArrTTL
+IP Time-To-Live value of the packet upon arrival.
+.It Em DepTime
+Real system time as perceived by the requester at the time of the request.
+.It Em DepMono
+Monotonic time as perceived by the requester at the time of the request.
+.It Em ArrTime
+Real system time upon arrival of the packet.
+.It Em ArrMono
+Monotonic time upon arrival of the packet,
+.El
+.
 .Sh PAYLOAD FORMAT
 The format of the payload is binary. All numeric fields are unsigned
 integers in network byte order, while the 64-bit unsigned integers are split

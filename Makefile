@@ -11,12 +11,35 @@ LDFLAGS = -lrt -lpthread -ldl
 
 all: bin/nreq bin/nres
 
-# executables
-bin/nreq: obj/req/main.o obj/util/convert.o obj/util/daemon.o obj/util/log.o obj/util/parse.o obj/util/ttl.o
-	$(CC) obj/req/main.o obj/util/convert.o obj/util/daemon.o obj/util/log.o obj/util/parse.o obj/util/ttl.o -o bin/nreq $(LDFLAGS)
+# requester executable
+bin/nreq: obj/req/main.o     \
+          obj/util/convert.o \
+          obj/util/daemon.o  \
+          obj/util/log.o     \
+          obj/util/parse.o   \
+          obj/util/ttl.o
+	$(CC) obj/req/main.o       \
+	      obj/util/convert.o   \
+	      obj/util/daemon.o    \
+	      obj/util/log.o       \
+	      obj/util/parse.o     \
+	      obj/util/ttl.o       \
+	      -o bin/nreq $(LDFLAGS)
 
-bin/nres: obj/res/main.o obj/util/convert.o obj/util/daemon.o obj/util/log.o obj/util/parse.o obj/util/ttl.o
-	$(CC) obj/res/main.o obj/util/convert.o obj/util/daemon.o obj/util/log.o obj/util/parse.o obj/util/ttl.o -o bin/nres $(LDFLAGS)
+# responder executable
+bin/nres: obj/res/main.o     \
+          obj/util/convert.o \
+          obj/util/daemon.o  \
+          obj/util/log.o     \
+          obj/util/parse.o   \
+          obj/util/ttl.o
+	$(CC) obj/res/main.o       \
+	      obj/util/convert.o   \
+	      obj/util/daemon.o    \
+	      obj/util/log.o       \
+	      obj/util/parse.o     \
+	      obj/util/ttl.o       \
+	      -o bin/nres $(LDFLAGS)
 
 # program object files
 obj/req/main.o: src/req/main.c

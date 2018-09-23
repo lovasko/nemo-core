@@ -764,7 +764,7 @@ send_all_datagrams(int sock, const uint64_t snum, const char* name)
     (void)clock_gettime(CLOCK_REALTIME,  &rts);
     (void)clock_gettime(CLOCK_MONOTONIC, &mts);
     fill_payload(&pl, &tgs[i], snum, rts, mts);
-    pl.pl_prot = sock == sock4 ? 4 : 6;
+    pl.pl_pver = sock == sock4 ? 4 : 6;
     encode_payload(&pl);
 
     // Send the datagram.

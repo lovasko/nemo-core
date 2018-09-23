@@ -848,7 +848,7 @@ report_event(const payload* pl)
   (void)memset(ttlstr,  '\0', sizeof(ttlstr));
 
   // Convert the IP address into a string.
-  if (pl->pl_prot == 4) {
+  if (pl->pl_pver == 4) {
     a4.s_addr = (uint32_t)pl->pl_laddr;
     inet_ntop(AF_INET, &a4, addrstr, sizeof(addrstr));
   } else {
@@ -877,7 +877,7 @@ report_event(const payload* pl)
                "%" PRIu64 "\n", // ArrTimeMono
                pl->pl_resk, pl->pl_reqk,
                pl->pl_snum, pl->pl_slen,
-               pl->pl_prot, addrstr, pl->pl_port,
+               pl->pl_pver, addrstr, pl->pl_port,
                pl->pl_ttl1, ttlstr,
                pl->pl_rtm1, pl->pl_mtm1,
                pl->pl_rtm2, pl->pl_mtm2);

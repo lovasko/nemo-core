@@ -30,6 +30,7 @@
 #include "util/daemon.h"
 #include "util/log.h"
 #include "util/parse.h"
+#include "util/ttl.h"
 
 
 // Default values.
@@ -547,6 +548,15 @@ create_socket4(void)
     return false;
   }
 
+  // Request the ancillary control message for IP TTL value.
+  val = 1;
+  ret = setsockopt(sock4, IPPROTO_IP, IP_RECVTTL, &val, sizeof(val));
+  if (ret == -1) {
+    log(LL_WARN, true, "main", "unable to request time-to-live values on "
+      "%s socket", "IPv4", val);
+    return false;
+  }
+
   return true;
 }
 
@@ -671,11 +681,14 @@ verify_payload(const ssize_t n, const payload* pl)
 ///
 /// @param[out] addr IPv4/IPv6 address
 /// @param[out] pl   payload
+/// @param[in]  msg  message headers
 /// @param[in]  sock socket
 static bool
-receive_datagram(struct sockaddr_storage* addr, payload* pl, int sock)
+receive_datagram(struct sockaddr_storage* addr,
+                 payload* pl,
+                 struct msghdr* msg,
+                 int sock)
 {
-  struct msghdr msg;
   struct iovec data;
   ssize_t n;
   bool retb;
@@ -688,15 +701,13 @@ receive_datagram(struct sockaddr_storage* addr, payload* pl, int sock)
   data.iov_len  = sizeof(*pl);
 
   // Prepare the message.
-  msg.msg_name       = addr;
-  msg.msg_namelen    = sizeof(*addr);
-  msg.msg_iov        = &data;
-  msg.msg_iovlen     = 1;
-  msg.msg_control    = NULL;
-  msg.msg_controllen = 0;
+  msg->msg_name       = addr;
+  msg->msg_namelen    = sizeof(*addr);
+  msg->msg_iov        = &data;
+  msg->msg_iovlen     = 1;
 
   // Receive the message and handle potential errors.
-  n = recvmsg(sock, &msg, MSG_DONTWAIT | MSG_TRUNC);
+  n = recvmsg(sock, msg, MSG_DONTWAIT | MSG_TRUNC);
   if (n < 0) {
     log(LL_WARN, true, "main", "receiving has failed");
 
@@ -720,13 +731,16 @@ receive_datagram(struct sockaddr_storage* addr, payload* pl, int sock)
 /// Update payload with local diagnostic information.
 /// @return success/failure indication
 ///
-/// @param[out] pl payload
+/// @param[out] pl  payload
+/// @param[in]  msg message header
 static bool
-update_payload(payload* pl)
+update_payload(payload* pl, struct msghdr* msg)
 {
   struct timespec mts;
   struct timespec rts;
   int ret;
+  int ttl;
+  bool retb;
 
   log(LL_TRACE, false, "main", "updating payload");
 
@@ -751,6 +765,15 @@ update_payload(payload* pl)
     return false;
   }
   tnanos(&pl->pl_rtm2, rts);
+
+  // Retrieve the received Time-To-Live value.
+  retb = retrieve_ttl(&ttl, msg);
+  if (retb == false) {
+    log(LL_WARN, false, "main", "unable to extract IP Time-To-Live value");
+    pl->pl_ttl2 = 0;
+  } else {
+    pl->pl_ttl2 = (uint8_t)ttl;
+  }
 
   return true;
 }
@@ -815,12 +838,14 @@ report_event(const payload* pl)
   char addrstr[128];
   struct in_addr a4;
   struct in6_addr a6;
+  char ttlstr[8];
 
   // No output to be performed if the silent mode was requested.
   if (op_sil == true)
     return;
 
   (void)memset(addrstr, '\0', sizeof(addrstr));
+  (void)memset(ttlstr,  '\0', sizeof(ttlstr));
 
   // Convert the IP address into a string.
   if (pl->pl_prot == 4) {
@@ -831,6 +856,12 @@ report_event(const payload* pl)
     inet_ntop(AF_INET6, &a6, addrstr, sizeof(addrstr));
   }
 
+  // If no TTL was received, report is as not available.
+  if (pl->pl_ttl2 == 0)
+    (void)strncpy(ttlstr, "N/A", 3);
+  else
+    (void)snprintf(ttlstr, 4, "%" PRIu8, pl->pl_ttl2);
+
   (void)printf("%" PRIu64 ","   // ResKey
                "%" PRIu64 ","   // ReqKey
                "%" PRIu64 ","   // SeqNum
@@ -838,6 +869,8 @@ report_event(const payload* pl)
                "%" PRIu8  ","   // Proto
                "%s,"            // FromAddr
                "%" PRIu16 ","   // Port
+               "%" PRIu8  ","   // DepTTL
+               "%s,"            // ArrTTL
                "%" PRIu64 ","   // DepTimeReal
                "%" PRIu64 ","   // DepTimeMono
                "%" PRIu64 ","   // ArrTimeReal
@@ -845,6 +878,7 @@ report_event(const payload* pl)
                pl->pl_resk, pl->pl_reqk,
                pl->pl_snum, pl->pl_slen,
                pl->pl_prot, addrstr, pl->pl_port,
+               pl->pl_ttl1, ttlstr,
                pl->pl_rtm1, pl->pl_mtm1,
                pl->pl_rtm2, pl->pl_mtm2);
 }
@@ -860,12 +894,20 @@ handle_event(int sock, const char* ipv)
   bool retb;
   struct sockaddr_storage addr;
   payload pl;
+  struct msghdr msg;
+  uint8_t cdata[512];
 
   log(LL_DEBUG, false, "main", "handling event on %s socket",
     sock == sock4 ? "IPv4" : "IPv6");
 
+  // Assign a buffer for storing the control messages received as part of the
+  // datagram. This data is later passed to other functions for reporting the
+  // relevant data.
+  msg.msg_control    = cdata;
+  msg.msg_controllen = sizeof(cdata);
+
   // Receive a request.
-  retb = receive_datagram(&addr, &pl, sock);
+  retb = receive_datagram(&addr, &pl, &msg, sock);
   if (retb == false) {
     log(LL_WARN, false, "main", "unable to receive datagram on the %s socket", ipv);
 
@@ -878,7 +920,7 @@ handle_event(int sock, const char* ipv)
   }
 
   // Update payload.
-  retb = update_payload(&pl);
+  retb = update_payload(&pl, &msg);
   if (retb == false) {
     log(LL_WARN, false, "main", "unable to update the payload");
     return false;
@@ -925,8 +967,12 @@ respond_loop(void)
 
   // Print the CSV header of the standard output.
   if (op_sil == false)
-    (void)printf("ResKey,ReqKey,SeqNum,SeqLen,Proto,FromAddr,Port,"
-      "DepTimeReal,DepTimeMono,ArrTimeReal,ArrTimeMono\n");
+    (void)printf("ResKey,ReqKey,"
+                 "SeqNum,SeqLen,"
+                 "Proto,FromAddr,Port,"
+                 "DepTTL,ArrTTL,"
+                 "DepTimeReal,DepTimeMono,"
+                 "ArrTimeReal,ArrTimeMono\n");
 
   // Add sockets to the event list.
   FD_ZERO(&rfd);

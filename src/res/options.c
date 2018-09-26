@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <time.h>
+#include <inttypes.h>
 
 #include "common/version.h"
 #include "res/proto.h"
@@ -452,4 +453,22 @@ parse_options(struct options* opts, int argc, char* argv[])
   log_col = opts->op_lcol;
 
   return true;
+}
+
+/// Use the logging framework to output the selected option values used
+/// throughout the run of the program.
+void
+log_options(const struct options* opts)
+{
+  log(LL_DEBUG, false, "main", "UDP port: %" PRIu64, opts->op_port);
+  log(LL_DEBUG, false, "main", "unique key: %" PRIu64, opts->op_key);
+  log(LL_DEBUG, false, "main", "Time-To-Live: %" PRIu64, opts->op_ttl);
+  log(LL_DEBUG, false, "main", "receive buffer size: %" PRIu64 " bytes",
+    opts->op_rbuf);
+  log(LL_DEBUG, false, "main", "send buffer size: %" PRIu64 " bytes",
+    opts->op_sbuf);
+  log(LL_DEBUG, false, "main", "monologue mode: %s",
+    opts->op_mono == true ? "on" : "off");
+  log(LL_DEBUG, false, "main", "daemon process: %s",
+    opts->op_dmon == true ? "yes" : "no");
 }

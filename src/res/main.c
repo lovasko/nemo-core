@@ -38,8 +38,8 @@
 // Global state.
 static int sock4;  ///< UDP/IPv4 socket.
 static int sock6;  ///< UDP/IPv6 socket.
-static bool sint;  ///< Signal interrupt indicator.
-static bool sterm; ///< Signal termination indicator.
+static volatile bool sint;  ///< Signal interrupt indicator.
+static volatile bool sterm; ///< Signal termination indicator.
 
 /// Signal handler for the SIGINT and SIGTERM signals.
 ///

@@ -27,13 +27,23 @@ bin/nreq: obj/req/main.o     \
 	      -o bin/nreq $(LDFLAGS)
 
 # responder executable
-bin/nres: obj/res/main.o     \
+bin/nres: obj/res/event.o    \
+          obj/res/main.o     \
+          obj/res/options.o  \
+          obj/res/payload.o  \
+          obj/res/plugins.o  \
+          obj/res/report.o   \
           obj/util/convert.o \
           obj/util/daemon.o  \
           obj/util/log.o     \
           obj/util/parse.o   \
           obj/util/ttl.o
-	$(CC) obj/res/main.o       \
+	$(CC) obj/res/event.o      \
+	      obj/res/main.o       \
+	      obj/res/options.o    \
+	      obj/res/payload.o    \
+	      obj/res/plugins.o    \
+	      obj/res/report.o     \
 	      obj/util/convert.o   \
 	      obj/util/daemon.o    \
 	      obj/util/log.o       \
@@ -41,12 +51,28 @@ bin/nres: obj/res/main.o     \
 	      obj/util/ttl.o       \
 	      -o bin/nres $(LDFLAGS)
 
-# program object files
+# requester object files
 obj/req/main.o: src/req/main.c
 	$(CC) $(CFLAGS) -c src/req/main.c -o obj/req/main.o
 
+# responder object files
+obj/res/event.o: src/res/event.c
+	$(CC) $(CFLAGS) -c src/res/event.c -o obj/res/event.o
+
 obj/res/main.o: src/res/main.c
 	$(CC) $(CFLAGS) -c src/res/main.c -o obj/res/main.o
+
+obj/res/options.o: src/res/options.c
+	$(CC) $(CFLAGS) -c src/res/options.c -o obj/res/options.o
+
+obj/res/payload.o: src/res/payload.c
+	$(CC) $(CFLAGS) -c src/res/payload.c -o obj/res/payload.o
+
+obj/res/plugins.o: src/res/plugins.c
+	$(CC) $(CFLAGS) -c src/res/plugins.c -o obj/res/plugins.o
+
+obj/res/report.o: src/res/report.c
+	$(CC) $(CFLAGS) -c src/res/report.c -o obj/res/report.o
 
 # utility object files
 obj/util/convert.o: src/util/convert.c
@@ -68,7 +94,12 @@ clean:
 	rm -f bin/nreq
 	rm -f bin/nres
 	rm -f obj/req/main.o
+	rm -f obj/res/event.o
 	rm -f obj/res/main.o
+	rm -f obj/res/options.o
+	rm -f obj/res/payload.o
+	rm -f obj/res/plugins.o
+	rm -f obj/res/report.o
 	rm -f obj/util/convert.o
 	rm -f obj/util/daemon.o
 	rm -f obj/util/log.o

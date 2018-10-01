@@ -1,1 +1,6 @@
+event.o
 main.o
+options.o
+payload.o
+plugins.o
+report.o

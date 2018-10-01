@@ -105,7 +105,7 @@ load_plugins(struct plugin* pins,
 /// @param[in] pins  array of plugins
 /// @param[in] npins number of plugins
 bool 
-start_actions(const struct plugin* pins, const uint64_t npins)
+init_plugins(const struct plugin* pins, const uint64_t npins)
 {
   uint64_t i;
   bool retb;

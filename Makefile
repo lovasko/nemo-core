@@ -59,51 +59,51 @@ bin/nres: obj/res/event.o    \
 
 # requester object files
 obj/req/main.o: src/req/main.c
-	$(CC) $(CFLAGS) -c src/req/main.c -o obj/req/main.o
+	$(CC) $(CFLAGS) -c src/req/main.c     -o obj/req/main.o
 
 # responder object files
 obj/res/event.o: src/res/event.c
-	$(CC) $(CFLAGS) -c src/res/event.c -o obj/res/event.o
+	$(CC) $(CFLAGS) -c src/res/event.c    -o obj/res/event.o
 
 obj/res/loop.o: src/res/loop.c
-	$(CC) $(CFLAGS) -c src/res/loop.c -o obj/res/loop.o
+	$(CC) $(CFLAGS) -c src/res/loop.c     -o obj/res/loop.o
 
 obj/res/main.o: src/res/main.c
-	$(CC) $(CFLAGS) -c src/res/main.c -o obj/res/main.o
+	$(CC) $(CFLAGS) -c src/res/main.c     -o obj/res/main.o
 
 obj/res/options.o: src/res/options.c
-	$(CC) $(CFLAGS) -c src/res/options.c -o obj/res/options.o
+	$(CC) $(CFLAGS) -c src/res/options.c  -o obj/res/options.o
 
 obj/res/payload.o: src/res/payload.c
-	$(CC) $(CFLAGS) -c src/res/payload.c -o obj/res/payload.o
+	$(CC) $(CFLAGS) -c src/res/payload.c  -o obj/res/payload.o
 
 obj/res/plugins.o: src/res/plugins.c
-	$(CC) $(CFLAGS) -c src/res/plugins.c -o obj/res/plugins.o
+	$(CC) $(CFLAGS) -c src/res/plugins.c  -o obj/res/plugins.o
 
 obj/res/report.o: src/res/report.c
-	$(CC) $(CFLAGS) -c src/res/report.c -o obj/res/report.o
+	$(CC) $(CFLAGS) -c src/res/report.c   -o obj/res/report.o
 
 obj/res/signal.o: src/res/signal.c
-	$(CC) $(CFLAGS) -c src/res/signal.c -o obj/res/signal.o
+	$(CC) $(CFLAGS) -c src/res/signal.c   -o obj/res/signal.o
 
 obj/res/socket.o: src/res/socket.c
-	$(CC) $(CFLAGS) -c src/res/socket.c -o obj/res/socket.o
+	$(CC) $(CFLAGS) -c src/res/socket.c   -o obj/res/socket.o
 
 # utility object files
 obj/util/convert.o: src/util/convert.c
 	$(CC) $(CFLAGS) -c src/util/convert.c -o obj/util/convert.o
 
 obj/util/daemon.o: src/util/daemon.c
-	$(CC) $(CFLAGS) -c src/util/daemon.c -o obj/util/daemon.o
+	$(CC) $(CFLAGS) -c src/util/daemon.c  -o obj/util/daemon.o
 
 obj/util/log.o: src/util/log.c
-	$(CC) $(CFLAGS) -c src/util/log.c -o obj/util/log.o
+	$(CC) $(CFLAGS) -c src/util/log.c     -o obj/util/log.o
 
 obj/util/parse.o: src/util/parse.c
-	$(CC) $(CFLAGS) -c src/util/parse.c -o obj/util/parse.o
+	$(CC) $(CFLAGS) -c src/util/parse.c   -o obj/util/parse.o
 
 obj/util/ttl.o: src/util/ttl.c
-	$(CC) $(CFLAGS) -c src/util/ttl.c -o obj/util/ttl.o
+	$(CC) $(CFLAGS) -c src/util/ttl.c     -o obj/util/ttl.o
 
 clean:
 	rm -f bin/nreq

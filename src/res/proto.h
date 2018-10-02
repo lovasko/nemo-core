@@ -15,6 +15,9 @@
 #include "res/types.h"
 
 
+// Loop.
+bool respond_loop(int sock4, int sock6, const struct options* opts);
+
 // Payload.
 bool verify_payload(const ssize_t n, const payload* pl);
 bool update_payload(payload* pl, struct msghdr* msg, const struct options* opts);
@@ -36,6 +39,9 @@ void free_plugins(const struct plugin* pins, const uint64_t npins);
 
 // Event.
 bool handle_event(int sock, const char* ipv, const struct options* opts);
+
+// Signal.
+bool install_signal_handlers(void);
 
 // Socket.
 bool create_socket4(int* sock, const struct options* opts);

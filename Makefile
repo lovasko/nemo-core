@@ -28,11 +28,13 @@ bin/nreq: obj/req/main.o     \
 
 # responder executable
 bin/nres: obj/res/event.o    \
+          obj/res/loop.o     \
           obj/res/main.o     \
           obj/res/options.o  \
           obj/res/payload.o  \
           obj/res/plugins.o  \
           obj/res/report.o   \
+          obj/res/signal.o   \
           obj/res/socket.o   \
           obj/util/convert.o \
           obj/util/daemon.o  \
@@ -40,11 +42,13 @@ bin/nres: obj/res/event.o    \
           obj/util/parse.o   \
           obj/util/ttl.o
 	$(CC) obj/res/event.o      \
+	      obj/res/loop.o       \
 	      obj/res/main.o       \
 	      obj/res/options.o    \
 	      obj/res/payload.o    \
 	      obj/res/plugins.o    \
 	      obj/res/report.o     \
+	      obj/res/signal.o     \
 	      obj/res/socket.o     \
 	      obj/util/convert.o   \
 	      obj/util/daemon.o    \
@@ -61,6 +65,9 @@ obj/req/main.o: src/req/main.c
 obj/res/event.o: src/res/event.c
 	$(CC) $(CFLAGS) -c src/res/event.c -o obj/res/event.o
 
+obj/res/loop.o: src/res/loop.c
+	$(CC) $(CFLAGS) -c src/res/loop.c -o obj/res/loop.o
+
 obj/res/main.o: src/res/main.c
 	$(CC) $(CFLAGS) -c src/res/main.c -o obj/res/main.o
 
@@ -75,6 +82,9 @@ obj/res/plugins.o: src/res/plugins.c
 
 obj/res/report.o: src/res/report.c
 	$(CC) $(CFLAGS) -c src/res/report.c -o obj/res/report.o
+
+obj/res/signal.o: src/res/signal.c
+	$(CC) $(CFLAGS) -c src/res/signal.c -o obj/res/signal.o
 
 obj/res/socket.o: src/res/socket.c
 	$(CC) $(CFLAGS) -c src/res/socket.c -o obj/res/socket.o
@@ -100,11 +110,13 @@ clean:
 	rm -f bin/nres
 	rm -f obj/req/main.o
 	rm -f obj/res/event.o
+	rm -f obj/res/loop.o
 	rm -f obj/res/main.o
 	rm -f obj/res/options.o
 	rm -f obj/res/payload.o
 	rm -f obj/res/plugins.o
 	rm -f obj/res/report.o
+	rm -f obj/res/signal.o
 	rm -f obj/res/socket.o
 	rm -f obj/util/convert.o
 	rm -f obj/util/daemon.o

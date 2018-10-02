@@ -171,5 +171,14 @@ create_socket6(int* sock, const struct options* opts)
     return false;
   }
 
+  // Request the ancillary control message for IP TTL value.
+  val = 1;
+  reti = setsockopt(*sock, IPPROTO_IPV6, IPV6_RECVHOPLIMIT, &val, sizeof(val));
+  if (reti == -1) {
+    log(LL_WARN, true, "main", "unable to request time-to-live values on "
+      "%s socket", "IPv6", val);
+    return false;
+  }
+
   return true;
 }

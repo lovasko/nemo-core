@@ -20,20 +20,30 @@ bool
 retrieve_ttl(int* ttl, struct msghdr* msg)
 {
   struct cmsghdr* cmsg;
-  int type;
+  int type4;
+  int type6;
 
   #if defined(__linux__)
-    type = IP_TTL;
+    type4 = IP_TTL;
+    type6 = IPV6_HOPLIMIT;
   #endif
 
   #if defined(__FreeBSD__)
-    type = IP_RECVTTL;
+    type4 = IP_RECVTTL;
+    type6 = IPV6_RECVHOPLIMIT;
   #endif
 
   for (cmsg = CMSG_FIRSTHDR(msg);
        cmsg != NULL;
        cmsg = CMSG_NXTHDR(msg, cmsg)) {
-    if (cmsg->cmsg_level == IPPROTO_IP && cmsg->cmsg_type == type) {
+    // Check the IPv4 label.
+    if (cmsg->cmsg_level == IPPROTO_IP && cmsg->cmsg_type == type4) {
+      *ttl = *(int*)CMSG_DATA(cmsg);
+      return true;
+    }
+
+    // Check the IPv6 label.
+    if (cmsg->cmsg_level == IPPROTO_IPV6 && cmsg->cmsg_type == type6) {
       *ttl = *(int*)CMSG_DATA(cmsg);
       return true;
     }

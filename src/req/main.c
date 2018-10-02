@@ -90,9 +90,9 @@ static bool     op_ipv6; ///< IPv6-only mode.
 // Global state.
 static int sock4;                         ///< IPv4 socket.
 static int sock6;                         ///< IPv6 socket.
-static bool sint;                         ///< SIGINT flag.
-static bool sterm;                        ///< SIGTERM flag.
-static bool susr1;                        ///< SIGUSR1 flag.
+static volatile bool sint;                         ///< SIGINT flag.
+static volatile bool sterm;                        ///< SIGTERM flag.
+static volatile bool susr1;                        ///< SIGUSR1 flag.
 static uint64_t ntgs;                     ///< Number of targets.
 static target tgs[NEMO_TARGET_COUNT_MAX]; ///< Target database.
 static pthread_t sender4;                 ///< IPv4 sender thread.

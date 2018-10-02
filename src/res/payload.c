@@ -66,7 +66,7 @@ update_payload(payload* pl, struct msghdr* msg, const struct options* opts)
 {
   struct timespec mts;
   struct timespec rts;
-  int ret;
+  int reti;
   int ttl;
   bool retb;
 
@@ -79,16 +79,16 @@ update_payload(payload* pl, struct msghdr* msg, const struct options* opts)
   pl->pl_resk = opts->op_key;
 
   // Obtain the steady (monotonic) clock time.
-  ret = clock_gettime(CLOCK_MONOTONIC, &mts);
-  if (ret == -1) {
+  reti = clock_gettime(CLOCK_MONOTONIC, &mts);
+  if (reti == -1) {
     log(LL_WARN, true, "main", "unable to obtain the steady time");
     return false;
   }
   tnanos(&pl->pl_mtm2, mts);
 
   // Obtain the system (real-time) clock time.
-  ret = clock_gettime(CLOCK_REALTIME, &rts);
-  if (ret == -1) {
+  reti = clock_gettime(CLOCK_REALTIME, &rts);
+  if (reti == -1) {
     log(LL_WARN, true, "main", "unable to obtain the system time");
     return false;
   }

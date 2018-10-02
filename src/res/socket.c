@@ -21,7 +21,7 @@
 bool
 create_socket4(int* sock, const struct options* opts)
 {
-  int ret;
+  int reti;
   struct sockaddr_in addr;
   int val;
 
@@ -40,8 +40,8 @@ create_socket4(int* sock, const struct options* opts)
 
   // Set the socket binding to be re-usable.
   val = 1;
-  ret = setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val));
-  if (ret == -1) {
+  reti = setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val));
+  if (reti == -1) {
     log(LL_WARN, true, "main", "unable to set the %s socket address reusable",
         "IPv4");
     return false;
@@ -51,16 +51,16 @@ create_socket4(int* sock, const struct options* opts)
   addr.sin_family      = AF_INET;
   addr.sin_port        = htons((uint16_t)opts->op_port);
   addr.sin_addr.s_addr = INADDR_ANY;
-  ret = bind(*sock, (struct sockaddr*)&addr, sizeof(addr));
-  if (ret < 0) {
+  reti = bind(*sock, (struct sockaddr*)&addr, sizeof(addr));
+  if (reti < 0) {
     log(LL_WARN, true, "main", "unable to bind the %s socket", "IPv4");
     return false;
   }
 
   // Set the socket receive buffer size.
   val = (int)opts->op_rbuf;
-  ret = setsockopt(*sock, SOL_SOCKET, SO_RCVBUF, &val, sizeof(val));
-  if (ret == -1) {
+  reti = setsockopt(*sock, SOL_SOCKET, SO_RCVBUF, &val, sizeof(val));
+  if (reti == -1) {
     log(LL_WARN, true, "main", "unable to set the %s socket receive buffer "
       "size to %d", "IPv4", val);
     return false;
@@ -68,8 +68,8 @@ create_socket4(int* sock, const struct options* opts)
 
   // Set the socket send buffer size.
   val = (int)opts->op_sbuf;
-  ret = setsockopt(*sock, SOL_SOCKET, SO_SNDBUF, &val, sizeof(val));
-  if (ret == -1) {
+  reti = setsockopt(*sock, SOL_SOCKET, SO_SNDBUF, &val, sizeof(val));
+  if (reti == -1) {
     log(LL_WARN, true, "main", "unable to set the %s socket send buffer size "
       "to %d", "IPv4", val);
     return false;
@@ -77,8 +77,8 @@ create_socket4(int* sock, const struct options* opts)
 
   // Set the outgoing Time-To-Live value.
   val = (int)opts->op_ttl;
-  ret = setsockopt(*sock, IPPROTO_IP, IP_TTL, &val, sizeof(val));
-  if (ret == -1) {
+  reti = setsockopt(*sock, IPPROTO_IP, IP_TTL, &val, sizeof(val));
+  if (reti == -1) {
     log(LL_WARN, true, "main", "unable to set the %s socket time-to-live to "
       "%d", "IPv4", val);
     return false;
@@ -86,8 +86,8 @@ create_socket4(int* sock, const struct options* opts)
 
   // Request the ancillary control message for IP TTL value.
   val = 1;
-  ret = setsockopt(*sock, IPPROTO_IP, IP_RECVTTL, &val, sizeof(val));
-  if (ret == -1) {
+  reti = setsockopt(*sock, IPPROTO_IP, IP_RECVTTL, &val, sizeof(val));
+  if (reti == -1) {
     log(LL_WARN, true, "main", "unable to request time-to-live values on "
       "%s socket", "IPv4", val);
     return false;
@@ -104,7 +104,7 @@ create_socket4(int* sock, const struct options* opts)
 bool
 create_socket6(int* sock, const struct options* opts)
 {
-  int ret;
+  int reti;
   struct sockaddr_in6 addr;
   int val;
 
@@ -123,16 +123,16 @@ create_socket6(int* sock, const struct options* opts)
 
   // Set the socket binding to be re-usable.
   val = 1;
-  ret = setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val));
-  if (ret == -1) {
+  reti = setsockopt(*sock, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val));
+  if (reti == -1) {
     log(LL_WARN, true, "main", "unable to set the %s socket address reusable", "IPv6");
     return false;
   }
 
   // Set the socket to only receive IPv6 traffic.
   val = 1;
-  ret = setsockopt(*sock, IPPROTO_IPV6, IPV6_V6ONLY, &val, sizeof(val));
-  if (ret == -1) {
+  reti = setsockopt(*sock, IPPROTO_IPV6, IPV6_V6ONLY, &val, sizeof(val));
+  if (reti == -1) {
     log(LL_WARN, true, "main", "unable to disable IPv4 traffic on %s socket", "IPv6");
     return false;
   }
@@ -141,32 +141,32 @@ create_socket6(int* sock, const struct options* opts)
   addr.sin6_family = AF_INET6;
   addr.sin6_port   = htons((uint16_t)opts->op_port);
   addr.sin6_addr   = in6addr_any;
-  ret = bind(*sock, (struct sockaddr*)&addr, sizeof(addr));
-  if (ret < 0) {
+  reti = bind(*sock, (struct sockaddr*)&addr, sizeof(addr));
+  if (reti < 0) {
     log(LL_WARN, true, "main", "unable to bind the %s socket", "IPv6");
     return false;
   }
 
   // Set the socket receive buffer size.
   val = (int)opts->op_rbuf;
-  ret = setsockopt(*sock, SOL_SOCKET, SO_RCVBUF, &val, sizeof(val));
-  if (ret == -1) {
+  reti = setsockopt(*sock, SOL_SOCKET, SO_RCVBUF, &val, sizeof(val));
+  if (reti == -1) {
     log(LL_WARN, true, "main", "unable to set the read socket buffer size to %d", val);
     return false;
   }
 
   // Set the socket send buffer size.
   val = (int)opts->op_sbuf;
-  ret = setsockopt(*sock, SOL_SOCKET, SO_SNDBUF, &val, sizeof(val));
-  if (ret == -1) {
+  reti = setsockopt(*sock, SOL_SOCKET, SO_SNDBUF, &val, sizeof(val));
+  if (reti == -1) {
     log(LL_WARN, true, "main", "unable to set the socket send buffer size to %d", val);
     return false;
   }
 
   // Set the outgoing Time-To-Live value.
   val = (int)opts->op_ttl;
-  ret = setsockopt(*sock, IPPROTO_IPV6, IPV6_UNICAST_HOPS, &val, sizeof(val));
-  if (ret == -1) {
+  reti = setsockopt(*sock, IPPROTO_IPV6, IPV6_UNICAST_HOPS, &val, sizeof(val));
+  if (reti == -1) {
     log(LL_WARN, true, "main", "unable to set time-to-live to %d", val);
     return false;
   }

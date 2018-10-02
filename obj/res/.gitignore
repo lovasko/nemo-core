@@ -4,3 +4,4 @@ options.o
 payload.o
 plugins.o
 report.o
+socket.o

@@ -33,6 +33,7 @@ bin/nres: obj/res/event.o    \
           obj/res/payload.o  \
           obj/res/plugins.o  \
           obj/res/report.o   \
+          obj/res/socket.o   \
           obj/util/convert.o \
           obj/util/daemon.o  \
           obj/util/log.o     \
@@ -44,6 +45,7 @@ bin/nres: obj/res/event.o    \
 	      obj/res/payload.o    \
 	      obj/res/plugins.o    \
 	      obj/res/report.o     \
+	      obj/res/socket.o     \
 	      obj/util/convert.o   \
 	      obj/util/daemon.o    \
 	      obj/util/log.o       \
@@ -74,6 +76,9 @@ obj/res/plugins.o: src/res/plugins.c
 obj/res/report.o: src/res/report.c
 	$(CC) $(CFLAGS) -c src/res/report.c -o obj/res/report.o
 
+obj/res/socket.o: src/res/socket.c
+	$(CC) $(CFLAGS) -c src/res/socket.c -o obj/res/socket.o
+
 # utility object files
 obj/util/convert.o: src/util/convert.c
 	$(CC) $(CFLAGS) -c src/util/convert.c -o obj/util/convert.o
@@ -100,6 +105,7 @@ clean:
 	rm -f obj/res/payload.o
 	rm -f obj/res/plugins.o
 	rm -f obj/res/report.o
+	rm -f obj/res/socket.o
 	rm -f obj/util/convert.o
 	rm -f obj/util/daemon.o
 	rm -f obj/util/log.o

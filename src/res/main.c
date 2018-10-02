@@ -35,9 +35,6 @@
 #include "util/ttl.h"
 
 
-// Global state.
-static int sock4;  ///< UDP/IPv4 socket.
-static int sock6;  ///< UDP/IPv6 socket.
 static volatile bool sint;  ///< Signal interrupt indicator.
 static volatile bool sterm; ///< Signal termination indicator.
 
@@ -100,171 +97,14 @@ install_signal_handlers(void)
   return true;
 }
 
-/// Create the IPv4 socket.
-/// @return success/failure indication
-///
-/// @param[in] opts command-line options
-static bool
-create_socket4(const struct options* opts)
-{
-  int ret;
-  struct sockaddr_in addr;
-  int val;
-
-  // Early exit if IPv4 is not selected.
-  if (opts->op_ipv4 == false)
-    return true;
-
-  log(LL_INFO, false, "main", "creating %s socket", "IPv4");
-
-  // Create a UDP socket.
-  sock4 = socket(AF_INET, SOCK_DGRAM, 0);
-  if (sock4 < 0) {
-    log(LL_WARN, true, "main", "unable to initialise the %s socket", "IPv4");
-    return false;
-  }
-
-  // Set the socket binding to be re-usable.
-  val = 1;
-  ret = setsockopt(sock4, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val));
-  if (ret == -1) {
-    log(LL_WARN, true, "main", "unable to set the %s socket address reusable",
-        "IPv4");
-    return false;
-  }
-
-  // Bind the socket to the selected port and local address.
-  addr.sin_family      = AF_INET;
-  addr.sin_port        = htons((uint16_t)opts->op_port);
-  addr.sin_addr.s_addr = INADDR_ANY;
-  ret = bind(sock4, (struct sockaddr*)&addr, sizeof(addr));
-  if (ret < 0) {
-    log(LL_WARN, true, "main", "unable to bind the %s socket", "IPv4");
-    return false;
-  }
-
-  // Set the socket receive buffer size.
-  val = (int)opts->op_rbuf;
-  ret = setsockopt(sock4, SOL_SOCKET, SO_RCVBUF, &val, sizeof(val));
-  if (ret == -1) {
-    log(LL_WARN, true, "main", "unable to set the %s socket receive buffer "
-      "size to %d", "IPv4", val);
-    return false;
-  }
-
-  // Set the socket send buffer size.
-  val = (int)opts->op_sbuf;
-  ret = setsockopt(sock4, SOL_SOCKET, SO_SNDBUF, &val, sizeof(val));
-  if (ret == -1) {
-    log(LL_WARN, true, "main", "unable to set the %s socket send buffer size "
-      "to %d", "IPv4", val);
-    return false;
-  }
-
-  // Set the outgoing Time-To-Live value.
-  val = (int)opts->op_ttl;
-  ret = setsockopt(sock4, IPPROTO_IP, IP_TTL, &val, sizeof(val));
-  if (ret == -1) {
-    log(LL_WARN, true, "main", "unable to set the %s socket time-to-live to "
-      "%d", "IPv4", val);
-    return false;
-  }
-
-  // Request the ancillary control message for IP TTL value.
-  val = 1;
-  ret = setsockopt(sock4, IPPROTO_IP, IP_RECVTTL, &val, sizeof(val));
-  if (ret == -1) {
-    log(LL_WARN, true, "main", "unable to request time-to-live values on "
-      "%s socket", "IPv4", val);
-    return false;
-  }
-
-  return true;
-}
-
-/// Create the IPv6 socket.
-/// @return success/failure indication
-///
-/// @param[in] opts command-line options
-static bool
-create_socket6(const struct options* opts)
-{
-  int ret;
-  struct sockaddr_in6 addr;
-  int val;
-
-  // Early exit if IPv6 is not selected.
-  if (opts->op_ipv6 == false)
-    return true;
-
-  log(LL_INFO, false, "main", "creating %s socket", "IPv6");
-
-  // Create a UDP socket.
-  sock6 = socket(AF_INET6, SOCK_DGRAM, 0);
-  if (sock6 < 0) {
-    log(LL_WARN, true, "main", "unable to initialize the %s socket", "IPv6");
-    return false;
-  }
-
-  // Set the socket binding to be re-usable.
-  val = 1;
-  ret = setsockopt(sock6, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val));
-  if (ret == -1) {
-    log(LL_WARN, true, "main", "unable to set the %s socket address reusable", "IPv6");
-    return false;
-  }
-
-  // Set the socket to only receive IPv6 traffic.
-  val = 1;
-  ret = setsockopt(sock6, IPPROTO_IPV6, IPV6_V6ONLY, &val, sizeof(val));
-  if (ret == -1) {
-    log(LL_WARN, true, "main", "unable to disable IPv4 traffic on %s socket", "IPv6");
-    return false;
-  }
-
-  // Bind the socket to the selected port and local address.
-  addr.sin6_family = AF_INET6;
-  addr.sin6_port   = htons((uint16_t)opts->op_port);
-  addr.sin6_addr   = in6addr_any;
-  ret = bind(sock6, (struct sockaddr*)&addr, sizeof(addr));
-  if (ret < 0) {
-    log(LL_WARN, true, "main", "unable to bind the %s socket", "IPv6");
-    return false;
-  }
-
-  // Set the socket receive buffer size.
-  val = (int)opts->op_rbuf;
-  ret = setsockopt(sock6, SOL_SOCKET, SO_RCVBUF, &val, sizeof(val));
-  if (ret == -1) {
-    log(LL_WARN, true, "main", "unable to set the read socket buffer size to %d", val);
-    return false;
-  }
-
-  // Set the socket send buffer size.
-  val = (int)opts->op_sbuf;
-  ret = setsockopt(sock6, SOL_SOCKET, SO_SNDBUF, &val, sizeof(val));
-  if (ret == -1) {
-    log(LL_WARN, true, "main", "unable to set the socket send buffer size to %d", val);
-    return false;
-  }
-
-  // Set the outgoing Time-To-Live value.
-  val = (int)opts->op_ttl;
-  ret = setsockopt(sock6, IPPROTO_IPV6, IPV6_UNICAST_HOPS, &val, sizeof(val));
-  if (ret == -1) {
-    log(LL_WARN, true, "main", "unable to set time-to-live to %d", val);
-    return false;
-  }
-
-  return true;
-}
-
 /// Start responding to requests on both IPv4 and IPv6 sockets.
 /// @return success/failure indication
 ///
-/// @param[in] opts command-line options
+/// @param[in] sock4 IPv4 socket
+/// @param[in] sock6 IPv6 socket
+/// @param[in] opts  command-line options
 static bool
-respond_loop(const struct options* opts)
+respond_loop(int sock4, int sock6, const struct options* opts)
 {
   int reti;
   int ndfs;
@@ -333,6 +173,8 @@ main(int argc, char* argv[])
   struct options opts;
   struct plugin pins[PLUG_MAX];
   uint64_t npins;
+  int sock4;
+  int sock6;
 
   // Parse command-line options.
   retb = parse_options(&opts, argc, argv);
@@ -358,14 +200,14 @@ main(int argc, char* argv[])
   }
 
   // Create the IPv4 socket.
-  retb = create_socket4(&opts);
+  retb = create_socket4(&sock4, &opts);
   if (retb == false) {
     log(LL_ERROR, false, "main", "unable to create %s socket", "IPv4");
     return EXIT_FAILURE;
   }
 
   // Create the IPv6 socket.
-  retb = create_socket6(&opts);
+  retb = create_socket6(&sock6, &opts);
   if (retb == false) {
     log(LL_ERROR, false, "main", "unable to create %s socket", "IPv6");
     return EXIT_FAILURE;
@@ -386,7 +228,7 @@ main(int argc, char* argv[])
   }
 
   // Start the main responding loop.
-  retb = respond_loop(&opts);
+  retb = respond_loop(sock4, sock6, &opts);
   if (retb == false) {
     log(LL_ERROR, false, "main", "responding loop has finished");
     return EXIT_FAILURE;

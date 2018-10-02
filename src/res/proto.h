@@ -37,4 +37,8 @@ void free_plugins(const struct plugin* pins, const uint64_t npins);
 // Event.
 bool handle_event(int sock, const char* ipv, const struct options* opts);
 
+// Socket.
+bool create_socket4(int* sock, const struct options* opts);
+bool create_socket6(int* sock, const struct options* opts);
+
 #endif

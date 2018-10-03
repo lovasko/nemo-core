@@ -13,6 +13,7 @@
 #include "common/version.h"
 #include "res/proto.h"
 #include "res/types.h"
+#include "res/version.h"
 #include "util/log.h"
 #include "util/parse.h"
 
@@ -61,9 +62,9 @@ print_usage(void)
     "  -s SBS  Socket send memory buffer size. (def=2m)\n"
     "  -t TTL  Outgoing IP Time-To-Live value. (def=%d)\n"
     "  -v      Increase the verbosity of the logging output.\n",
-    NEMO_VERSION_MAJOR,
-    NEMO_VERSION_MINOR,
-    NEMO_VERSION_PATCH,
+    NEMO_RES_VERSION_MAJOR,
+    NEMO_RES_VERSION_MINOR,
+    NEMO_RES_VERSION_PATCH,
     NEMO_PAYLOAD_VERSION,
     DEF_UDP_PORT,
     DEF_TIME_TO_LIVE);

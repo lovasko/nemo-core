@@ -24,7 +24,7 @@ void
 report_header(const struct options* opts)
 {
   // No output to be performed if the silent mode was requested.
-  if (opts->op_sil == false)
+  if (opts->op_sil == true)
     return;
 
   // Binary mode has no header.

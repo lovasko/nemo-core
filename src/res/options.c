@@ -229,7 +229,7 @@ option_p(struct options* opts, const char* inp)
   return parse_uint64(&opts->op_port, inp, 1, 65535);
 }
 
-/// 
+/// Suppress reporting to the standard output stream.
 /// @return success/failure indication
 ///
 /// @param[out] opts options

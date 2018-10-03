@@ -47,7 +47,7 @@ print_usage(void)
     "Options:\n"
     "  -4      Use only the IPv4 protocol.\n"
     "  -6      Use only the IPv6 protocol.\n"
-    "  -a OBJ  Path to shared object file of an action set.\n"
+    "  -a OBJ  Attach a plugin from a shared object file.\n"
     "  -b      Reporting data to be in binary format.\n"
     "  -d      Run the process as a daemon.\n"
     "  -e      Stop the process on first transmission error.\n"

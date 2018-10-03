@@ -4,35 +4,13 @@
 // Distributed under the terms of the 2-clause BSD License. The full
 // license is in the file LICENSE, distributed as part of this software.
 
-#include <arpa/inet.h>
-#include <netinet/in.h>
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/select.h>
-#include <sys/socket.h>
-
-#include <stdlib.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
 #include <stdbool.h>
-#include <signal.h>
-#include <time.h>
-#include <inttypes.h>
-#include <fcntl.h>
-#include <dlfcn.h>
+#include <stdint.h>
 
-#include "common/payload.h"
-#include "common/version.h"
 #include "res/proto.h"
 #include "res/types.h"
-#include "util/convert.h"
 #include "util/daemon.h"
 #include "util/log.h"
-#include "util/parse.h"
-#include "util/ttl.h"
 
 
 /// Unicast network responder.

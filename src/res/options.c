@@ -336,6 +336,7 @@ set_defaults(struct options* opts)
   opts->op_mono = DEF_MONOLOGUE;
   opts->op_dmon = DEF_DAEMON;
   opts->op_sil  = DEF_SILENT;
+  opts->op_bin  = DEF_BINARY;
   opts->op_llvl = (log_lvl = DEF_LOG_LEVEL);
   opts->op_lcol = (log_col = DEF_LOG_COLOR);
   opts->op_key  = generate_key();

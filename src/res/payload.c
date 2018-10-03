@@ -27,7 +27,7 @@ verify_payload(const ssize_t n, const payload* pl)
   // Verify the size of the datagram.
   if ((size_t)n != sizeof(*pl)) {
     log(LL_WARN, false, "main", "wrong datagram size, expected: %zd, actual: %zu",
-        n, sizeof(*pl));
+        sizeof(*pl), n);
     return false;
   }
 

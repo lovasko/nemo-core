@@ -462,6 +462,12 @@ parse_options(struct options* opts, int argc, char* argv[])
     }
   }
 
+  // Verify that there are no positional arguments.
+  if (optind != argc) {
+    log(LL_WARN, false, "main", "no arguments are expected");
+    return false;
+  }
+
   retb = organize_protocols(opts);
   if (retb == false)
     return false;

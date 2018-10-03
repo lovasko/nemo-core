@@ -28,6 +28,8 @@ struct options {
   bool        op_mono;           ///< Monologue mode (no responses).
   bool        op_dmon;           ///< Daemon process.
   bool        op_sil;            ///< Standard output presence.
+  bool        op_bin;            ///< Binary reporting mode.
+  uint8_t     op_pad[7];         ///< Padding (unused).
 };
 
 /// Command-line option.

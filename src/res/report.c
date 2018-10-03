@@ -27,6 +27,10 @@ report_header(const struct options* opts)
   if (opts->op_sil == false)
     return;
 
+  // Binary mode has no header.
+  if (opts->op_bin == true)
+    return;
+
   // Print the CSV header of the standard output.
   (void)printf("ReqKey,ResKey,SeqNum,SeqLen,IPVer,Addr,Port,DepTTL,ArrTTL,"
                "DepRealTime,DepMonoTime,ArrRealTime,ArrMonoTime\n");
@@ -44,10 +48,20 @@ report_event(const payload* pl, const struct options* opts)
   struct in_addr a4;
   struct in6_addr a6;
   char ttlstr[8];
+  payload plout;
 
   // No output to be performed if the silent mode was requested.
   if (opts->op_sil == true)
     return;
+
+  // Binary mode expects the payload in a on-wire encoding.
+  if (opts->op_bin == true) {
+    (void)memcpy(&plout, pl, sizeof(plout));
+    encode_payload(&plout);
+    (void)fwrite(&plout, sizeof(plout), 1, stdout);
+
+    return;
+  }
 
   (void)memset(addrstr, '\0', sizeof(addrstr));
   (void)memset(ttlstr,  '\0', sizeof(ttlstr));

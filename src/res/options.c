@@ -28,6 +28,7 @@
 #define DEF_MONOLOGUE           false
 #define DEF_DAEMON              false
 #define DEF_SILENT              false
+#define DEF_BINARY              false
 
 /// Print the usage information to the standard output stream.
 static void
@@ -47,6 +48,7 @@ print_usage(void)
     "  -a OBJ  Path to shared object file of an action set.\n"
     "  -4      Use only the IPv4 protocol.\n"
     "  -6      Use only the IPv6 protocol.\n"
+    "  -b      Reporting data to be in binary format.\n"
     "  -d      Run the process as a daemon.\n"
     "  -e      Stop the process on first transmission error.\n"
     "  -h      Print this help message.\n"
@@ -114,6 +116,20 @@ option_a(struct options* opts, const char* inp)
 
   opts->op_plgs[i] = inp;
   i++;
+
+  return true;
+}
+
+/// Change the reporting to binary mode.
+/// @return success/failure indication
+///
+/// @param[out] opts options
+/// @param[in]  inp  argument input (unused)
+static bool
+option_b(struct options* opts, const char* inp)
+{
+  (void)inp;
+  opts->op_bin = true;
 
   return true;
 }
@@ -389,10 +405,11 @@ parse_options(struct options* opts, int argc, char* argv[])
   bool retb;
   uint64_t i;
   char optdsl[128];
-  struct option ents[15] = { 
+  struct option ents[16] = { 
     { '4',  false, option_4 },
     { '6',  false, option_6 },
     { 'a',  true , option_a },
+    { 'b',  false, option_b },
     { 'd',  false, option_d },
     { 'e',  false, option_e },
     { 'h',  false, option_h },
@@ -410,7 +427,7 @@ parse_options(struct options* opts, int argc, char* argv[])
   log(LL_INFO, false, "main", "parsing command-line options");
 
   (void)memset(optdsl, '\0', sizeof(optdsl));
-  generate_getopt_string(optdsl, ents, 15);
+  generate_getopt_string(optdsl, ents, 16);
 
   // Set optional arguments to sensible defaults.
   set_defaults(opts);
@@ -431,7 +448,7 @@ parse_options(struct options* opts, int argc, char* argv[])
     }
 
     // Find the relevant option.
-    for (i = 0; i < 15; i++) {
+    for (i = 0; i < 16; i++) {
       if (ents[i].op_name == (char)opt) {
         retb = ents[i].op_act(opts, optarg);
         if (retb == false) {
@@ -471,4 +488,6 @@ log_options(const struct options* opts)
     opts->op_mono == true ? "on" : "off");
   log(LL_DEBUG, false, "main", "daemon process: %s",
     opts->op_dmon == true ? "yes" : "no");
+  log(LL_DEBUG, false, "main", "binary report: %s",
+    opts->op_dmon == true ? "on" : "off");
 }

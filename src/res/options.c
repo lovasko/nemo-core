@@ -486,9 +486,9 @@ log_options(const struct options* opts)
   log(LL_DEBUG, false, "main", "send buffer size: %" PRIu64 " bytes",
     opts->op_sbuf);
   log(LL_DEBUG, false, "main", "monologue mode: %s",
-    opts->op_mono == true ? "on" : "off");
+    opts->op_mono == true ? "yes" : "no");
   log(LL_DEBUG, false, "main", "daemon process: %s",
     opts->op_dmon == true ? "yes" : "no");
   log(LL_DEBUG, false, "main", "binary report: %s",
-    opts->op_dmon == true ? "on" : "off");
+    opts->op_dmon == true ? "yes" : "no");
 }

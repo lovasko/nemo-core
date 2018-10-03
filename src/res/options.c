@@ -74,7 +74,7 @@ print_usage(void)
 ///
 /// @param[out] opts options
 /// @param[in]  inp  argument input (unused)
-static bool 
+static bool
 option_4(struct options* opts, const char* inp)
 {
   (void)inp;
@@ -406,7 +406,7 @@ parse_options(struct options* opts, int argc, char* argv[])
   bool retb;
   uint64_t i;
   char optdsl[128];
-  struct option ents[16] = { 
+  struct option ents[16] = {
     { '4',  false, option_4 },
     { '6',  false, option_6 },
     { 'a',  true , option_a },
@@ -422,7 +422,7 @@ parse_options(struct options* opts, int argc, char* argv[])
     { 'r',  true , option_r },
     { 's',  true , option_s },
     { 't',  true , option_t },
-    { 'v',  false, option_v } 
+    { 'v',  false, option_v }
   };
 
   log(LL_INFO, false, "main", "parsing command-line options");

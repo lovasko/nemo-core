@@ -69,19 +69,23 @@ respond_loop(int sock4, int sock6, const struct options* opts)
     }
 
     // Handle incoming IPv4 datagrams.
-    reti = FD_ISSET(sock4, &rfd);
-    if (reti > 0) {
-      retb = handle_event(sock4, "IPv4", opts);
-      if (retb == false)
-        return false;
+    if (opts->op_ipv4 == true) {
+      reti = FD_ISSET(sock4, &rfd);
+      if (reti > 0) {
+        retb = handle_event(sock4, "IPv4", opts);
+        if (retb == false)
+          return false;
+      }
     }
 
     // Handle incoming IPv6 datagrams.
-    reti = FD_ISSET(sock6, &rfd);
-    if (reti > 0) {
-      retb = handle_event(sock6, "IPv6", opts);
-      if (retb == false)
-        return false;
+    if (opts->op_ipv6 == true) {
+      reti = FD_ISSET(sock6, &rfd);
+      if (reti > 0) {
+        retb = handle_event(sock6, "IPv6", opts);
+        if (retb == false)
+          return false;
+      }
     }
   }
 

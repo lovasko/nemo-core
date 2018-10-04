@@ -33,6 +33,24 @@ signal_handler(int sig)
   if (sig == SIGTERM) sterm = true;
 }
 
+/// Block the delivery of all signals, except the two signals that can not be
+/// intercepted.
+static void
+block_all_signals(void)
+{
+  sigset_t mask;
+
+  // All signals that are not part of the set are standard signals and
+  // therefore the listed errors do not apply.
+  (void)sigfillset(&mask);
+  (void)sigdelset(&mask, SIGSTOP);
+  (void)sigdelset(&mask, SIGKILL);
+
+  // None of the two errno values apply to the call and therefore we can assume
+  // that the call always succeeds.
+  (void)sigprocmask(SIG_SETMASK, &mask, NULL);
+}
+
 /// Install signal handler for the SIGINT signal.
 /// @return success/failure indication
 ///
@@ -42,7 +60,6 @@ bool
 install_signal_handlers(void)
 {
   struct sigaction sa;
-  sigset_t ss;
   int reti;
 
   log(LL_INFO, false, "main", "installing signal handlers");
@@ -51,12 +68,10 @@ install_signal_handlers(void)
   sint  = false;
   sterm = false;
 
-  // Create and apply a set of blocked signals. We exclude the two recognised
-  // signals from this set.
-  (void)sigfillset(&ss);
-  (void)sigdelset(&ss, SIGINT);
-  (void)sigdelset(&ss, SIGTERM);
-  (void)sigprocmask(SIG_SETMASK, &ss, NULL);
+  // This action makes sure that no system calls or execution context will get
+  // interrupted by a signal. The pselect(2) call explicitly enables the
+  // delivery of a set of signals, which in turn set the indicator flags.
+  block_all_signals();
 
   // Initialise the handler settings.
   (void)memset(&sa, 0, sizeof(sa));

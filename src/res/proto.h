@@ -43,7 +43,6 @@ bool handle_event(int sock, const char* ipv, const struct options* opts);
 
 // Signal.
 bool install_signal_handlers(void);
-void block_all_signals(void);
 void create_signal_mask(sigset_t* mask);
 
 // Socket.

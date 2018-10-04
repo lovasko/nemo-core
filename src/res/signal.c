@@ -80,3 +80,33 @@ install_signal_handlers(void)
 
   return true;
 }
+
+/// Block all signals. This is expected when using the pselect(2) call, that
+/// enables a set of signals during the waiting period. No other system calls
+/// or execution 
+void
+block_all_signals(void)
+{
+  sigset_t mask;
+
+  // All signals that are not part of the set are standard signals and
+  // therefore the listed errors do not apply.
+  (void)sigfillset(&mask);
+  (void)sigdelset(&mask, SIGSTOP);
+  (void)sigdelset(&mask, SIGKILL);
+
+  // None of the two errno values apply to the call and therefore we can assume
+  // that the call always succeeds.
+  (void)sigprocmask(SIG_SETMASK, &mask, NULL);
+}
+
+/// Create a signal mask that enables the SIGINT and SIGTERM signals.
+void
+create_signal_mask(sigset_t* mask)
+{
+  (void)sigfillset(mask);
+  (void)sigdelset(mask, SIGSTOP);
+  (void)sigdelset(mask, SIGKILL);
+  (void)sigdelset(mask, SIGINT);
+  (void)sigdelset(mask, SIGTERM);
+}

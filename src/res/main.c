@@ -40,6 +40,9 @@ main(int argc, char* argv[])
     }
   }
 
+  // Block all signals.
+  block_all_signals();
+
   // Install the signal handlers.
   retb = install_signal_handlers();
   if (retb == false) {

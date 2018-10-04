@@ -8,6 +8,7 @@
 
 #include <stdbool.h>
 #include <errno.h>
+#include <signal.h>
 
 #include "res/proto.h"
 #include "res/types.h"
@@ -33,6 +34,7 @@ respond_loop(int sock4, int sock6, const struct options* opts)
   int ndfs;
   bool retb;
   fd_set rfd;
+  sigset_t mask;
 
   log(LL_INFO, false, "main", "starting the response loop");
   log_options(opts);
@@ -48,9 +50,13 @@ respond_loop(int sock4, int sock6, const struct options* opts)
   // Compute the file descriptor count.
   ndfs = (opts->op_ipv4 == true && opts->op_ipv6 == true) ? 5 : 4;
 
+  // Create the signal mask used for enabling signals during the pselect(2)
+  // waiting.
+  create_signal_mask(&mask);
+
   while (true) {
     // Wait for incoming datagram events.
-    reti = pselect(ndfs, &rfd, NULL, NULL, NULL, NULL);
+    reti = pselect(ndfs, &rfd, NULL, NULL, NULL, &mask);
     if (reti == -1) {
       // Check for interrupt (possibly due to a signal).
       if (errno == EINTR) {

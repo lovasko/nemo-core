@@ -10,6 +10,7 @@
 #include <sys/socket.h>
 
 #include <stdlib.h>
+#include <signal.h>
 
 #include "common/payload.h"
 #include "res/types.h"
@@ -42,6 +43,8 @@ bool handle_event(int sock, const char* ipv, const struct options* opts);
 
 // Signal.
 bool install_signal_handlers(void);
+void block_all_signals(void);
+void create_signal_mask(sigset_t* mask);
 
 // Socket.
 bool create_socket4(int* sock, const struct options* opts);

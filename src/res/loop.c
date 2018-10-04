@@ -55,6 +55,8 @@ respond_loop(int sock4, int sock6, const struct options* opts)
   create_signal_mask(&mask);
 
   while (true) {
+    log(LL_TRACE, false, "main", "waiting for incoming datagrams");
+
     // Wait for incoming datagram events.
     reti = pselect(ndfs, &rfd, NULL, NULL, NULL, &mask);
     if (reti == -1) {

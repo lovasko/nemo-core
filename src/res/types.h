@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+
 #define PLUG_MAX 32
 
 /// Command-line options.

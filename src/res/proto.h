@@ -21,7 +21,10 @@ void reset_counters(struct counters* cts);
 void log_counters(const char* ipv, const struct counters* cts);
 
 // Event.
-bool handle_event(struct counters* cts, int sock, const char* ipv, const struct options* opts);
+bool handle_event(struct counters* cts,
+                  int sock,
+                  const char* ipv,
+                  const struct options* opts);
 
 // Loop.
 bool respond_loop(struct counters* cts4,
@@ -32,7 +35,9 @@ bool respond_loop(struct counters* cts4,
   
 // Payload.
 bool verify_payload(struct counters* cts, const ssize_t n, const payload* pl);
-bool update_payload(payload* pl, struct msghdr* msg, const struct options* opts);
+bool update_payload(payload* pl,
+                    struct msghdr* msg,
+                    const struct options* opts);
 
 // Report.
 void report_header(const struct options* opts);
@@ -44,9 +49,13 @@ bool parse_options(struct options* opts, int argc, char* argv[]);
 void log_options(const struct options* opts);
 
 // Plugins.
-bool load_plugins(struct plugin* pins, uint64_t* npins, const struct options* opts);
+bool load_plugins(struct plugin* pins,
+                  uint64_t* npins,
+                  const struct options* opts);
 bool init_plugins(const struct plugin* pins, const uint64_t npins);
-void exec_plugins(const struct plugin* pins, const uint64_t npins, const payload* pl);
+void exec_plugins(const struct plugin* pins,
+                  const uint64_t npins,
+                  const payload* pl);
 void free_plugins(const struct plugin* pins, const uint64_t npins);
 
 // Signal.

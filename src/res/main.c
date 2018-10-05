@@ -83,10 +83,8 @@ main(int argc, char* argv[])
 
   // Start the main responding loop.
   retb = respond_loop(&cts4, &cts6, sock4, sock6, &opts);
-  if (retb == false) {
+  if (retb == false)
     log(LL_ERROR, false, "main", "responding loop has finished");
-    return EXIT_FAILURE;
-  }
 
   // Terminate actions.
   free_plugins(pins, npins);

@@ -16,13 +16,15 @@
 /// Receive datagrams on both IPv4 and IPv6.
 /// @return success/failure indication
 ///
+/// @param[out] cts  event counters
 /// @param[out] addr IPv4/IPv6 address
 /// @param[out] pl   payload
 /// @param[in]  msg  message headers
 /// @param[in]  sock socket
 /// @param[in]  opts command-line options
 static bool
-receive_datagram(struct sockaddr_storage* addr,
+receive_datagram(struct counters* cts,
+                 struct sockaddr_storage* addr,
                  payload* pl,
                  struct msghdr* msg,
                  int sock,
@@ -48,6 +50,7 @@ receive_datagram(struct sockaddr_storage* addr,
   n = recvmsg(sock, msg, MSG_DONTWAIT | MSG_TRUNC);
   if (n < 0) {
     log(LL_WARN, true, "main", "receiving has failed");
+    cts->ct_reni++;
 
     if (opts->op_err == true)
       return false;
@@ -57,7 +60,7 @@ receive_datagram(struct sockaddr_storage* addr,
   decode_payload(pl);
 
   // Verify the payload correctness.
-  retb = verify_payload(n, pl);
+  retb = verify_payload(cts, n, pl);
   if (retb == false) {
     log(LL_WARN, false, "main", "invalid payload content");
     return false;
@@ -69,12 +72,14 @@ receive_datagram(struct sockaddr_storage* addr,
 /// Send a payload to the defined address.
 /// @return success/failure indication
 ///
-/// @param[in] sock socket
-/// @param[in] pl   payload
-/// @param[in] addr IPv4/IPv6 address
-/// @param[in] opts command-line options
+/// @param[out] cts  event counters
+/// @param[in]  sock socket
+/// @param[in]  pl   payload
+/// @param[in]  addr IPv4/IPv6 address
+/// @param[in]  opts command-line options
 static bool
-send_datagram(int sock,
+send_datagram(struct counters* cts,
+              int sock,
               payload* pl,
               struct sockaddr_storage* addr,
               const struct options* opts)
@@ -104,6 +109,7 @@ send_datagram(int sock,
   n = sendmsg(sock, &msg, MSG_DONTWAIT);
   if (n < 0) {
     log(LL_WARN, true, "main", "unable to send datagram");
+    cts->ct_seni++;
 
     if (opts->op_err == true)
       return false;
@@ -123,11 +129,15 @@ send_datagram(int sock,
 /// Handle the event of an incoming datagram.
 /// @return success/failure indication
 ///
-/// @param[in] sock socket
-/// @param[in] ipv  IP version
-/// @param[in] opts command-line options
+/// @param[out] cts  event counters
+/// @param[in]  sock socket
+/// @param[in]  ipv  IP version
+/// @param[in]  opts command-line options
 bool
-handle_event(int sock, const char* ipv, const struct options* opts)
+handle_event(struct counters* cts,
+             int sock,
+             const char* ipv,
+             const struct options* opts)
 {
   bool retb;
   struct sockaddr_storage addr;
@@ -142,7 +152,7 @@ handle_event(int sock, const char* ipv, const struct options* opts)
   msg.msg_controllen = sizeof(cdata);
 
   // Receive a request.
-  retb = receive_datagram(&addr, &pl, &msg, sock, opts);
+  retb = receive_datagram(cts, &addr, &pl, &msg, sock, opts);
   if (retb == false) {
     log(LL_WARN, false, "main", "unable to receive datagram on the %s socket", ipv);
 
@@ -176,7 +186,7 @@ handle_event(int sock, const char* ipv, const struct options* opts)
     return true;
 
   // Send a response back.
-  retb = send_datagram(sock, &pl, &addr, opts);
+  retb = send_datagram(cts, sock, &pl, &addr, opts);
   if (retb == false) {
     log(LL_WARN, false, "main", "unable to send datagram on the %s socket", ipv);
 

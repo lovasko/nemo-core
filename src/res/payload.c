@@ -17,10 +17,11 @@
 /// Verify the incoming payload for correctness.
 /// @return success/failure indication
 ///
-/// @param[in] n  length of the received data
-/// @param[in] pl payload
+/// @param[out] cts event counters
+/// @param[in]  n   length of the received data
+/// @param[in]  pl  payload
 bool
-verify_payload(const ssize_t n, const payload* pl)
+verify_payload(struct counters* cts, const ssize_t n, const payload* pl)
 {
   log(LL_TRACE, false, "main", "verifying payload");
 
@@ -28,6 +29,7 @@ verify_payload(const ssize_t n, const payload* pl)
   if ((size_t)n != sizeof(*pl)) {
     log(LL_WARN, false, "main", "wrong datagram size, expected: %zd, actual: %zu",
         sizeof(*pl), n);
+    cts->ct_resz++;
     return false;
   }
 
@@ -35,6 +37,7 @@ verify_payload(const ssize_t n, const payload* pl)
   if (pl->pl_mgic != NEMO_PAYLOAD_MAGIC) {
     log(LL_DEBUG, false, "main", "payload identifier unknown, expected: %"
         PRIx32 ", actual: %" PRIx32, NEMO_PAYLOAD_MAGIC, pl->pl_mgic);
+    cts->ct_remg++;
     return false;
   }
 
@@ -42,6 +45,7 @@ verify_payload(const ssize_t n, const payload* pl)
   if (pl->pl_fver != NEMO_PAYLOAD_VERSION) {
     log(LL_DEBUG, false, "main", "unsupported payload version, expected: %"
         PRIu8 ", actual: %" PRIu8, NEMO_PAYLOAD_VERSION, pl->pl_fver);
+    cts->ct_repv++;
     return false;
   }
 
@@ -49,6 +53,7 @@ verify_payload(const ssize_t n, const payload* pl)
   if (pl->pl_type != NEMO_PAYLOAD_TYPE_REQUEST) {
     log(LL_DEBUG, false, "main", "unexpected payload type, expected: %"
         PRIu8 ", actual: %" PRIu8, NEMO_PAYLOAD_TYPE_REQUEST, pl->pl_type);
+    cts->ct_rety++;
     return false;
   }
 

@@ -24,11 +24,17 @@ extern volatile bool sint;
 /// @global sint
 /// @global sterm
 ///
-/// @param[in] sock4 IPv4 socket
-/// @param[in] sock6 IPv6 socket
-/// @param[in] opts  command-line options
+/// @param[out] cts4  IPv4 event counters
+/// @param[out] cts6  IPv6 event counters
+/// @param[in]  sock4 IPv4 socket
+/// @param[in]  sock6 IPv6 socket
+/// @param[in]  opts  command-line options
 bool
-respond_loop(int sock4, int sock6, const struct options* opts)
+respond_loop(struct counters* cts4,
+             struct counters* cts6,
+             int sock4,
+             int sock6,
+             const struct options* opts)
 {
   int reti;
   int ndfs;
@@ -80,7 +86,7 @@ respond_loop(int sock4, int sock6, const struct options* opts)
     if (opts->op_ipv4 == true) {
       reti = FD_ISSET(sock4, &rfd);
       if (reti > 0) {
-        retb = handle_event(sock4, "IPv4", opts);
+        retb = handle_event(cts4, sock4, "IPv4", opts);
         if (retb == false)
           return false;
       }
@@ -90,7 +96,7 @@ respond_loop(int sock4, int sock6, const struct options* opts)
     if (opts->op_ipv6 == true) {
       reti = FD_ISSET(sock6, &rfd);
       if (reti > 0) {
-        retb = handle_event(sock6, "IPv6", opts);
+        retb = handle_event(cts6, sock6, "IPv6", opts);
         if (retb == false)
           return false;
       }

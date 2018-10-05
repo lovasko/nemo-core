@@ -23,6 +23,8 @@ main(int argc, char* argv[])
   uint64_t npins;
   int sock4;
   int sock6;
+  struct counters cts4;
+  struct counters cts6;
 
   // Parse command-line options.
   retb = parse_options(&opts, argc, argv);
@@ -75,8 +77,12 @@ main(int argc, char* argv[])
     return EXIT_FAILURE;
   }
 
+  // Initialise counters.
+  if (opts.op_ipv4 == true) reset_counters(&cts4);
+  if (opts.op_ipv6 == true) reset_counters(&cts6);
+
   // Start the main responding loop.
-  retb = respond_loop(sock4, sock6, &opts);
+  retb = respond_loop(&cts4, &cts6, sock4, sock6, &opts);
   if (retb == false) {
     log(LL_ERROR, false, "main", "responding loop has finished");
     return EXIT_FAILURE;
@@ -84,6 +90,10 @@ main(int argc, char* argv[])
 
   // Terminate actions.
   free_plugins(pins, npins);
+
+  // Print final values of counters.
+  if (opts.op_ipv4 == true) log_counters("IPv4", &cts4);
+  if (opts.op_ipv6 == true) log_counters("IPv6", &cts6);
 
   // Flush the standard output and error streams.
   retb = flush_report_stream(&opts);

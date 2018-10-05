@@ -51,4 +51,16 @@ struct plugin {
   bool      (*pi_free)(void);               ///< Clean-up procedure.
 };
 
+/// Set of counters of events for a single connection.
+struct counters {
+  uint64_t ct_rall; ///< Number of overall received messages.
+  uint64_t ct_reni; ///< Received errors due to network issues.
+  uint64_t ct_resz; ///< Received errors due to size mismatch.
+  uint64_t ct_remg; ///< Received errors due to magic number mismatch.
+  uint64_t ct_repv; ///< Received errors due to payload version mismatch.
+  uint64_t ct_rety; ///< Received errors due to payload type.
+  uint64_t ct_sall; ///< Number of overall sent messages.
+  uint64_t ct_seni; ///< Sent errors due to network issues.
+};
+
 #endif

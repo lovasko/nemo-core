@@ -16,11 +16,19 @@
 #include "res/types.h"
 
 
-// Loop.
-bool respond_loop(int sock4, int sock6, const struct options* opts);
+// Counters.
+void reset_counters(struct counters* cts);
+void log_counters(const char* ipv, const struct counters* cts);
 
+// Loop.
+bool respond_loop(struct counters* cts4,
+                  struct counters* cts6,
+                  int sock4,
+                  int sock6,
+                  const struct options* opts);
+  
 // Payload.
-bool verify_payload(const ssize_t n, const payload* pl);
+bool verify_payload(struct counters* cts, const ssize_t n, const payload* pl);
 bool update_payload(payload* pl, struct msghdr* msg, const struct options* opts);
 
 // Report.
@@ -39,7 +47,7 @@ void exec_plugins(const struct plugin* pins, const uint64_t npins, const payload
 void free_plugins(const struct plugin* pins, const uint64_t npins);
 
 // Event.
-bool handle_event(int sock, const char* ipv, const struct options* opts);
+bool handle_event(struct counters* cts, int sock, const char* ipv, const struct options* opts);
 
 // Signal.
 bool install_signal_handlers(void);

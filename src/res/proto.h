@@ -20,6 +20,9 @@
 void reset_counters(struct counters* cts);
 void log_counters(const char* ipv, const struct counters* cts);
 
+// Event.
+bool handle_event(struct counters* cts, int sock, const char* ipv, const struct options* opts);
+
 // Loop.
 bool respond_loop(struct counters* cts4,
                   struct counters* cts6,
@@ -45,9 +48,6 @@ bool load_plugins(struct plugin* pins, uint64_t* npins, const struct options* op
 bool init_plugins(const struct plugin* pins, const uint64_t npins);
 void exec_plugins(const struct plugin* pins, const uint64_t npins, const payload* pl);
 void free_plugins(const struct plugin* pins, const uint64_t npins);
-
-// Event.
-bool handle_event(struct counters* cts, int sock, const char* ipv, const struct options* opts);
 
 // Signal.
 bool install_signal_handlers(void);

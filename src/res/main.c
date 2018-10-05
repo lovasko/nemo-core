@@ -99,7 +99,7 @@ main(int argc, char* argv[])
   retb = flush_report_stream(&opts);
   if (retb == false) {
     log(LL_ERROR, false, "main", "unable to flush the report stream");
-    return false;
+    return EXIT_FAILURE;
   }
 
   return EXIT_SUCCESS;

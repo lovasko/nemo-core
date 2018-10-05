@@ -1,3 +1,4 @@
+counters.o
 event.o
 loop.o
 main.o

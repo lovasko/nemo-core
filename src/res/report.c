@@ -117,18 +117,10 @@ flush_report_stream(const struct options* opts)
 
   log(LL_INFO, false, "main", "flushing standard output stream");
 
-  // First flush all stdio buffers.
+  // Flush all stdio buffers.
   reti = fflush(stdout);
   if (reti == -1) {
     log(LL_WARN, true, "main", "unable to flush the standard output");
-    return false;
-  }
-
-  // Now make sure that all data from the kernel are written to the appropriate
-  // device.
-  reti = fsync(STDOUT_FILENO);
-  if (reti == -1) {
-    log(LL_WARN, true, "main", "unable to synchronize kernel data to device");
     return false;
   }
 

@@ -16,6 +16,10 @@
 #include "res/types.h"
 
 
+// Config.
+bool parse_config(struct config* cf, int argc, char* argv[]);
+void log_config(const struct config* cf);
+
 // Counters.
 void reset_counters(struct counters* cts);
 void log_counters(const char* ipv, const struct counters* cts);
@@ -24,34 +28,30 @@ void log_counters(const char* ipv, const struct counters* cts);
 bool handle_event(struct counters* cts,
                   int sock,
                   const char* ipv,
-                  const struct options* opts);
+                  const struct config* cf);
 
 // Loop.
 bool respond_loop(struct counters* cts4,
                   struct counters* cts6,
                   int sock4,
                   int sock6,
-                  const struct options* opts);
+                  const struct config* cf);
   
 // Payload.
 bool verify_payload(struct counters* cts, const ssize_t n, const payload* pl);
 bool update_payload(payload* pl,
                     struct msghdr* msg,
-                    const struct options* opts);
+                    const struct config* cf);
 
 // Report.
-void report_header(const struct options* opts);
-void report_event(const payload* pl, const struct options* opts);
-bool flush_report_stream(const struct options* opts);
-
-// Options.
-bool parse_options(struct options* opts, int argc, char* argv[]);
-void log_options(const struct options* opts);
+void report_header(const struct config* cf);
+void report_event(const payload* pl, const struct config* cf);
+bool flush_report_stream(const struct config* cf);
 
 // Plugins.
 bool load_plugins(struct plugin* pins,
                   uint64_t* npins,
-                  const struct options* opts);
+                  const struct config* cf);
 bool init_plugins(const struct plugin* pins, const uint64_t npins);
 void exec_plugins(const struct plugin* pins,
                   const uint64_t npins,
@@ -63,7 +63,7 @@ bool install_signal_handlers(void);
 void create_signal_mask(sigset_t* mask);
 
 // Socket.
-bool create_socket4(int* sock, const struct options* opts);
-bool create_socket6(int* sock, const struct options* opts);
+bool create_socket4(int* sock, const struct config* cf);
+bool create_socket6(int* sock, const struct config* cf);
 
 #endif

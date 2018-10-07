@@ -18,7 +18,7 @@ int
 main(int argc, char* argv[])
 {
   bool retb;
-  struct options opts;
+  struct config cf;
   struct plugin pins[PLUG_MAX];
   uint64_t npins;
   int sock4;
@@ -26,15 +26,15 @@ main(int argc, char* argv[])
   struct counters cts4;
   struct counters cts6;
 
-  // Parse command-line options.
-  retb = parse_options(&opts, argc, argv);
+  // Parse configuration from command-line options.
+  retb = parse_config(&cf, argc, argv);
   if (retb == false) {
-    log(LL_ERROR, false, "main", "unable to parse command-line options");
+    log(LL_ERROR, false, "main", "unable to parse the configuration");
     return EXIT_FAILURE;
   }
 
   // Optionally turn the process into a daemon.
-  if (opts.op_dmon == true) {
+  if (cf.cf_dmon == true) {
     retb = turn_into_daemon();
     if (retb == false) {
       log(LL_ERROR, false, "main", "unable to turn process into a daemon");
@@ -50,21 +50,21 @@ main(int argc, char* argv[])
   }
 
   // Create the IPv4 socket.
-  retb = create_socket4(&sock4, &opts);
+  retb = create_socket4(&sock4, &cf);
   if (retb == false) {
     log(LL_ERROR, false, "main", "unable to create %s socket", "IPv4");
     return EXIT_FAILURE;
   }
 
   // Create the IPv6 socket.
-  retb = create_socket6(&sock6, &opts);
+  retb = create_socket6(&sock6, &cf);
   if (retb == false) {
     log(LL_ERROR, false, "main", "unable to create %s socket", "IPv6");
     return EXIT_FAILURE;
   }
 
   // Start actions.
-  retb = load_plugins(pins, &npins, &opts);
+  retb = load_plugins(pins, &npins, &cf);
   if (retb == false) {
     log(LL_ERROR, false, "main", "unable to load all actions");
     return EXIT_FAILURE;
@@ -78,11 +78,11 @@ main(int argc, char* argv[])
   }
 
   // Initialise counters.
-  if (opts.op_ipv4 == true) reset_counters(&cts4);
-  if (opts.op_ipv6 == true) reset_counters(&cts6);
+  if (cf.cf_ipv4 == true) reset_counters(&cts4);
+  if (cf.cf_ipv6 == true) reset_counters(&cts6);
 
   // Start the main responding loop.
-  retb = respond_loop(&cts4, &cts6, sock4, sock6, &opts);
+  retb = respond_loop(&cts4, &cts6, sock4, sock6, &cf);
   if (retb == false)
     log(LL_ERROR, false, "main", "responding loop has been terminated");
 
@@ -90,11 +90,11 @@ main(int argc, char* argv[])
   free_plugins(pins, npins);
 
   // Print final values of counters.
-  if (opts.op_ipv4 == true) log_counters("IPv4", &cts4);
-  if (opts.op_ipv6 == true) log_counters("IPv6", &cts6);
+  if (cf.cf_ipv4 == true) log_counters("IPv4", &cts4);
+  if (cf.cf_ipv6 == true) log_counters("IPv6", &cts6);
 
   // Flush the standard output and error streams.
-  retb = flush_report_stream(&opts);
+  retb = flush_report_stream(&cf);
   if (retb == false) {
     log(LL_ERROR, false, "main", "unable to flush the report stream");
     return EXIT_FAILURE;

@@ -13,31 +13,31 @@
 
 #define PLUG_MAX 32
 
-/// Command-line options.
-struct options {
-  const char* op_plgs[PLUG_MAX]; ///< Paths to plugin shared object libraries.
-  uint64_t    op_port;           ///< UDP port number.
-  uint64_t    op_rbuf;           ///< Socket receive buffer size.
-  uint64_t    op_sbuf;           ///< Socket send buffer size.
-  uint64_t    op_key;            ///< Unique key.
-  uint64_t    op_ttl;            ///< Time-To-Live for outgoing IP packets.
-  bool        op_err;            ///< Early exit on first network error.
-  bool        op_ipv4;           ///< IPv4-only traffic.
-  bool        op_ipv6;           ///< IPv6-only traffic.
-  uint8_t     op_llvl;           ///< Minimal log level.
-  bool        op_lcol;           ///< Log coloring policy.
-  bool        op_mono;           ///< Monologue mode (no responses).
-  bool        op_dmon;           ///< Daemon process.
-  bool        op_sil;            ///< Standard output presence.
-  bool        op_bin;            ///< Binary reporting mode.
-  uint8_t     op_pad[7];         ///< Padding (unused).
+/// Configuration.
+struct config {
+  const char* cf_plgs[PLUG_MAX]; ///< Paths to plugin shared object libraries.
+  uint64_t    cf_port;           ///< UDP port number.
+  uint64_t    cf_rbuf;           ///< Socket receive buffer size.
+  uint64_t    cf_sbuf;           ///< Socket send buffer size.
+  uint64_t    cf_key;            ///< Unique key.
+  uint64_t    cf_ttl;            ///< Time-To-Live for outgoing IP packets.
+  bool        cf_err;            ///< Early exit on first network error.
+  bool        cf_ipv4;           ///< IPv4-only traffic.
+  bool        cf_ipv6;           ///< IPv6-only traffic.
+  uint8_t     cf_llvl;           ///< Minimal log level.
+  bool        cf_lcol;           ///< Log coloring policy.
+  bool        cf_mono;           ///< Monologue mode (no responses).
+  bool        cf_dmon;           ///< Daemon process.
+  bool        cf_sil;            ///< Standard output presence.
+  bool        cf_bin;            ///< Binary reporting mode.
+  uint8_t     cf_pad[7];         ///< Padding (unused).
 };
 
 /// Command-line option.
 struct option {
-  const char op_name;                  ///< Name.
-  bool op_arg;                         ///< Has argument?
-  bool (*op_act)(struct options* opts, ///< Action to perform.
+  const char op_name;               ///< Name.
+  bool op_arg;                      ///< Has argument?
+  bool (*op_act)(struct config* cf, ///< Action to perform.
                  const char* inp);
 };
 

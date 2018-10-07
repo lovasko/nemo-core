@@ -28,13 +28,13 @@ extern volatile bool sint;
 /// @param[out] cts6  IPv6 event counters
 /// @param[in]  sock4 IPv4 socket
 /// @param[in]  sock6 IPv6 socket
-/// @param[in]  opts  command-line options
+/// @param[in]  cf    configuration
 bool
 respond_loop(struct counters* cts4,
              struct counters* cts6,
              int sock4,
              int sock6,
-             const struct options* opts)
+             const struct config* cf)
 {
   int reti;
   int ndfs;
@@ -43,18 +43,18 @@ respond_loop(struct counters* cts4,
   sigset_t mask;
 
   log(LL_INFO, false, "main", "starting the response loop");
-  log_options(opts);
+  log_config(cf);
 
   // Print the CSV header of the standard output.
-  report_header(opts);
+  report_header(cf);
 
   // Add sockets to the event list.
   FD_ZERO(&rfd);
-  if (opts->op_ipv4 == true) FD_SET(sock4, &rfd);
-  if (opts->op_ipv6 == true) FD_SET(sock6, &rfd);
+  if (cf->cf_ipv4 == true) FD_SET(sock4, &rfd);
+  if (cf->cf_ipv6 == true) FD_SET(sock6, &rfd);
 
   // Compute the file descriptor count.
-  ndfs = (opts->op_ipv4 == true && opts->op_ipv6 == true) ? 5 : 4;
+  ndfs = (cf->cf_ipv4 == true && cf->cf_ipv6 == true) ? 5 : 4;
 
   // Create the signal mask used for enabling signals during the pselect(2)
   // waiting.
@@ -83,20 +83,20 @@ respond_loop(struct counters* cts4,
     }
 
     // Handle incoming IPv4 datagrams.
-    if (opts->op_ipv4 == true) {
+    if (cf->cf_ipv4 == true) {
       reti = FD_ISSET(sock4, &rfd);
       if (reti > 0) {
-        retb = handle_event(cts4, sock4, "IPv4", opts);
+        retb = handle_event(cts4, sock4, "IPv4", cf);
         if (retb == false)
           return false;
       }
     }
 
     // Handle incoming IPv6 datagrams.
-    if (opts->op_ipv6 == true) {
+    if (cf->cf_ipv6 == true) {
       reti = FD_ISSET(sock6, &rfd);
       if (reti > 0) {
-        retb = handle_event(cts6, sock6, "IPv6", opts);
+        retb = handle_event(cts6, sock6, "IPv6", cf);
         if (retb == false)
           return false;
       }

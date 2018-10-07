@@ -27,11 +27,11 @@ bin/nreq: obj/req/main.o     \
 	      -o bin/nreq $(LDFLAGS)
 
 # responder executable
-bin/nres: obj/res/counters.o \
+bin/nres: obj/res/config.o   \
+          obj/res/counters.o \
           obj/res/event.o    \
           obj/res/loop.o     \
           obj/res/main.o     \
-          obj/res/options.o  \
           obj/res/payload.o  \
           obj/res/plugins.o  \
           obj/res/report.o   \
@@ -42,11 +42,11 @@ bin/nres: obj/res/counters.o \
           obj/util/log.o     \
           obj/util/parse.o   \
           obj/util/ttl.o
-	$(CC) obj/res/counters.o   \
+	$(CC) obj/res/config.o     \
+	      obj/res/counters.o   \
 	      obj/res/event.o      \
 	      obj/res/loop.o       \
 	      obj/res/main.o       \
-	      obj/res/options.o    \
 	      obj/res/payload.o    \
 	      obj/res/plugins.o    \
 	      obj/res/report.o     \
@@ -64,6 +64,9 @@ obj/req/main.o: src/req/main.c
 	$(CC) $(CFLAGS) -c src/req/main.c     -o obj/req/main.o
 
 # responder object files
+obj/res/config.o: src/res/config.c
+	$(CC) $(CFLAGS) -c src/res/config.c -o obj/res/config.o
+
 obj/res/counters.o: src/res/counters.c
 	$(CC) $(CFLAGS) -c src/res/counters.c -o obj/res/counters.o
 
@@ -75,9 +78,6 @@ obj/res/loop.o: src/res/loop.c
 
 obj/res/main.o: src/res/main.c
 	$(CC) $(CFLAGS) -c src/res/main.c     -o obj/res/main.o
-
-obj/res/options.o: src/res/options.c
-	$(CC) $(CFLAGS) -c src/res/options.c  -o obj/res/options.o
 
 obj/res/payload.o: src/res/payload.c
 	$(CC) $(CFLAGS) -c src/res/payload.c  -o obj/res/payload.o
@@ -114,11 +114,11 @@ clean:
 	rm -f bin/nreq
 	rm -f bin/nres
 	rm -f obj/req/main.o
+	rm -f obj/res/config.o
 	rm -f obj/res/counters.o
 	rm -f obj/res/event.o
 	rm -f obj/res/loop.o
 	rm -f obj/res/main.o
-	rm -f obj/res/options.o
 	rm -f obj/res/payload.o
 	rm -f obj/res/plugins.o
 	rm -f obj/res/report.o

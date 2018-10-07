@@ -73,13 +73,13 @@ print_usage(void)
 /// Select IPv4 protocol only.
 /// @return success/failure indication
 ///
-/// @param[out] opts options
-/// @param[in]  inp  argument input (unused)
+/// @param[out] cf  configuration
+/// @param[in]  inp argument input (unused)
 static bool
-option_4(struct options* opts, const char* inp)
+option_4(struct config* cf, const char* inp)
 {
   (void)inp;
-  opts->op_ipv4 = true;
+  cf->cf_ipv4 = true;
 
   return true;
 }
@@ -87,13 +87,13 @@ option_4(struct options* opts, const char* inp)
 /// Select IPv6 protocol only.
 /// @return success/failure indication
 ///
-/// @param[out] opts options
-/// @param[in]  inp  argument input (unused)
+/// @param[out] cf  configuration
+/// @param[in]  inp argument input (unused)
 static bool
-option_6(struct options* opts, const char* inp)
+option_6(struct config* cf, const char* inp)
 {
   (void)inp;
-  opts->op_ipv6 = true;
+  cf->cf_ipv6 = true;
 
   return true;
 }
@@ -103,10 +103,10 @@ option_6(struct options* opts, const char* inp)
 /// the shared objects.
 /// @return success/failure indication
 ///
-/// @param[out] opts options
-/// @param[in]  inp  argument input
+/// @param[out] cf  configuration
+/// @param[in]  inp argument input
 static bool
-option_a(struct options* opts, const char* inp)
+option_a(struct config* cf, const char* inp)
 {
   static uint64_t i = 0;
 
@@ -115,7 +115,7 @@ option_a(struct options* opts, const char* inp)
     return false;
   }
 
-  opts->op_plgs[i] = inp;
+  cf->cf_plgs[i] = inp;
   i++;
 
   return true;
@@ -124,13 +124,13 @@ option_a(struct options* opts, const char* inp)
 /// Change the reporting to binary mode.
 /// @return success/failure indication
 ///
-/// @param[out] opts options
-/// @param[in]  inp  argument input (unused)
+/// @param[out] cf  configuration
+/// @param[in]  inp argument input (unused)
 static bool
-option_b(struct options* opts, const char* inp)
+option_b(struct config* cf, const char* inp)
 {
   (void)inp;
-  opts->op_bin = true;
+  cf->cf_bin = true;
 
   return true;
 }
@@ -138,13 +138,13 @@ option_b(struct options* opts, const char* inp)
 /// Run the process as a system daemon.
 /// @return success/failure indication
 ///
-/// @param[out] opts options
-/// @param[in]  inp  argument input (unused)
+/// @param[out] cf  configuration
+/// @param[in]  inp argument input (unused)
 static bool
-option_d(struct options* opts, const char* inp)
+option_d(struct config* cf, const char* inp)
 {
   (void)inp;
-  opts->op_dmon = true;
+  cf->cf_dmon = true;
 
   return true;
 }
@@ -152,13 +152,13 @@ option_d(struct options* opts, const char* inp)
 /// Terminate the process on first network-related error.
 /// @return success/failure indication
 ///
-/// @param[out] opts options
-/// @param[in]  inp  argument input (unused)
+/// @param[out] cf  configuration
+/// @param[in]  inp argument input (unused)
 static bool
-option_e(struct options* opts, const char* inp)
+option_e(struct config* cf, const char* inp)
 {
   (void)inp;
-  opts->op_err = true;
+  cf->cf_err = true;
 
   return true;
 }
@@ -166,12 +166,12 @@ option_e(struct options* opts, const char* inp)
 /// Print the usage help message and exit the process.
 /// @return success/failure indication
 ///
-/// @param[out] opts options
-/// @param[in]  inp  argument input (unused)
+/// @param[out] cf  configuration
+/// @param[in]  inp argument input (unused)
 static bool
-option_h(struct options* opts, const char* inp)
+option_h(struct config* cf, const char* inp)
 {
-  (void)opts;
+  (void)cf;
   (void)inp;
 
   print_usage();
@@ -183,24 +183,24 @@ option_h(struct options* opts, const char* inp)
 /// Set a unique key to identify the flow.
 /// @return success/failure indication
 ///
-/// @param[out] opts options
-/// @param[in]  inp  argument input
+/// @param[out] cf  configuration
+/// @param[in]  inp argument input
 static bool
-option_k(struct options* opts, const char* inp)
+option_k(struct config* cf, const char* inp)
 {
-  return parse_uint64(&opts->op_key, inp, 1, UINT64_MAX);
+  return parse_uint64(&cf->cf_key, inp, 1, UINT64_MAX);
 }
 
 /// Enable monologue mode where no responses are being issued.
 /// @return success/failure indication
 ///
-/// @param[out] opts options
-/// @param[in]  inp  argument input (unused)
+/// @param[out] cf  configuration
+/// @param[in]  inp argument input (unused)
 static bool
-option_m(struct options* opts, const char* inp)
+option_m(struct config* cf, const char* inp)
 {
   (void)inp;
-  opts->op_mono = true;
+  cf->cf_mono = true;
 
   return true;
 }
@@ -208,13 +208,13 @@ option_m(struct options* opts, const char* inp)
 /// Turn off coloring and highlights in the logging output.
 /// @return success/failure indication
 ///
-/// @param[out] opts options
-/// @param[in]  inp  argument input (unused)
+/// @param[out] cf  configuration 
+/// @param[in]  inp argument input (unused)
 static bool
-option_n(struct options* opts, const char* inp)
+option_n(struct config* cf, const char* inp)
 {
   (void)inp;
-  opts->op_lcol = false;
+  cf->cf_lcol = false;
 
   return true;
 }
@@ -222,24 +222,24 @@ option_n(struct options* opts, const char* inp)
 /// Set the UDP port number used for all communication.
 /// @return success/failure indication
 ///
-/// @param[out] opts options
-/// @param[in]  inp  argument input
+/// @param[out] cf  configuration
+/// @param[in]  inp argument input
 static bool
-option_p(struct options* opts, const char* inp)
+option_p(struct config* cf, const char* inp)
 {
-  return parse_uint64(&opts->op_port, inp, 1, 65535);
+  return parse_uint64(&cf->cf_port, inp, 1, 65535);
 }
 
 /// Suppress reporting to the standard output stream.
 /// @return success/failure indication
 ///
-/// @param[out] opts options
-/// @param[in]  inp  argument input (unused)
+/// @param[out] cf  configuration
+/// @param[in]  inp argument input (unused)
 static bool
-option_q(struct options* opts, const char* inp)
+option_q(struct config* cf, const char* inp)
 {
   (void)inp;
-  opts->op_sil = true;
+  cf->cf_sil = true;
 
   return true;
 }
@@ -247,50 +247,50 @@ option_q(struct options* opts, const char* inp)
 /// Set the socket receive buffer size.
 /// @return success/failure indication
 ///
-/// @param[out] opts options
-/// @param[in]  inp  argument input
+/// @param[out] cf  configuration
+/// @param[in]  inp argument input
 static bool
-option_r(struct options* opts, const char* inp)
+option_r(struct config* cf, const char* inp)
 {
-  return parse_scalar(&opts->op_rbuf, inp, "b", parse_memory_unit);
+  return parse_scalar(&cf->cf_rbuf, inp, "b", parse_memory_unit);
 }
 
 /// Set the socket send buffer size.
 /// @return success/failure indication
 ///
-/// @param[out] opts options
-/// @param[in]  inp  argument input
+/// @param[out] cf  configuration
+/// @param[in]  inp argument input
 static bool
-option_s(struct options* opts, const char* inp)
+option_s(struct config* cf, const char* inp)
 {
-  return parse_scalar(&opts->op_sbuf, inp, "b", parse_memory_unit);
+  return parse_scalar(&cf->cf_sbuf, inp, "b", parse_memory_unit);
 }
 
 /// Set the IP Time-To-Live value.
 /// @return success/failure indication
 ///
-/// @param[out] opts options
-/// @param[in]  inp  argument input
+/// @param[out] cf  configuration
+/// @param[in]  inp argument input
 static bool
-option_t(struct options* opts, const char* inp)
+option_t(struct config* cf, const char* inp)
 {
-  return parse_uint64(&opts->op_ttl, inp, 1, 255);
+  return parse_uint64(&cf->cf_ttl, inp, 1, 255);
 }
 
 /// Increase the logging verbosity.
 /// @return success/failure indication
 ///
-/// @param[out] opts options
-/// @param[in]  inp  argument input (unused)
+/// @param[out] cf  configuration
+/// @param[in]  inp argument input (unused)
 static bool
-option_v(struct options* opts, const char* inp)
+option_v(struct config* cf, const char* inp)
 {
   (void)inp;
 
-  if (opts->op_llvl == LL_DEBUG) opts->op_llvl = LL_TRACE;
-  if (opts->op_llvl == LL_INFO)  opts->op_llvl = LL_DEBUG;
-  if (opts->op_llvl == LL_WARN)  opts->op_llvl = LL_INFO;
-  if (opts->op_llvl == LL_ERROR) opts->op_llvl = LL_WARN;
+  if (cf->cf_llvl == LL_DEBUG) cf->cf_llvl = LL_TRACE;
+  if (cf->cf_llvl == LL_INFO)  cf->cf_llvl = LL_DEBUG;
+  if (cf->cf_llvl == LL_WARN)  cf->cf_llvl = LL_INFO;
+  if (cf->cf_llvl == LL_ERROR) cf->cf_llvl = LL_WARN;
 
   return true;
 }
@@ -321,47 +321,47 @@ generate_key(void)
 
 /// Assign default values to all options.
 ///
-/// @param[out] opts command-line options
+/// @param[out] cf configuration
 static void
-set_defaults(struct options* opts)
+set_defaults(struct config* cf)
 {
   intmax_t i;
 
   for (i = 0; i < PLUG_MAX; i++)
-    opts->op_plgs[i] = NULL;
-  opts->op_rbuf = DEF_RECEIVE_BUFFER_SIZE;
-  opts->op_sbuf = DEF_SEND_BUFFER_SIZE;
-  opts->op_err  = DEF_EXIT_ON_ERROR;
-  opts->op_port = DEF_UDP_PORT;
-  opts->op_ttl  = DEF_TIME_TO_LIVE;
-  opts->op_mono = DEF_MONOLOGUE;
-  opts->op_dmon = DEF_DAEMON;
-  opts->op_sil  = DEF_SILENT;
-  opts->op_bin  = DEF_BINARY;
-  opts->op_llvl = (log_lvl = DEF_LOG_LEVEL);
-  opts->op_lcol = (log_col = DEF_LOG_COLOR);
-  opts->op_key  = generate_key();
-  opts->op_ipv4 = false;
-  opts->op_ipv6 = false;
+    cf->cf_plgs[i] = NULL;
+  cf->cf_rbuf = DEF_RECEIVE_BUFFER_SIZE;
+  cf->cf_sbuf = DEF_SEND_BUFFER_SIZE;
+  cf->cf_err  = DEF_EXIT_ON_ERROR;
+  cf->cf_port = DEF_UDP_PORT;
+  cf->cf_ttl  = DEF_TIME_TO_LIVE;
+  cf->cf_mono = DEF_MONOLOGUE;
+  cf->cf_dmon = DEF_DAEMON;
+  cf->cf_sil  = DEF_SILENT;
+  cf->cf_bin  = DEF_BINARY;
+  cf->cf_llvl = (log_lvl = DEF_LOG_LEVEL);
+  cf->cf_lcol = (log_col = DEF_LOG_COLOR);
+  cf->cf_key  = generate_key();
+  cf->cf_ipv4 = false;
+  cf->cf_ipv6 = false;
 }
 
 /// Sanitize the IPv4/IPv6 options.
 /// @return success/failure indication
 ///
-/// @param[out] opts command-line options
+/// @param[out] cf configuration
 static bool
-organize_protocols(struct options* opts)
+organize_protocols(struct config* cf)
 {
   // Check whether two exclusive modes were selected.
-  if (opts->op_ipv4 == true && opts->op_ipv6 == true) {
+  if (cf->cf_ipv4 == true && cf->cf_ipv6 == true) {
     log(LL_WARN, false, "main", "options -4 and -6 are mutually exclusive");
     return false;
   }
 
   // If no restrictions on the IP version were set, enable both versions.
-  if (opts->op_ipv4 == false && opts->op_ipv6 == false) {
-    opts->op_ipv4 = true;
-    opts->op_ipv6 = true;
+  if (cf->cf_ipv4 == false && cf->cf_ipv6 == false) {
+    cf->cf_ipv4 = true;
+    cf->cf_ipv6 = true;
   }
 
   return true;
@@ -394,20 +394,20 @@ generate_getopt_string(char* str,
   }
 }
 
-/// Parse command-line options.
+/// Parse configuration defined as command-line options.
 /// @return success/failure indication
 ///
-/// @param[out] opts command-line options
+/// @param[out] cf   configuration
 /// @param[in]  argc argument count
 /// @param[in]  argv argument vector
 bool
-parse_options(struct options* opts, int argc, char* argv[])
+parse_config(struct config* cf, int argc, char* argv[])
 {
   int opt;
   bool retb;
   uint64_t i;
   char optdsl[128];
-  struct option ents[16] = {
+  struct option opts[16] = {
     { '4',  false, option_4 },
     { '6',  false, option_6 },
     { 'a',  true , option_a },
@@ -429,10 +429,10 @@ parse_options(struct options* opts, int argc, char* argv[])
   log(LL_INFO, false, "main", "parsing command-line options");
 
   (void)memset(optdsl, '\0', sizeof(optdsl));
-  generate_getopt_string(optdsl, ents, 16);
+  generate_getopt_string(optdsl, opts, 16);
 
   // Set optional arguments to sensible defaults.
-  set_defaults(opts);
+  set_defaults(cf);
 
   // Loop through available options.
   while (true) {
@@ -451,8 +451,8 @@ parse_options(struct options* opts, int argc, char* argv[])
 
     // Find the relevant option.
     for (i = 0; i < 16; i++) {
-      if (ents[i].op_name == (char)opt) {
-        retb = ents[i].op_act(opts, optarg);
+      if (opts[i].op_name == (char)opt) {
+        retb = opts[i].op_act(cf, optarg);
         if (retb == false) {
           log(LL_WARN, false, "main", "action for option '%c' failed", opt);
           return false;
@@ -469,33 +469,35 @@ parse_options(struct options* opts, int argc, char* argv[])
     return false;
   }
 
-  retb = organize_protocols(opts);
+  retb = organize_protocols(cf);
   if (retb == false)
     return false;
 
   // Assign the logging settings.
-  log_lvl = opts->op_llvl;
-  log_col = opts->op_lcol;
+  log_lvl = cf->cf_llvl;
+  log_col = cf->cf_lcol;
 
   return true;
 }
 
 /// Use the logging framework to output the selected option values used
 /// throughout the run of the program.
+///
+/// @param[in] cf configuration
 void
-log_options(const struct options* opts)
+log_config(const struct config* cf)
 {
-  log(LL_DEBUG, false, "main", "UDP port: %" PRIu64, opts->op_port);
-  log(LL_DEBUG, false, "main", "unique key: %" PRIu64, opts->op_key);
-  log(LL_DEBUG, false, "main", "Time-To-Live: %" PRIu64, opts->op_ttl);
+  log(LL_DEBUG, false, "main", "UDP port: %" PRIu64, cf->cf_port);
+  log(LL_DEBUG, false, "main", "unique key: %" PRIu64, cf->cf_key);
+  log(LL_DEBUG, false, "main", "Time-To-Live: %" PRIu64, cf->cf_ttl);
   log(LL_DEBUG, false, "main", "receive buffer size: %" PRIu64 " bytes",
-    opts->op_rbuf);
+    cf->cf_rbuf);
   log(LL_DEBUG, false, "main", "send buffer size: %" PRIu64 " bytes",
-    opts->op_sbuf);
+    cf->cf_sbuf);
   log(LL_DEBUG, false, "main", "monologue mode: %s",
-    opts->op_mono == true ? "yes" : "no");
+    cf->cf_mono == true ? "yes" : "no");
   log(LL_DEBUG, false, "main", "daemon process: %s",
-    opts->op_dmon == true ? "yes" : "no");
+    cf->cf_dmon == true ? "yes" : "no");
   log(LL_DEBUG, false, "main", "binary report: %s",
-    opts->op_dmon == true ? "yes" : "no");
+    cf->cf_dmon == true ? "yes" : "no");
 }

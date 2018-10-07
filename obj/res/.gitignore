@@ -1,8 +1,8 @@
+config.o
 counters.o
 event.o
 loop.o
 main.o
-options.o
 payload.o
 plugins.o
 report.o

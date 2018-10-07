@@ -63,11 +63,11 @@ verify_payload(struct counters* cts, const ssize_t n, const payload* pl)
 /// Update payload with local diagnostic information.
 /// @return success/failure indication
 ///
-/// @param[out] pl   payload
-/// @param[in]  msg  message header
-/// @param[in]  opts command-line options
+/// @param[out] pl  payload
+/// @param[in]  msg message header
+/// @param[in]  cf  configuration
 bool
-update_payload(payload* pl, struct msghdr* msg, const struct options* opts)
+update_payload(payload* pl, struct msghdr* msg, const struct config* cf)
 {
   struct timespec mts;
   struct timespec rts;
@@ -81,7 +81,7 @@ update_payload(payload* pl, struct msghdr* msg, const struct options* opts)
   pl->pl_type = NEMO_PAYLOAD_TYPE_RESPONSE;
 
   // Sign the payload.
-  pl->pl_resk = opts->op_key;
+  pl->pl_resk = cf->cf_key;
 
   // Obtain the steady (monotonic) clock time.
   reti = clock_gettime(CLOCK_MONOTONIC, &mts);

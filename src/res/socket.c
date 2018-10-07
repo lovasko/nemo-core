@@ -17,16 +17,16 @@
 /// @return success/failure indication
 ///
 /// @param[out] sock socket object
-/// @param[in]  opts command-line options
+/// @param[in]  cf   configuration
 bool
-create_socket4(int* sock, const struct options* opts)
+create_socket4(int* sock, const struct config* cf)
 {
   int reti;
   struct sockaddr_in addr;
   int val;
 
   // Early exit if IPv4 is not selected.
-  if (opts->op_ipv4 == false)
+  if (cf->cf_ipv4 == false)
     return true;
 
   log(LL_INFO, false, "main", "creating %s socket", "IPv4");
@@ -49,7 +49,7 @@ create_socket4(int* sock, const struct options* opts)
 
   // Bind the socket to the selected port and local address.
   addr.sin_family      = AF_INET;
-  addr.sin_port        = htons((uint16_t)opts->op_port);
+  addr.sin_port        = htons((uint16_t)cf->cf_port);
   addr.sin_addr.s_addr = INADDR_ANY;
   reti = bind(*sock, (struct sockaddr*)&addr, sizeof(addr));
   if (reti < 0) {
@@ -58,7 +58,7 @@ create_socket4(int* sock, const struct options* opts)
   }
 
   // Set the socket receive buffer size.
-  val = (int)opts->op_rbuf;
+  val = (int)cf->cf_rbuf;
   reti = setsockopt(*sock, SOL_SOCKET, SO_RCVBUF, &val, sizeof(val));
   if (reti == -1) {
     log(LL_WARN, true, "main", "unable to set the %s socket receive buffer "
@@ -67,7 +67,7 @@ create_socket4(int* sock, const struct options* opts)
   }
 
   // Set the socket send buffer size.
-  val = (int)opts->op_sbuf;
+  val = (int)cf->cf_sbuf;
   reti = setsockopt(*sock, SOL_SOCKET, SO_SNDBUF, &val, sizeof(val));
   if (reti == -1) {
     log(LL_WARN, true, "main", "unable to set the %s socket send buffer size "
@@ -76,7 +76,7 @@ create_socket4(int* sock, const struct options* opts)
   }
 
   // Set the outgoing Time-To-Live value.
-  val = (int)opts->op_ttl;
+  val = (int)cf->cf_ttl;
   reti = setsockopt(*sock, IPPROTO_IP, IP_TTL, &val, sizeof(val));
   if (reti == -1) {
     log(LL_WARN, true, "main", "unable to set the %s socket time-to-live to "
@@ -100,16 +100,16 @@ create_socket4(int* sock, const struct options* opts)
 /// @return success/failure indication
 ///
 /// @param[out] sock socket object
-/// @param[in]  opts command-line options
+/// @param[in]  cf   configuration
 bool
-create_socket6(int* sock, const struct options* opts)
+create_socket6(int* sock, const struct config* cf)
 {
   int reti;
   struct sockaddr_in6 addr;
   int val;
 
   // Early exit if IPv6 is not selected.
-  if (opts->op_ipv6 == false)
+  if (cf->cf_ipv6 == false)
     return true;
 
   log(LL_INFO, false, "main", "creating %s socket", "IPv6");
@@ -139,7 +139,7 @@ create_socket6(int* sock, const struct options* opts)
 
   // Bind the socket to the selected port and local address.
   addr.sin6_family = AF_INET6;
-  addr.sin6_port   = htons((uint16_t)opts->op_port);
+  addr.sin6_port   = htons((uint16_t)cf->cf_port);
   addr.sin6_addr   = in6addr_any;
   reti = bind(*sock, (struct sockaddr*)&addr, sizeof(addr));
   if (reti < 0) {
@@ -148,7 +148,7 @@ create_socket6(int* sock, const struct options* opts)
   }
 
   // Set the socket receive buffer size.
-  val = (int)opts->op_rbuf;
+  val = (int)cf->cf_rbuf;
   reti = setsockopt(*sock, SOL_SOCKET, SO_RCVBUF, &val, sizeof(val));
   if (reti == -1) {
     log(LL_WARN, true, "main", "unable to set the read socket buffer size to %d", val);
@@ -156,7 +156,7 @@ create_socket6(int* sock, const struct options* opts)
   }
 
   // Set the socket send buffer size.
-  val = (int)opts->op_sbuf;
+  val = (int)cf->cf_sbuf;
   reti = setsockopt(*sock, SOL_SOCKET, SO_SNDBUF, &val, sizeof(val));
   if (reti == -1) {
     log(LL_WARN, true, "main", "unable to set the socket send buffer size to %d", val);
@@ -164,7 +164,7 @@ create_socket6(int* sock, const struct options* opts)
   }
 
   // Set the outgoing Time-To-Live value.
-  val = (int)opts->op_ttl;
+  val = (int)cf->cf_ttl;
   reti = setsockopt(*sock, IPPROTO_IPV6, IPV6_UNICAST_HOPS, &val, sizeof(val));
   if (reti == -1) {
     log(LL_WARN, true, "main", "unable to set time-to-live to %d", val);

@@ -21,14 +21,14 @@
 /// @param[out] pl   payload
 /// @param[in]  msg  message headers
 /// @param[in]  sock socket
-/// @param[in]  opts command-line options
+/// @param[in]  cf   configuration
 static bool
 receive_datagram(struct counters* cts,
                  struct sockaddr_storage* addr,
                  payload* pl,
                  struct msghdr* msg,
                  int sock,
-                 const struct options* opts)
+                 const struct config* cf)
 {
   struct iovec data;
   ssize_t n;
@@ -52,7 +52,7 @@ receive_datagram(struct counters* cts,
     log(LL_WARN, true, "main", "receiving has failed");
     cts->ct_reni++;
 
-    if (opts->op_err == true)
+    if (cf->cf_err == true)
       return false;
   }
 
@@ -76,13 +76,13 @@ receive_datagram(struct counters* cts,
 /// @param[in]  sock socket
 /// @param[in]  pl   payload
 /// @param[in]  addr IPv4/IPv6 address
-/// @param[in]  opts command-line options
+/// @param[in]  cf   configuration
 static bool
 send_datagram(struct counters* cts,
               int sock,
               payload* pl,
               struct sockaddr_storage* addr,
-              const struct options* opts)
+              const struct config* cf)
 {
   ssize_t n;
   struct msghdr msg;
@@ -111,7 +111,7 @@ send_datagram(struct counters* cts,
     log(LL_WARN, true, "main", "unable to send datagram");
     cts->ct_seni++;
 
-    if (opts->op_err == true)
+    if (cf->cf_err == true)
       return false;
   }
 
@@ -119,7 +119,7 @@ send_datagram(struct counters* cts,
   if ((size_t)n != sizeof(*pl)) {
     log(LL_WARN, false, "main", "wrong sent payload size");
 
-    if (opts->op_err == true)
+    if (cf->cf_err == true)
       return false;
   }
 
@@ -132,12 +132,12 @@ send_datagram(struct counters* cts,
 /// @param[out] cts  event counters
 /// @param[in]  sock socket
 /// @param[in]  ipv  IP version
-/// @param[in]  opts command-line options
+/// @param[in]  cf   configuration
 bool
 handle_event(struct counters* cts,
              int sock,
              const char* ipv,
-             const struct options* opts)
+             const struct config* cf)
 {
   bool retb;
   struct sockaddr_storage addr;
@@ -152,7 +152,7 @@ handle_event(struct counters* cts,
   msg.msg_controllen = sizeof(cdata);
 
   // Receive a request.
-  retb = receive_datagram(cts, &addr, &pl, &msg, sock, opts);
+  retb = receive_datagram(cts, &addr, &pl, &msg, sock, cf);
   if (retb == false) {
     log(LL_WARN, false, "main", "unable to receive datagram on the %s socket", ipv);
 
@@ -161,11 +161,11 @@ handle_event(struct counters* cts,
     // transmission errors should be treated as fatal. In order to propagate
     // error, we need to return 'false', if op_err was 'true'. The same applies
     // in the opposite case.
-    return !opts->op_err;
+    return !cf->cf_err;
   }
 
   // Update payload.
-  retb = update_payload(&pl, &msg, opts);
+  retb = update_payload(&pl, &msg, cf);
   if (retb == false) {
     log(LL_WARN, false, "main", "unable to update the payload");
     return false;
@@ -179,19 +179,19 @@ handle_event(struct counters* cts,
   // }
 
   // Report the event as a entry in the CSV output.
-  report_event(&pl, opts);
+  report_event(&pl, cf);
 
   // Do not respond if the monologue mode is turned on.
-  if (opts->op_mono == true)
+  if (cf->cf_mono == true)
     return true;
 
   // Send a response back.
-  retb = send_datagram(cts, sock, &pl, &addr, opts);
+  retb = send_datagram(cts, sock, &pl, &addr, cf);
   if (retb == false) {
     log(LL_WARN, false, "main", "unable to send datagram on the %s socket", ipv);
 
     // Following the same logic as above in the receive stage.
-    return !opts->op_err;
+    return !cf->cf_err;
   }
 
   return true;

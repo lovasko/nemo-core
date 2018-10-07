@@ -16,14 +16,14 @@
 /// Count the number of selected plugins.
 /// @return number of plugins
 ///
-/// @param[in] opts command-line options
+/// @param[in] cf configuration
 static uint64_t
-count_plugins(const struct options* opts)
+count_plugins(const struct config* cf)
 {
   uint64_t res;
 
   for (res = 0; res < PLUG_MAX; res++)
-    if (opts->op_plgs[res] == NULL)
+    if (cf->cf_plgs[res] == NULL)
       break;
 
   return res;
@@ -49,21 +49,21 @@ report_error(const char* name)
 ///
 /// @param[out] pins  array of plugins
 /// @param[out] npins number of plugins
-/// @param[in]  opts  command-line options
+/// @param[in]  cf    configuration
 bool
 load_plugins(struct plugin* pins,
              uint64_t* npins,
-             const struct options* opts)
+             const struct config* cf)
 {
   uint64_t i;
 
-  *npins = count_plugins(opts);
+  *npins = count_plugins(cf);
 
   for (i = 0; i < *npins; i++) {
     // Open the shared object library.
-    pins[i].pi_hndl = dlopen(opts->op_plgs[i], RTLD_NOW);
+    pins[i].pi_hndl = dlopen(cf->cf_plgs[i], RTLD_NOW);
     if (pins[i].pi_hndl == NULL) {
-      report_error(opts->op_plgs[i]);
+      report_error(cf->cf_plgs[i]);
       return false;
     }
 

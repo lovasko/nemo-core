@@ -19,16 +19,16 @@
 
 /// Print the CSV header of the reporting output.
 ///
-/// @param[in] opts command-line options
+/// @param[in] cf configuration
 void
-report_header(const struct options* opts)
+report_header(const struct config* cf)
 {
   // No output to be performed if the silent mode was requested.
-  if (opts->op_sil == true)
+  if (cf->cf_sil == true)
     return;
 
   // Binary mode has no header.
-  if (opts->op_bin == true)
+  if (cf->cf_bin == true)
     return;
 
   // Print the CSV header of the standard output.
@@ -39,10 +39,10 @@ report_header(const struct options* opts)
 /// Report the event of the incoming datagram by printing a CSV-formatted line
 /// to the standard output stream.
 ///
-/// @param[in] pl   payload
-/// @param[in] opts command-line options
+/// @param[in] pl payload
+/// @param[in] cf configuration
 void
-report_event(const payload* pl, const struct options* opts)
+report_event(const payload* pl, const struct config* cf)
 {
   char addrstr[128];
   struct in_addr a4;
@@ -51,11 +51,11 @@ report_event(const payload* pl, const struct options* opts)
   payload plout;
 
   // No output to be performed if the silent mode was requested.
-  if (opts->op_sil == true)
+  if (cf->cf_sil == true)
     return;
 
   // Binary mode expects the payload in a on-wire encoding.
-  if (opts->op_bin == true) {
+  if (cf->cf_bin == true) {
     (void)memcpy(&plout, pl, sizeof(plout));
     encode_payload(&plout);
     (void)fwrite(&plout, sizeof(plout), 1, stdout);
@@ -105,14 +105,14 @@ report_event(const payload* pl, const struct options* opts)
 /// Flush all data written to the standard output to their respective device.
 /// @return success/failure indication
 ///
-/// @param[in] opts command-line options
+/// @param[in] cf configuration
 bool
-flush_report_stream(const struct options* opts)
+flush_report_stream(const struct config* cf)
 {
   int reti;
 
   // No output was performed if the silent mode was requested.
-  if (opts->op_sil == true)
+  if (cf->cf_sil == true)
     return true;
 
   log(LL_INFO, false, "main", "flushing standard output stream");

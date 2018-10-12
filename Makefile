@@ -65,7 +65,7 @@ obj/req/main.o: src/req/main.c
 
 # responder object files
 obj/res/config.o: src/res/config.c
-	$(CC) $(CFLAGS) -c src/res/config.c -o obj/res/config.o
+	$(CC) $(CFLAGS) -c src/res/config.c   -o obj/res/config.o
 
 obj/res/counters.o: src/res/counters.c
 	$(CC) $(CFLAGS) -c src/res/counters.c -o obj/res/counters.o

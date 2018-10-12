@@ -71,7 +71,7 @@ main(int argc, char* argv[])
   }
 
   // Start actions.
-  retb = init_plugins(pins, npins);
+  retb = start_plugins(pins, npins);
   if (retb == false) {
     log(LL_ERROR, false, "main", "unable to start all actions");
     return EXIT_FAILURE;
@@ -86,8 +86,8 @@ main(int argc, char* argv[])
   if (retb == false)
     log(LL_ERROR, false, "main", "responding loop has been terminated");
 
-  // Terminate actions.
-  free_plugins(pins, npins);
+  // Terminate plugins.
+  terminate_plugins(pins, npins);
 
   // Print final values of counters.
   if (cf.cf_ipv4 == true) log_counters("IPv4", &cts4);

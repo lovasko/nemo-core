@@ -4,6 +4,7 @@
 // Distributed under the terms of the 2-clause BSD License. The full
 // license is in the file LICENSE, distributed as part of this software.
 
+#include <unistd.h>
 #include <dlfcn.h>
 #include <string.h>
 
@@ -99,22 +100,68 @@ load_plugins(struct plugin* pins,
   return true;
 }
 
-/// Start all plugins.
+/// Continuously read payloads from the pipe, blocking when no data is
+/// available.
+///
+/// @param[in] pin plugin
+static void
+read_loop(const struct plugin* pin)
+{
+  payload pl;
+  ssize_t retss;
+
+  while (true) {
+    // Read a payload from the pipe.
+    retss = read(pin->pi_pipe[0], &pl, sizeof(pl));
+    
+    // Check for errors.
+    if (retss == -1) {
+      log(LL_WARN, true, "main", "unable to read payload from a pipe");
+      return;
+    }
+
+    // Check whether a full payload was dequeued.
+    if (retss != (ssize_t)sizeof(pl)) {
+      log(LL_WARN, false, "main", "unable to read full payload from a "
+        "pipe");
+      return;
+    }
+
+    // Execute the plugin event action based on the payload content.
+    pin->pi_evnt(pl.pl_reqk, pl.pl_reqk, pl.pl_reqk, pl.pl_reqk);
+  }
+}
+
+/// Close the appropriate end of the pipe depending on which forked process
+/// executes this function.
 /// @return success/failure indication
 ///
-/// @param[in] pins  array of plugins
-/// @param[in] npins number of plugins
-bool
-init_plugins(const struct plugin* pins, const uint64_t npins)
+/// @param[in] pin plugin
+static bool
+close_pipe_end(const struct plugin* pin)
 {
-  uint64_t i;
-  bool retb;
+  int reti;
 
-  for (i = 0; i < npins; i++) {
-    retb = pins[i].pi_init();
-    if (retb == false) {
-      log(LL_WARN, false, "main", "unable to initialize plugin %s",
-        pins[i].pi_name);
+  // If we are within the child plugin process, close the writing end of the
+  // pipe, as the plugins do not communicate back to the main responder
+  // process. This also decrements the reference count on the writing end back
+  // to pre-fork one, meaning that the pipe will be disposed of once the main
+  // process closes the end.
+  if (pin->pi_pid == 0) {
+    reti = close(pin->pi_pipe[1]);
+    if (reti == -1) {
+      log(LL_WARN, true, "main", "unable to close the writing end of the "
+        "pipe");
+      return false;
+    }
+  } else {
+    // If we are within the parent responder process, close the reading end of
+    // the pipe, as the parent process does not expect communication from the
+    // plugins.
+    reti = close(pin->pi_pipe[0]);
+    if (reti == -1) {
+      log(LL_WARN, true, "main", "unable to close the reading end of the "
+        "pipe");
       return false;
     }
   }
@@ -122,44 +169,110 @@ init_plugins(const struct plugin* pins, const uint64_t npins)
   return true;
 }
 
-/// Perform the event action.
+/// Start all plugins.
+/// @return success/failure indication
+///
+/// @param[out] pins  array of plugins
+/// @param[in]  npins number of plugins
+bool
+start_plugins(struct plugin* pins, const uint64_t npins)
+{
+  uint64_t i;
+  int reti;
+  bool retb;
+
+  for (i = 0; i < npins; i++) {
+    // Create a pipe through which the processes will communicate.
+    reti = pipe(pins[i].pi_pipe);
+    if (reti == -1) {
+      log(LL_WARN, true, "main", "unable to create a pipe");
+      return false;
+    }
+
+    // Create a new process.
+    pins[i].pi_pid = fork();
+
+    // Check for error first.
+    if (pins[i].pi_pid == -1) {
+      log(LL_WARN, true, "main", "unable to start a plugin process");
+      return false;
+    }
+
+    // Close the appropriate end of the pipe in each process.
+    retb = close_pipe_end(&pins[i]);
+    if (retb == false)
+      return false;
+
+    // In case this code is executed in the child process start
+    // the main event loop.
+    if (pins[i].pi_pid == 0) {
+      retb = pins[i].pi_init();
+      if (retb == false) {
+        log(LL_WARN, false, "main", "unable to initialise plugin %s",
+          pins[i].pi_name);
+        return false;
+      }
+
+      // 
+      read_loop(&pins[i]);
+
+      pins[i].pi_free();
+      exit(EXIT_SUCCESS);
+    }
+  }
+
+  return true;
+}
+
+/// Perform the event action. This is done by sending a payload via a pipe
+/// to the plugin process. The plugin process has a continuous read loop and
+/// executes the appropriate plugin action.
 ///
 /// @param[in] pins  array of plugins
 /// @param[in] npins number of plugins
 /// @param[in] pl    payload
 void
-exec_plugins(const struct plugin* pins,
-             const uint64_t npins,
-             const payload* pl)
+notify_plugins(const struct plugin* pins,
+               const uint64_t npins,
+               const payload* pl)
 {
   uint64_t i;
-  bool retb;
+  ssize_t retss;
 
   for (i = 0; i < npins; i++) {
-    retb = pins[i].pi_evnt(pl->pl_resk, pl->pl_reqk, pl->pl_reqk, pl->pl_reqk);
-    if (retb == false)
-      log(LL_WARN, false, "main", "unable to execute plugin %s",
+    retss = write(pins[i].pi_pipe[0], pl, sizeof(*pl));
+
+    // Check for error.
+    if (retss == -1)
+      log(LL_WARN, true, "main", "unable to send payload to plugin %s",
+        pins[i].pi_name);
+
+    // Check whether all expected data was written to the pipe.
+    if (retss != (ssize_t)sizeof(*pl))
+      log(LL_WARN, false, "main", "unable to full payload to plugin %s",
         pins[i].pi_name);
   }
 }
 
-/// Perform clean-up of all plugins.
+/// Terminate all plugins. This is done by closing the appropriate pipe,
+/// causing the read loop to terminate. This in turn triggers the clean-up
+/// procedure defined for the plugin. The main process waits for the process
+/// to finish.
 ///
 /// @param[in] pins  array of plugins
 /// @param[in] npins number of plugins
 void
-free_plugins(const struct plugin* pins, const uint64_t npins)
+terminate_plugins(const struct plugin* pins, const uint64_t npins)
 {
   uint64_t i;
-  bool retb;
+  int reti;
 
-  // The loop does not terminate when a particular clean-up routine fails, as
-  // the process is already about to terminate. This way all plugins get a
-  // chance to perform an orderly clean-up.
+  // The loop does not terminate when a particular clean-up routine fails,
+  // as the process is already about to terminate. This way all plugins get
+  // a chance to perform an orderly clean-up.
   for (i = 0; i < npins; i++) {
-    retb = pins[i].pi_free();
-    if (retb == false)
-      log(LL_WARN, false, "main", "clean-up of plugin %s failed",
-        pins[i].pi_name);
+    reti = close(pins[i].pi_pipe[1]);
+    if (reti == -1)
+      log(LL_WARN, true, "main", "unable to close a pipe");
   }
 }

@@ -7,6 +7,8 @@
 #ifndef NEMO_RES_TYPES_H
 #define NEMO_RES_TYPES_H
 
+#include <sys/types.h>
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -49,6 +51,8 @@ struct plugin {
   bool      (*pi_evnt)(uint64_t, uint64_t,
                        uint64_t, uint64_t); ///< Response event procedure.
   bool      (*pi_free)(void);               ///< Clean-up procedure.
+  pid_t       pi_pid;                       ///< Process ID of the sandbox.
+  int         pi_pipe[2];                   ///< Payload notification channel.
 };
 
 /// Set of counters of events for a single connection.

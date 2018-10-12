@@ -52,11 +52,11 @@ bool flush_report_stream(const struct config* cf);
 bool load_plugins(struct plugin* pins,
                   uint64_t* npins,
                   const struct config* cf);
-bool init_plugins(const struct plugin* pins, const uint64_t npins);
-void exec_plugins(const struct plugin* pins,
-                  const uint64_t npins,
-                  const payload* pl);
-void free_plugins(const struct plugin* pins, const uint64_t npins);
+bool start_plugins(struct plugin* pins, const uint64_t npins);
+void notify_plugins(const struct plugin* pins,
+                    const uint64_t npins,
+                    const payload* pl);
+void terminate_plugins(const struct plugin* pins, const uint64_t npins);
 
 // Signal.
 bool install_signal_handlers(void);

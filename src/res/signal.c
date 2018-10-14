@@ -15,6 +15,7 @@
 
 volatile bool sint;  ///< Signal interrupt indicator.
 volatile bool sterm; ///< Signal termination indicator.
+volatile bool susr1; ///< User request for details indicator.
 
 /// Signal handler for the SIGINT and SIGTERM signals.
 ///
@@ -24,6 +25,7 @@ volatile bool sterm; ///< Signal termination indicator.
 ///
 /// @global sint
 /// @global sterm
+/// @global susr1
 ///
 /// @param[in] sig signal number
 static void
@@ -31,6 +33,7 @@ signal_handler(int sig)
 {
   if (sig == SIGINT)  sint  = true;
   if (sig == SIGTERM) sterm = true;
+  if (sig == SIGUSR1) susr1 = true;
 }
 
 /// Block the delivery of all signals, except the two signals that can not be
@@ -67,6 +70,7 @@ install_signal_handlers(void)
   // Reset the signal indicator.
   sint  = false;
   sterm = false;
+  susr1 = false;
 
   // This action makes sure that no system calls or execution context will get
   // interrupted by a signal. The pselect(2) call explicitly enables the
@@ -93,6 +97,14 @@ install_signal_handlers(void)
     return false;
   }
 
+  // Install signal handler for SIGUSR1.
+  reti = sigaction(SIGUSR1, &sa, NULL);
+  if (reti == -1) {
+    log(LL_WARN, true, "main", "unable to add signal handler for %s",
+        "SIGUSR1");
+    return false;
+  }
+
   return true;
 }
 
@@ -107,4 +119,5 @@ create_signal_mask(sigset_t* mask)
   (void)sigdelset(mask, SIGKILL);
   (void)sigdelset(mask, SIGINT);
   (void)sigdelset(mask, SIGTERM);
+  (void)sigdelset(mask, SIGUSR1);
 }

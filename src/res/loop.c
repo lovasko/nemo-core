@@ -17,12 +17,59 @@
 
 extern volatile bool sterm;
 extern volatile bool sint;
+extern volatile bool susr1;
+
+/// Handle the incoming signal.
+/// @return exit/continue decision
+///
+/// @global sint
+/// @global sterm
+/// @global susr1
+///
+/// @param[in] cts4 IPv4 event counters
+/// @param[in] cts6 IPv6 event counters
+/// @param[in] cf   configuration
+static bool
+handle_interrupt(const struct counters* cts4,
+                 const struct counters* cts6,
+	         const struct config* cf)
+{
+  log(LL_TRACE, false, "main", "handling interrupt");
+
+  // Exit upon receiving SIGINT.
+  if (sint == true) {
+    log(LL_WARN, false, "main", "received the %s signal", "SIGINT");
+    return false;
+  }
+
+  // Exit upon receiving SIGTERM.
+  if (sterm == true) {
+    log(LL_WARN, false, "main", "received the %s signal", "SIGTERM");
+    return false;
+  }
+
+  // Print logging information and continue the process upon receiving SIGUSR1.
+  if (susr1 == true) {
+    log_config(cf);
+    if (cf->cf_ipv4 == true) log_counters("IPv4", cts4);
+    if (cf->cf_ipv6 == true) log_counters("IPv6", cts6);
+
+    // Reset the signal indicator, so that following signal handling will avoid
+    // the false positive.
+    susr1 = false;
+    return true;
+  }
+
+  log(LL_WARN, false, "main", "unknown interrupt occurred");
+  return false;
+}
 
 /// Start responding to requests on both IPv4 and IPv6 sockets.
 /// @return success/failure indication
 ///
 /// @global sint
 /// @global sterm
+/// @global susr1
 ///
 /// @param[out] cts4  IPv4 event counters
 /// @param[out] cts6  IPv6 event counters
@@ -68,12 +115,9 @@ respond_loop(struct counters* cts4,
     if (reti == -1) {
       // Check for interrupt (possibly due to a signal).
       if (errno == EINTR) {
-        if (sint == true)
-          log(LL_WARN, false, "main", "received the %s signal", "SIGINT");
-        else if (sterm == true)
-          log(LL_WARN, false, "main", "received the %s signal", "SIGTERM");
-        else
-          log(LL_WARN, false, "main", "unknown event queue interrupt");
+        retb = handle_interrupt(cts4, cts6, cf);
+        if (retb == true)
+          continue;
 
         return false;
       }

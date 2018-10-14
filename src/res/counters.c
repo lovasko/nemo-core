@@ -40,7 +40,7 @@ log_counters(const char* ipv, const struct counters* cts)
     ipv, cts->ct_reni);
   log(LL_INFO, false, "main", "%s receive datagram size mismatches: %" PRIu64,
     ipv, cts->ct_resz);
-  log(LL_INFO, false, "main", "%s receive magic identifier mismatches: %"
+  log(LL_INFO, false, "main", "%s receive payload magic mismatches: %"
     PRIu64, ipv, cts->ct_remg);
   log(LL_INFO, false, "main", "%s receive payload version mismatches: %"
     PRIu64, ipv, cts->ct_repv);

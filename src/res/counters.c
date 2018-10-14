@@ -22,6 +22,7 @@ reset_counters(struct counters* cts)
   cts->ct_resz = 0;
   cts->ct_remg = 0;
   cts->ct_repv = 0;
+  cts->ct_rety = 0;
   cts->ct_sall = 0;
   cts->ct_seni = 0;
 }

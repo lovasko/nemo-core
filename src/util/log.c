@@ -58,7 +58,7 @@ highlight(char* out, const char* inp)
 
       // Locate the substitution's end and copy the contents.
       *pcent = '%';
-      delim = strpbrk(pcent, "cdfghopsu");
+      delim = strpbrk(pcent, "cdfghopsux");
       if (delim != NULL) {
         delim++;
         hold = *delim;

@@ -34,19 +34,19 @@ reset_counters(struct counters* cts)
 void 
 log_counters(const char* ipv, const struct counters* cts)
 {
-  log(LL_INFO, false, "main", "%s overall received: %" PRIu64, ipv,
+  log(LL_DEBUG, false, "main", "%s overall received: %" PRIu64, ipv,
     cts->ct_rall);
-  log(LL_INFO, false, "main", "%s receive network-related errors: %" PRIu64,
+  log(LL_DEBUG, false, "main", "%s receive network-related errors: %" PRIu64,
     ipv, cts->ct_reni);
-  log(LL_INFO, false, "main", "%s receive datagram size mismatches: %" PRIu64,
+  log(LL_DEBUG, false, "main", "%s receive datagram size mismatches: %" PRIu64,
     ipv, cts->ct_resz);
-  log(LL_INFO, false, "main", "%s receive payload magic mismatches: %"
+  log(LL_DEBUG, false, "main", "%s receive payload magic mismatches: %"
     PRIu64, ipv, cts->ct_remg);
-  log(LL_INFO, false, "main", "%s receive payload version mismatches: %"
+  log(LL_DEBUG, false, "main", "%s receive payload version mismatches: %"
     PRIu64, ipv, cts->ct_repv);
-  log(LL_INFO, false, "main", "%s receive payload type mismatches: %" PRIu64,
+  log(LL_DEBUG, false, "main", "%s receive payload type mismatches: %" PRIu64,
     ipv, cts->ct_rety);
-  log(LL_INFO, false, "main", "%s overall sent: %" PRIu64, ipv, cts->ct_sall);
-  log(LL_INFO, false, "main", "%s send network-related errors: %" PRIu64, ipv,
+  log(LL_DEBUG, false, "main", "%s overall sent: %" PRIu64, ipv, cts->ct_sall);
+  log(LL_DEBUG, false, "main", "%s send network-related errors: %" PRIu64, ipv,
     cts->ct_seni);
 }

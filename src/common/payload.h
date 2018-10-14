@@ -20,7 +20,7 @@
 
 
 // Diagnostic payload.
-typedef struct _payload {
+struct payload {
   uint32_t pl_mgic;   ///< Magic identifier.
   uint8_t  pl_fver;   ///< Format version.
   uint8_t  pl_type;   ///< Message type.
@@ -40,6 +40,6 @@ typedef struct _payload {
   uint64_t pl_rtm1;   ///< System time of request.
   uint64_t pl_mtm2;   ///< Steady time of response.
   uint64_t pl_rtm2;   ///< System time of response.
-} payload;
+};
 
 #endif

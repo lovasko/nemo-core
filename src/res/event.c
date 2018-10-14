@@ -25,7 +25,7 @@
 static bool
 receive_datagram(struct counters* cts,
                  struct sockaddr_storage* addr,
-                 payload* pl,
+                 struct payload* pl,
                  struct msghdr* msg,
                  int sock,
                  const struct config* cf)
@@ -80,7 +80,7 @@ receive_datagram(struct counters* cts,
 static bool
 send_datagram(struct counters* cts,
               int sock,
-              payload* pl,
+              struct payload* pl,
               struct sockaddr_storage* addr,
               const struct config* cf)
 {
@@ -141,7 +141,7 @@ handle_event(struct counters* cts,
 {
   bool retb;
   struct sockaddr_storage addr;
-  payload pl;
+  struct payload pl;
   struct msghdr msg;
   uint8_t cdata[512];
 

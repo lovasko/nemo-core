@@ -124,7 +124,7 @@ tipv6(struct in6_addr* addr, const uint64_t lo, const uint64_t hi)
 ///
 /// @param[out] pl payload
 void
-encode_payload(payload* pl)
+encode_payload(struct payload* pl)
 {
   pl->pl_mgic  = htonl(pl->pl_mgic);
   pl->pl_port  = htons(pl->pl_port);
@@ -146,7 +146,7 @@ encode_payload(payload* pl)
 ///
 /// @param[out] pl payload
 void
-decode_payload(payload* pl)
+decode_payload(struct payload* pl)
 {
   pl->pl_mgic  = ntohl(pl->pl_mgic);
   pl->pl_port  = ntohs(pl->pl_port);

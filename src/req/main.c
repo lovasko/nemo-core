@@ -704,7 +704,7 @@ set_target_address(struct sockaddr_storage* ss, const target tg)
 /// @param[in]  rts  system time
 /// @param[in]  mts  steady time
 static void
-fill_payload(payload *pl,
+fill_payload(struct payload *pl,
              const target* tg,
              const uint64_t snum,
              const struct timespec rts,
@@ -735,7 +735,7 @@ static bool
 send_all_datagrams(int sock, const uint64_t snum, const char* name)
 {
   uint64_t i;
-  payload pl;
+  struct payload pl;
   struct timespec rts;
   struct timespec mts;
   struct msghdr msg;
@@ -879,7 +879,7 @@ static void*
 recv_worker(void* arg)
 {
   ssize_t retss;
-  payload pl;
+  struct payload pl;
   struct msghdr msg;
   struct iovec iov;
   struct sockaddr_storage addr;

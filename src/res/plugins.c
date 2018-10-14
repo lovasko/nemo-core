@@ -107,7 +107,7 @@ load_plugins(struct plugin* pins,
 static void
 read_loop(const struct plugin* pin)
 {
-  payload pl;
+  struct payload pl;
   ssize_t retss;
 
   while (true) {
@@ -234,7 +234,7 @@ start_plugins(struct plugin* pins, const uint64_t npins)
 void
 notify_plugins(const struct plugin* pins,
                const uint64_t npins,
-               const payload* pl)
+               const struct payload* pl)
 {
   uint64_t i;
   ssize_t retss;

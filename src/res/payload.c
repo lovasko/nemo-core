@@ -21,7 +21,7 @@
 /// @param[in]  n   length of the received data
 /// @param[in]  pl  payload
 bool
-verify_payload(struct counters* cts, const ssize_t n, const payload* pl)
+verify_payload(struct counters* cts, const ssize_t n, const struct payload* pl)
 {
   log(LL_TRACE, false, "main", "verifying payload");
 
@@ -67,7 +67,7 @@ verify_payload(struct counters* cts, const ssize_t n, const payload* pl)
 /// @param[in]  msg message header
 /// @param[in]  cf  configuration
 bool
-update_payload(payload* pl, struct msghdr* msg, const struct config* cf)
+update_payload(struct payload* pl, struct msghdr* msg, const struct config* cf)
 {
   struct timespec mts;
   struct timespec rts;

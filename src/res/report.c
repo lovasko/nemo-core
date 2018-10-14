@@ -42,13 +42,13 @@ report_header(const struct config* cf)
 /// @param[in] pl payload
 /// @param[in] cf configuration
 void
-report_event(const payload* pl, const struct config* cf)
+report_event(const struct payload* pl, const struct config* cf)
 {
   char addrstr[128];
   struct in_addr a4;
   struct in6_addr a6;
   char ttlstr[8];
-  payload plout;
+  struct payload plout;
 
   // No output to be performed if the silent mode was requested.
   if (cf->cf_sil == true)

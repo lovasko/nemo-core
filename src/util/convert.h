@@ -28,7 +28,7 @@ void fipv6(uint64_t* lo, uint64_t* hi, const struct in6_addr addr);
 void tipv6(struct in6_addr* addr, const uint64_t lo, const uint64_t hi);
 
 // Payload on-wire format conversions.
-void encode_payload(payload* pl);
-void decode_payload(payload* pl);
+void encode_payload(struct payload* pl);
+void decode_payload(struct payload* pl);
 
 #endif

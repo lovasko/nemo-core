@@ -38,14 +38,16 @@ bool respond_loop(struct counters* cts4,
                   const struct config* cf);
   
 // Payload.
-bool verify_payload(struct counters* cts, const ssize_t n, const payload* pl);
-bool update_payload(payload* pl,
+bool verify_payload(struct counters* cts,
+                    const ssize_t n,
+                    const struct payload* pl);
+bool update_payload(struct payload* pl,
                     struct msghdr* msg,
                     const struct config* cf);
 
 // Report.
 void report_header(const struct config* cf);
-void report_event(const payload* pl, const struct config* cf);
+void report_event(const struct payload* pl, const struct config* cf);
 bool flush_report_stream(const struct config* cf);
 
 // Plugins.
@@ -55,7 +57,7 @@ bool load_plugins(struct plugin* pins,
 bool start_plugins(struct plugin* pins, const uint64_t npins);
 void notify_plugins(const struct plugin* pins,
                     const uint64_t npins,
-                    const payload* pl);
+                    const struct payload* pl);
 void terminate_plugins(const struct plugin* pins, const uint64_t npins);
 
 // Signal.

@@ -27,7 +27,7 @@ verify_payload(struct counters* cts, const ssize_t n, const payload* pl)
 
   // Verify the size of the datagram.
   if ((size_t)n != sizeof(*pl)) {
-    log(LL_WARN, false, "main", "wrong datagram size, expected: %zd, actual: %zu",
+    log(LL_DEBUG, false, "main", "wrong datagram size, expected: %zd, actual: %zu",
         sizeof(*pl), n);
     cts->ct_resz++;
     return false;

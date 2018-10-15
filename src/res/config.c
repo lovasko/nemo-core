@@ -10,7 +10,6 @@
 #include <time.h>
 #include <inttypes.h>
 
-#include "common/version.h"
 #include "res/proto.h"
 #include "res/types.h"
 #include "res/version.h"

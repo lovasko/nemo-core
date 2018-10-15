@@ -23,8 +23,8 @@
 #include <pthread.h>
 #include <inttypes.h>
 
-#include "common/version.h"
 #include "common/payload.h"
+#include "req/version.h"
 #include "util/convert.h"
 #include "util/daemon.h"
 #include "util/log.h"
@@ -170,9 +170,9 @@ print_usage(void)
     "  -t TTL  Set the Time-To-Live for all published datagrams. (def=%d)\n"
     "  -v      Increase the verbosity of the logging output.\n"
     "  -w DUR  Wait time for responses after last request. (def=2s)\n",
-    NEMO_VERSION_MAJOR,
-    NEMO_VERSION_MINOR,
-    NEMO_VERSION_PATCH,
+    NEMO_REQ_VERSION_MAJOR,
+    NEMO_REQ_VERSION_MINOR,
+    NEMO_REQ_VERSION_PATCH,
     NEMO_PAYLOAD_VERSION,
     DEF_COUNT,
     DEF_UDP_PORT,

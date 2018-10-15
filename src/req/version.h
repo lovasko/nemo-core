@@ -4,12 +4,12 @@
 // Distributed under the terms of the 2-clause BSD License. The full
 // license is in the file LICENSE, distributed as part of this software.
 
-#ifndef NEMO_COMMON_VERSION_H
-#define NEMO_COMMON_VERSION_H
+#ifndef NEMO_REQ_VERSION_H
+#define NEMO_REQ_VERSION_H
 
 // Program version.
-#define NEMO_VERSION_MAJOR 0
-#define NEMO_VERSION_MINOR 1
-#define NEMO_VERSION_PATCH 0
+#define NEMO_REQ_VERSION_MAJOR 1
+#define NEMO_REQ_VERSION_MINOR 0
+#define NEMO_REQ_VERSION_PATCH 0
 
 #endif

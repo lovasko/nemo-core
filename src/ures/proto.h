@@ -13,7 +13,7 @@
 #include <signal.h>
 
 #include "common/payload.h"
-#include "res/types.h"
+#include "ures/types.h"
 
 
 // Config.

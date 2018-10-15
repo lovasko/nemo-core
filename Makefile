@@ -9,90 +9,90 @@ FTM = -D_BSD_SOURCE -D_XOPEN_SOURCE -D_POSIX_C_SOURCE=200809L -D_DEFAULT_SOURCE
 CFLAGS = -fno-builtin -std=c99 -Wall -Wextra -Werror $(FTM) -Isrc/ -pthread
 LDFLAGS = -lrt -lpthread -ldl
 
-all: bin/nreq bin/nres
+all: bin/ureq bin/ures
 
-# requester executable
-bin/nreq: obj/req/main.o       \
+# unicast requester executable
+bin/ureq: obj/ureq/main.o      \
           obj/common/convert.o \
           obj/common/daemon.o  \
           obj/common/log.o     \
           obj/common/parse.o   \
           obj/common/ttl.o
-	$(CC) obj/req/main.o         \
+	$(CC) obj/ureq/main.o        \
 	      obj/common/convert.o   \
 	      obj/common/daemon.o    \
 	      obj/common/log.o       \
 	      obj/common/parse.o     \
 	      obj/common/ttl.o       \
-	      -o bin/nreq $(LDFLAGS)
+	      -o bin/ureq $(LDFLAGS)
 
-# responder executable
-bin/nres: obj/common/convert.o \
+# unicast responder executable
+bin/ures: obj/common/convert.o \
           obj/common/daemon.o  \
           obj/common/log.o     \
           obj/common/parse.o   \
           obj/common/ttl.o     \
-          obj/res/config.o     \
-          obj/res/counters.o   \
-          obj/res/event.o      \
-          obj/res/loop.o       \
-          obj/res/main.o       \
-          obj/res/payload.o    \
-          obj/res/plugins.o    \
-          obj/res/report.o     \
-          obj/res/signal.o     \
-          obj/res/socket.o
+          obj/ures/config.o    \
+          obj/ures/counters.o  \
+          obj/ures/event.o     \
+          obj/ures/loop.o      \
+          obj/ures/main.o      \
+          obj/ures/payload.o   \
+          obj/ures/plugins.o   \
+          obj/ures/report.o    \
+          obj/ures/signal.o    \
+          obj/ures/socket.o
 	$(CC) obj/common/convert.o   \
 	      obj/common/daemon.o    \
 	      obj/common/log.o       \
 	      obj/common/parse.o     \
 	      obj/common/ttl.o       \
-	      obj/res/config.o       \
-	      obj/res/counters.o     \
-	      obj/res/event.o        \
-	      obj/res/loop.o         \
-	      obj/res/main.o         \
-	      obj/res/payload.o      \
-	      obj/res/plugins.o      \
-	      obj/res/report.o       \
-	      obj/res/signal.o       \
-	      obj/res/socket.o       \
-	      -o bin/nres $(LDFLAGS)
+	      obj/ures/config.o      \
+	      obj/ures/counters.o    \
+	      obj/ures/event.o       \
+	      obj/ures/loop.o        \
+	      obj/ures/main.o        \
+	      obj/ures/payload.o     \
+	      obj/ures/plugins.o     \
+	      obj/ures/report.o      \
+	      obj/ures/signal.o      \
+	      obj/ures/socket.o      \
+	      -o bin/ures $(LDFLAGS)
 
-# requester object files
-obj/req/main.o: src/req/main.c
-	$(CC) $(CFLAGS) -c src/req/main.c       -o obj/req/main.o
+# unicast requester object files
+obj/ureq/main.o: src/ureq/main.c
+	$(CC) $(CFLAGS) -c src/ureq/main.c      -o obj/ureq/main.o
 
-# responder object files
-obj/res/config.o: src/res/config.c
-	$(CC) $(CFLAGS) -c src/res/config.c     -o obj/res/config.o
+# unicast responder object files
+obj/ures/config.o: src/ures/config.c
+	$(CC) $(CFLAGS) -c src/ures/config.c    -o obj/ures/config.o
 
-obj/res/counters.o: src/res/counters.c
-	$(CC) $(CFLAGS) -c src/res/counters.c   -o obj/res/counters.o
+obj/ures/counters.o: src/ures/counters.c
+	$(CC) $(CFLAGS) -c src/ures/counters.c  -o obj/ures/counters.o
 
-obj/res/event.o: src/res/event.c
-	$(CC) $(CFLAGS) -c src/res/event.c      -o obj/res/event.o
+obj/ures/event.o: src/ures/event.c
+	$(CC) $(CFLAGS) -c src/ures/event.c     -o obj/ures/event.o
 
-obj/res/loop.o: src/res/loop.c
-	$(CC) $(CFLAGS) -c src/res/loop.c       -o obj/res/loop.o
+obj/ures/loop.o: src/ures/loop.c
+	$(CC) $(CFLAGS) -c src/ures/loop.c      -o obj/ures/loop.o
 
-obj/res/main.o: src/res/main.c
-	$(CC) $(CFLAGS) -c src/res/main.c       -o obj/res/main.o
+obj/ures/main.o: src/ures/main.c
+	$(CC) $(CFLAGS) -c src/ures/main.c      -o obj/ures/main.o
 
-obj/res/payload.o: src/res/payload.c
-	$(CC) $(CFLAGS) -c src/res/payload.c    -o obj/res/payload.o
+obj/ures/payload.o: src/ures/payload.c
+	$(CC) $(CFLAGS) -c src/ures/payload.c   -o obj/ures/payload.o
 
-obj/res/plugins.o: src/res/plugins.c
-	$(CC) $(CFLAGS) -c src/res/plugins.c    -o obj/res/plugins.o
+obj/ures/plugins.o: src/ures/plugins.c
+	$(CC) $(CFLAGS) -c src/ures/plugins.c   -o obj/ures/plugins.o
 
-obj/res/report.o: src/res/report.c
-	$(CC) $(CFLAGS) -c src/res/report.c     -o obj/res/report.o
+obj/ures/report.o: src/ures/report.c
+	$(CC) $(CFLAGS) -c src/ures/report.c    -o obj/ures/report.o
 
-obj/res/signal.o: src/res/signal.c
-	$(CC) $(CFLAGS) -c src/res/signal.c     -o obj/res/signal.o
+obj/ures/signal.o: src/ures/signal.c
+	$(CC) $(CFLAGS) -c src/ures/signal.c    -o obj/ures/signal.o
 
-obj/res/socket.o: src/res/socket.c
-	$(CC) $(CFLAGS) -c src/res/socket.c     -o obj/res/socket.o
+obj/ures/socket.o: src/ures/socket.c
+	$(CC) $(CFLAGS) -c src/ures/socket.c    -o obj/ures/socket.o
 
 # common object files
 obj/common/convert.o: src/common/convert.c
@@ -111,21 +111,21 @@ obj/common/ttl.o: src/common/ttl.c
 	$(CC) $(CFLAGS) -c src/common/ttl.c     -o obj/common/ttl.o
 
 clean:
-	rm -f bin/nreq
-	rm -f bin/nres
+	rm -f bin/ureq
+	rm -f bin/ures
 	rm -f obj/common/convert.o
 	rm -f obj/common/daemon.o
 	rm -f obj/common/log.o
 	rm -f obj/common/parse.o
 	rm -f obj/common/ttl.o
-	rm -f obj/req/main.o
-	rm -f obj/res/config.o
-	rm -f obj/res/counters.o
-	rm -f obj/res/event.o
-	rm -f obj/res/loop.o
-	rm -f obj/res/main.o
-	rm -f obj/res/payload.o
-	rm -f obj/res/plugins.o
-	rm -f obj/res/report.o
-	rm -f obj/res/signal.o
-	rm -f obj/res/socket.o
+	rm -f obj/ureq/main.o
+	rm -f obj/ures/config.o
+	rm -f obj/ures/counters.o
+	rm -f obj/ures/event.o
+	rm -f obj/ures/loop.o
+	rm -f obj/ures/main.o
+	rm -f obj/ures/payload.o
+	rm -f obj/ures/plugins.o
+	rm -f obj/ures/report.o
+	rm -f obj/ures/signal.o
+	rm -f obj/ures/socket.o

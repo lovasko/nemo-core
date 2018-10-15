@@ -13,8 +13,8 @@
 
 #include "common/convert.h"
 #include "common/log.h"
-#include "res/proto.h"
-#include "res/types.h"
+#include "ures/proto.h"
+#include "ures/types.h"
 
 
 /// Print the CSV header of the reporting output.

@@ -12,9 +12,9 @@
 
 #include "common/log.h"
 #include "common/parse.h"
-#include "res/proto.h"
-#include "res/types.h"
-#include "res/version.h"
+#include "ures/proto.h"
+#include "ures/types.h"
+#include "ures/version.h"
 
 
 // Default values.

@@ -7,8 +7,8 @@
 #include <inttypes.h>
 
 #include "common/log.h"
-#include "res/proto.h"
-#include "res/types.h"
+#include "ures/proto.h"
+#include "ures/types.h"
 
 
 /// Reset all counters to zero.

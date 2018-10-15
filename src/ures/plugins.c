@@ -10,8 +10,8 @@
 
 #include "common/log.h"
 #include "common/payload.h"
-#include "res/proto.h"
-#include "res/types.h"
+#include "ures/proto.h"
+#include "ures/types.h"
 
 
 /// Count the number of selected plugins.

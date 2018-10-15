@@ -6,9 +6,9 @@
 
 #include <inttypes.h>
 
+#include "common/log.h"
 #include "res/proto.h"
 #include "res/types.h"
-#include "util/log.h"
 
 
 /// Reset all counters to zero.

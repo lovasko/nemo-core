@@ -7,10 +7,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "common/daemon.h"
+#include "common/log.h"
 #include "res/proto.h"
 #include "res/types.h"
-#include "util/daemon.h"
-#include "util/log.h"
 
 
 /// Unicast network responder.

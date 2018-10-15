@@ -15,7 +15,8 @@
 #include <time.h>
 #include <inttypes.h>
 
-#include "log.h"
+#include "common/log.h"
+
 
 // Logging settings.
 uint8_t log_lvl; ///< Minimal logging level.

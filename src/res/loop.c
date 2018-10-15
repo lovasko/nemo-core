@@ -10,9 +10,9 @@
 #include <errno.h>
 #include <signal.h>
 
+#include "common/log.h"
 #include "res/proto.h"
 #include "res/types.h"
-#include "util/log.h"
 
 
 extern volatile bool sterm;

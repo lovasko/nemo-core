@@ -11,10 +11,10 @@
 #include <string.h>
 #include <inttypes.h>
 
+#include "common/convert.h"
+#include "common/log.h"
 #include "res/proto.h"
 #include "res/types.h"
-#include "util/convert.h"
-#include "util/log.h"
 
 
 /// Print the CSV header of the reporting output.

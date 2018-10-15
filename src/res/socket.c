@@ -8,9 +8,9 @@
 
 #include <netinet/in.h>
 
+#include "common/log.h"
 #include "res/proto.h"
 #include "res/types.h"
-#include "util/log.h"
 
 
 /// Create the IPv4 socket.

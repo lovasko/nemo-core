@@ -23,12 +23,12 @@
 #include <pthread.h>
 #include <inttypes.h>
 
+#include "common/convert.h"
+#include "common/daemon.h"
+#include "common/log.h"
+#include "common/parse.h"
 #include "common/payload.h"
 #include "req/version.h"
-#include "util/convert.h"
-#include "util/daemon.h"
-#include "util/log.h"
-#include "util/parse.h"
 
 
 // Default values for optional arguments.

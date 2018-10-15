@@ -8,9 +8,9 @@
 #include <signal.h>
 #include <string.h>
 
+#include "common/log.h"
 #include "res/proto.h"
 #include "res/types.h"
-#include "util/log.h"
 
 
 volatile bool sint;  ///< Signal interrupt indicator.

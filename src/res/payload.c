@@ -6,12 +6,12 @@
 
 #include <inttypes.h>
 
+#include "common/convert.h"
+#include "common/log.h"
 #include "common/payload.h"
+#include "common/ttl.h"
 #include "res/proto.h"
 #include "res/types.h"
-#include "util/convert.h"
-#include "util/log.h"
-#include "util/ttl.h"
 
 
 /// Verify the incoming payload for correctness.

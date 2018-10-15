@@ -8,10 +8,10 @@
 #include <dlfcn.h>
 #include <string.h>
 
+#include "common/log.h"
 #include "common/payload.h"
-#include "res/types.h"
 #include "res/proto.h"
-#include "util/log.h"
+#include "res/types.h"
 
 
 /// Count the number of selected plugins.

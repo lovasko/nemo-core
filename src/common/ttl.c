@@ -8,7 +8,7 @@
 
 #include <stdlib.h>
 
-#include "util/ttl.h"
+#include "common/ttl.h"
 
 
 /// Traverse the control messages and obtain the received Time-To-Live value.

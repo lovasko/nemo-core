@@ -6,11 +6,11 @@
 
 #include <sys/socket.h>
 
+#include "common/convert.h"
+#include "common/log.h"
 #include "common/payload.h"
 #include "res/proto.h"
 #include "res/types.h"
-#include "util/convert.h"
-#include "util/log.h"
 
 
 /// Receive datagrams on both IPv4 and IPv6.

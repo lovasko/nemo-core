@@ -12,8 +12,8 @@
 #include <fcntl.h>
 #include <stdio.h>
 
-#include "util/daemon.h"
-#include "util/log.h"
+#include "common/daemon.h"
+#include "common/log.h"
 
 
 /// Redirect all standard streams to /dev/null.

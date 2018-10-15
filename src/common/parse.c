@@ -15,8 +15,8 @@
 #include <inttypes.h>
 #include <errno.h>
 
-#include "parse.h"
-#include "log.h"
+#include "common/log.h"
+#include "common/parse.h"
 
 
 /// Convert a string into an unsigned 64-bit integer.

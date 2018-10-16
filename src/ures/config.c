@@ -72,12 +72,12 @@ print_usage(void)
 /// Select IPv4 protocol only.
 /// @return success/failure indication
 ///
-/// @param[out] cf  configuration
-/// @param[in]  inp argument input (unused)
+/// @param[out] cf configuration
+/// @param[in]  in argument input (unused)
 static bool
-option_4(struct config* cf, const char* inp)
+option_4(struct config* cf, const char* in)
 {
-  (void)inp;
+  (void)in;
   cf->cf_ipv4 = true;
 
   return true;
@@ -86,12 +86,12 @@ option_4(struct config* cf, const char* inp)
 /// Select IPv6 protocol only.
 /// @return success/failure indication
 ///
-/// @param[out] cf  configuration
-/// @param[in]  inp argument input (unused)
+/// @param[out] cf configuration
+/// @param[in]  in argument input (unused)
 static bool
-option_6(struct config* cf, const char* inp)
+option_6(struct config* cf, const char* in)
 {
-  (void)inp;
+  (void)in;
   cf->cf_ipv6 = true;
 
   return true;
@@ -102,10 +102,10 @@ option_6(struct config* cf, const char* inp)
 /// the shared objects.
 /// @return success/failure indication
 ///
-/// @param[out] cf  configuration
-/// @param[in]  inp argument input
+/// @param[out] cf configuration
+/// @param[in]  in argument input
 static bool
-option_a(struct config* cf, const char* inp)
+option_a(struct config* cf, const char* in)
 {
   static uint64_t i = 0;
 
@@ -114,7 +114,7 @@ option_a(struct config* cf, const char* inp)
     return false;
   }
 
-  cf->cf_plgs[i] = inp;
+  cf->cf_plgs[i] = in;
   i++;
 
   return true;
@@ -123,12 +123,12 @@ option_a(struct config* cf, const char* inp)
 /// Change the reporting to binary mode.
 /// @return success/failure indication
 ///
-/// @param[out] cf  configuration
-/// @param[in]  inp argument input (unused)
+/// @param[out] cf configuration
+/// @param[in]  in argument input (unused)
 static bool
-option_b(struct config* cf, const char* inp)
+option_b(struct config* cf, const char* in)
 {
-  (void)inp;
+  (void)in;
   cf->cf_bin = true;
 
   return true;
@@ -137,12 +137,12 @@ option_b(struct config* cf, const char* inp)
 /// Run the process as a system daemon.
 /// @return success/failure indication
 ///
-/// @param[out] cf  configuration
-/// @param[in]  inp argument input (unused)
+/// @param[out] cf configuration
+/// @param[in]  in argument input (unused)
 static bool
-option_d(struct config* cf, const char* inp)
+option_d(struct config* cf, const char* in)
 {
-  (void)inp;
+  (void)in;
   cf->cf_dmon = true;
 
   return true;
@@ -151,12 +151,12 @@ option_d(struct config* cf, const char* inp)
 /// Terminate the process on first network-related error.
 /// @return success/failure indication
 ///
-/// @param[out] cf  configuration
-/// @param[in]  inp argument input (unused)
+/// @param[out] cf configuration
+/// @param[in]  in argument input (unused)
 static bool
-option_e(struct config* cf, const char* inp)
+option_e(struct config* cf, const char* in)
 {
-  (void)inp;
+  (void)in;
   cf->cf_err = true;
 
   return true;
@@ -165,13 +165,13 @@ option_e(struct config* cf, const char* inp)
 /// Print the usage help message and exit the process.
 /// @return success/failure indication
 ///
-/// @param[out] cf  configuration
-/// @param[in]  inp argument input (unused)
+/// @param[out] cf configuration
+/// @param[in]  in argument input (unused)
 static bool
-option_h(struct config* cf, const char* inp)
+option_h(struct config* cf, const char* in)
 {
   (void)cf;
-  (void)inp;
+  (void)in;
 
   print_usage();
   exit(EXIT_FAILURE);
@@ -182,23 +182,23 @@ option_h(struct config* cf, const char* inp)
 /// Set a unique key to identify the flow.
 /// @return success/failure indication
 ///
-/// @param[out] cf  configuration
-/// @param[in]  inp argument input
+/// @param[out] cf configuration
+/// @param[in]  in argument input
 static bool
-option_k(struct config* cf, const char* inp)
+option_k(struct config* cf, const char* in)
 {
-  return parse_uint64(&cf->cf_key, inp, 1, UINT64_MAX);
+  return parse_uint64(&cf->cf_key, in, 1, UINT64_MAX);
 }
 
 /// Enable monologue mode where no responses are being issued.
 /// @return success/failure indication
 ///
-/// @param[out] cf  configuration
-/// @param[in]  inp argument input (unused)
+/// @param[out] cf configuration
+/// @param[in]  in argument input (unused)
 static bool
-option_m(struct config* cf, const char* inp)
+option_m(struct config* cf, const char* in)
 {
-  (void)inp;
+  (void)in;
   cf->cf_mono = true;
 
   return true;
@@ -207,12 +207,12 @@ option_m(struct config* cf, const char* inp)
 /// Turn off coloring and highlights in the logging output.
 /// @return success/failure indication
 ///
-/// @param[out] cf  configuration 
-/// @param[in]  inp argument input (unused)
+/// @param[out] cf configuration 
+/// @param[in]  in argument input (unused)
 static bool
-option_n(struct config* cf, const char* inp)
+option_n(struct config* cf, const char* in)
 {
-  (void)inp;
+  (void)in;
   cf->cf_lcol = false;
 
   return true;
@@ -221,23 +221,23 @@ option_n(struct config* cf, const char* inp)
 /// Set the UDP port number used for all communication.
 /// @return success/failure indication
 ///
-/// @param[out] cf  configuration
-/// @param[in]  inp argument input
+/// @param[out] cf configuration
+/// @param[in]  in argument input
 static bool
-option_p(struct config* cf, const char* inp)
+option_p(struct config* cf, const char* in)
 {
-  return parse_uint64(&cf->cf_port, inp, 1, 65535);
+  return parse_uint64(&cf->cf_port, in, 1, 65535);
 }
 
 /// Suppress reporting to the standard output stream.
 /// @return success/failure indication
 ///
-/// @param[out] cf  configuration
-/// @param[in]  inp argument input (unused)
+/// @param[out] cf configuration
+/// @param[in]  in argument input (unused)
 static bool
-option_q(struct config* cf, const char* inp)
+option_q(struct config* cf, const char* in)
 {
-  (void)inp;
+  (void)in;
   cf->cf_sil = true;
 
   return true;
@@ -246,45 +246,45 @@ option_q(struct config* cf, const char* inp)
 /// Set the socket receive buffer size.
 /// @return success/failure indication
 ///
-/// @param[out] cf  configuration
-/// @param[in]  inp argument input
+/// @param[out] cf configuration
+/// @param[in]  in argument input
 static bool
-option_r(struct config* cf, const char* inp)
+option_r(struct config* cf, const char* in)
 {
-  return parse_scalar(&cf->cf_rbuf, inp, "b", parse_memory_unit);
+  return parse_scalar(&cf->cf_rbuf, in, "b", parse_memory_unit);
 }
 
 /// Set the socket send buffer size.
 /// @return success/failure indication
 ///
-/// @param[out] cf  configuration
-/// @param[in]  inp argument input
+/// @param[out] cf configuration
+/// @param[in]  in argument input
 static bool
-option_s(struct config* cf, const char* inp)
+option_s(struct config* cf, const char* in)
 {
-  return parse_scalar(&cf->cf_sbuf, inp, "b", parse_memory_unit);
+  return parse_scalar(&cf->cf_sbuf, in, "b", parse_memory_unit);
 }
 
 /// Set the IP Time-To-Live value.
 /// @return success/failure indication
 ///
-/// @param[out] cf  configuration
-/// @param[in]  inp argument input
+/// @param[out] cf configuration
+/// @param[in]  in argument input
 static bool
-option_t(struct config* cf, const char* inp)
+option_t(struct config* cf, const char* in)
 {
-  return parse_uint64(&cf->cf_ttl, inp, 1, 255);
+  return parse_uint64(&cf->cf_ttl, in, 1, 255);
 }
 
 /// Increase the logging verbosity.
 /// @return success/failure indication
 ///
-/// @param[out] cf  configuration
-/// @param[in]  inp argument input (unused)
+/// @param[out] cf configuration
+/// @param[in]  in argument input (unused)
 static bool
-option_v(struct config* cf, const char* inp)
+option_v(struct config* cf, const char* in)
 {
-  (void)inp;
+  (void)in;
 
   if (cf->cf_llvl == LL_DEBUG) cf->cf_llvl = LL_TRACE;
   if (cf->cf_llvl == LL_INFO)  cf->cf_llvl = LL_DEBUG;

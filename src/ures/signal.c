@@ -17,7 +17,7 @@ volatile bool sint;  ///< Signal interrupt indicator.
 volatile bool sterm; ///< Signal termination indicator.
 volatile bool susr1; ///< User request for details indicator.
 
-/// Signal handler for the SIGINT and SIGTERM signals.
+/// Signal handler for the SIGINT, SIGTERM, and SIGUSR1 signals.
 ///
 /// This handler does not perform any action, just toggles the indicator
 /// for the signal. The actual signal handling is done by the respond_loop
@@ -54,11 +54,12 @@ block_all_signals(void)
   (void)sigprocmask(SIG_SETMASK, &mask, NULL);
 }
 
-/// Install signal handler for the SIGINT signal.
+/// Install signal handlers for the SIGINT, SIGTERM, and SIGUSR1 signals.
 /// @return success/failure indication
 ///
 /// @global sint
 /// @global sterm
+/// @global susr1
 bool
 install_signal_handlers(void)
 {
@@ -108,7 +109,7 @@ install_signal_handlers(void)
   return true;
 }
 
-/// Create a signal mask that enables the SIGINT and SIGTERM signals.
+/// Create a signal mask that enables the SIGINT, SIGTERM, and SIGUSR1 signals.
 ///
 /// @param[out] mask signal mask applied while waiting
 void

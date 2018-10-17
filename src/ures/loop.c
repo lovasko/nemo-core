@@ -32,7 +32,7 @@ extern volatile bool susr1;
 static bool
 handle_interrupt(const struct counters* cts4,
                  const struct counters* cts6,
-	         const struct config* cf)
+                 const struct config* cf)
 {
   log(LL_TRACE, false, "main", "handling interrupt");
 

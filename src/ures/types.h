@@ -43,7 +43,7 @@ struct option {
                  const char* inp);
 };
 
-/// Plug-in shared object library.
+/// Event callback plugin.
 struct plugin {
   const char* pi_name;                      ///< Name.
   void*       pi_hndl;                      ///< Shared object handle.
@@ -55,7 +55,7 @@ struct plugin {
   int         pi_pipe[2];                   ///< Payload notification channel.
 };
 
-/// Set of counters of events for a single connection.
+/// Event counters.
 struct counters {
   uint64_t ct_rall; ///< Number of overall received messages.
   uint64_t ct_reni; ///< Received errors due to network issues.

@@ -28,6 +28,8 @@ void log_counters(const char* ipv, const struct counters* cts);
 bool handle_event(struct counters* cts,
                   int sock,
                   const char* ipv,
+                  const struct plugin* pins,
+                  const uint64_t npins,
                   const struct config* cf);
 
 // Loop.
@@ -35,6 +37,8 @@ bool respond_loop(struct counters* cts4,
                   struct counters* cts6,
                   int sock4,
                   int sock6,
+                  const struct plugin* pins,
+                  const uint64_t npins,
                   const struct config* cf);
   
 // Payload.

@@ -82,7 +82,7 @@ main(int argc, char* argv[])
   if (cf.cf_ipv6 == true) reset_counters(&cts6);
 
   // Start the main responding loop.
-  retb = respond_loop(&cts4, &cts6, sock4, sock6, &cf);
+  retb = respond_loop(&cts4, &cts6, sock4, sock6, pins, npins, &cf);
   if (retb == false)
     log(LL_ERROR, false, "main", "responding loop has been terminated");
 

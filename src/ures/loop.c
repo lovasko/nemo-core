@@ -75,12 +75,16 @@ handle_interrupt(const struct counters* cts4,
 /// @param[out] cts6  IPv6 event counters
 /// @param[in]  sock4 IPv4 socket
 /// @param[in]  sock6 IPv6 socket
+/// @param[in]  pins  array of plugins
+/// @param[in]  npins number of plugins
 /// @param[in]  cf    configuration
 bool
 respond_loop(struct counters* cts4,
              struct counters* cts6,
              int sock4,
              int sock6,
+             const struct plugin* pins,
+             const uint64_t npins,
              const struct config* cf)
 {
   int reti;
@@ -130,7 +134,7 @@ respond_loop(struct counters* cts4,
     if (cf->cf_ipv4 == true) {
       reti = FD_ISSET(sock4, &rfd);
       if (reti > 0) {
-        retb = handle_event(cts4, sock4, "IPv4", cf);
+        retb = handle_event(cts4, sock4, "IPv4", pins, npins, cf);
         if (retb == false)
           return false;
       }
@@ -140,7 +144,7 @@ respond_loop(struct counters* cts4,
     if (cf->cf_ipv6 == true) {
       reti = FD_ISSET(sock6, &rfd);
       if (reti > 0) {
-        retb = handle_event(cts6, sock6, "IPv6", cf);
+        retb = handle_event(cts6, sock6, "IPv6", pins, npins, cf);
         if (retb == false)
           return false;
       }

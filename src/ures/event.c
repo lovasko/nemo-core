@@ -129,14 +129,18 @@ send_datagram(struct counters* cts,
 /// Handle the event of an incoming datagram.
 /// @return success/failure indication
 ///
-/// @param[out] cts  event counters
-/// @param[in]  sock socket
-/// @param[in]  ipv  IP version
-/// @param[in]  cf   configuration
+/// @param[out] cts   event counters
+/// @param[in]  sock  socket
+/// @param[in]  ipv   IP version
+/// @param[in]  pins  array of plugins
+/// @param[in]  npins number of plugins
+/// @param[in]  cf    configuration
 bool
 handle_event(struct counters* cts,
              int sock,
              const char* ipv,
+             const struct plugin* pins,
+             const uint64_t npins,
              const struct config* cf)
 {
   bool retb;
@@ -171,12 +175,8 @@ handle_event(struct counters* cts,
     return false;
   }
 
-  // Trigger all associated action sets.
-  // retb = trigger_actions(&pl);
-  // if (retb == false) {
-  //   log(LL_WARN, false, "main", "unable to trigger all actions");
-  //   return false;
-  // }
+  // Notify all attached plugins about the payload.
+  notify_plugins(pins, npins, &pl);
 
   // Report the event as a entry in the CSV output.
   report_event(&pl, cf);

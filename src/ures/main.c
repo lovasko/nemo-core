@@ -63,17 +63,17 @@ main(int argc, char* argv[])
     return EXIT_FAILURE;
   }
 
-  // Start actions.
+  // Start plugins.
   retb = load_plugins(pins, &npins, &cf);
   if (retb == false) {
-    log(LL_ERROR, false, "main", "unable to load all actions");
+    log(LL_ERROR, false, "main", "unable to load all plugins");
     return EXIT_FAILURE;
   }
 
-  // Start actions.
+  // Start plugins.
   retb = start_plugins(pins, npins);
   if (retb == false) {
-    log(LL_ERROR, false, "main", "unable to start all actions");
+    log(LL_ERROR, false, "main", "unable to start all plugins");
     return EXIT_FAILURE;
   }
 

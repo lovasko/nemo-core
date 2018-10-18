@@ -75,7 +75,7 @@ create_socket4(struct proto* pr, const struct config* cf)
   reti = setsockopt(pr->pr_sock, IPPROTO_IP, IP_TTL, &val, sizeof(val));
   if (reti == -1) {
     log(LL_WARN, true, "main", "unable to set the socket Time-To-Live to %d",
-		  val);
+      val);
     return false;
   }
 
@@ -84,7 +84,7 @@ create_socket4(struct proto* pr, const struct config* cf)
   reti = setsockopt(pr->pr_sock, IPPROTO_IP, IP_RECVTTL, &val, sizeof(val));
   if (reti == -1) {
     log(LL_WARN, true, "main", "unable to request Time-To-Live values on the "
-		  "socket");
+      "socket");
     return false;
   }
 
@@ -142,8 +142,8 @@ create_socket6(struct proto* pr, const struct config* cf)
   val = (int)cf->cf_rbuf;
   reti = setsockopt(pr->pr_sock, SOL_SOCKET, SO_RCVBUF, &val, sizeof(val));
   if (reti == -1) {
-    log(LL_WARN, true, "main", "unable to set the read socket buffer size to "
-		  "%d", val);
+    log(LL_WARN, true, "main", "unable to set the receive buffer size to %d",
+      val);
     return false;
   }
 
@@ -151,15 +151,15 @@ create_socket6(struct proto* pr, const struct config* cf)
   val = (int)cf->cf_sbuf;
   reti = setsockopt(pr->pr_sock, SOL_SOCKET, SO_SNDBUF, &val, sizeof(val));
   if (reti == -1) {
-    log(LL_WARN, true, "main", "unable to set the socket send buffer size to "
-		  "%d", val);
+    log(LL_WARN, true, "main", "unable to set the send buffer size to %d",
+      val);
     return false;
   }
 
   // Set the outgoing hop count.
   val = (int)cf->cf_ttl;
   reti = setsockopt(pr->pr_sock, IPPROTO_IPV6, IPV6_UNICAST_HOPS, &val,
-	  sizeof(val));
+    sizeof(val));
   if (reti == -1) {
     log(LL_WARN, true, "main", "unable to set hop count to %d", val);
     return false;
@@ -168,7 +168,7 @@ create_socket6(struct proto* pr, const struct config* cf)
   // Request the ancillary control message for hop counts.
   val = 1;
   reti = setsockopt(pr->pr_sock, IPPROTO_IPV6, IPV6_RECVHOPLIMIT, &val,
-	  sizeof(val));
+    sizeof(val));
   if (reti == -1) {
     log(LL_WARN, true, "main", "unable to request hop count values");
     return false;

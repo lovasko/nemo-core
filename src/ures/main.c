@@ -21,8 +21,8 @@ main(int argc, char* argv[])
   struct config cf;
   struct plugin pins[PLUG_MAX];
   uint64_t npins;
-	struct proto p4;
-	struct proto p6;
+  struct proto p4;
+  struct proto p6;
 
   // Parse configuration from command-line options.
   retb = parse_config(&cf, argc, argv);
@@ -61,28 +61,28 @@ main(int argc, char* argv[])
     return EXIT_FAILURE;
   }
 
-	// Initialize the IPv4 connection.
+  // Initialize the IPv4 connection.
   if (cf.cf_ipv4 == true) {
-		reset_counters(&p4);
-		p4.pr_name = "IPv4";
+    reset_counters(&p4);
+    p4.pr_name = "IPv4";
 
-		retb = create_socket4(&p4, &cf);
-		if (retb == false) {
-			log(LL_ERROR, false, "main", "unable to create %s socket", p4.pr_name);
-			return EXIT_FAILURE;
-		}
-	}
+    retb = create_socket4(&p4, &cf);
+    if (retb == false) {
+      log(LL_ERROR, false, "main", "unable to create %s socket", p4.pr_name);
+      return EXIT_FAILURE;
+    }
+  }
 
-	// Initialize the IPv6 connection.
+  // Initialize the IPv6 connection.
   if (cf.cf_ipv6 == true) {
-	  reset_counters(&p6);
-		p6.pr_name = "IPv6";
+    reset_counters(&p6);
+    p6.pr_name = "IPv6";
 
-		retb = create_socket6(&p6, &cf);
-		if (retb == false) {
-			log(LL_ERROR, false, "main", "unable to create %s socket", p6.pr_name);
-			return EXIT_FAILURE;
-		}
+    retb = create_socket6(&p6, &cf);
+    if (retb == false) {
+      log(LL_ERROR, false, "main", "unable to create %s socket", p6.pr_name);
+      return EXIT_FAILURE;
+    }
   }
 
   // Start the main responding loop.

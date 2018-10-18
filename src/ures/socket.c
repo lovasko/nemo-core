@@ -29,7 +29,7 @@ create_socket4(struct proto* pr, const struct config* cf)
 
   // Create a UDP socket.
   pr->pr_sock = socket(AF_INET, SOCK_DGRAM, 0);
-  if (pr->pr_sock < 0) {
+  if (pr->pr_sock == -1) {
     log(LL_WARN, true, "main", "unable to initialise the socket");
     return false;
   }
@@ -47,7 +47,7 @@ create_socket4(struct proto* pr, const struct config* cf)
   addr.sin_port        = htons((uint16_t)cf->cf_port);
   addr.sin_addr.s_addr = INADDR_ANY;
   reti = bind(pr->pr_sock, (struct sockaddr*)&addr, sizeof(addr));
-  if (reti < 0) {
+  if (reti == -1) {
     log(LL_WARN, true, "main", "unable to bind the socket");
     return false;
   }
@@ -107,7 +107,7 @@ create_socket6(struct proto* pr, const struct config* cf)
 
   // Create a UDP socket.
   pr->pr_sock = socket(AF_INET6, SOCK_DGRAM, 0);
-  if (pr->pr_sock < 0) {
+  if (pr->pr_sock == -1) {
     log(LL_WARN, true, "main", "unable to initialize the socket");
     return false;
   }
@@ -133,7 +133,7 @@ create_socket6(struct proto* pr, const struct config* cf)
   addr.sin6_port   = htons((uint16_t)cf->cf_port);
   addr.sin6_addr   = in6addr_any;
   reti = bind(pr->pr_sock, (struct sockaddr*)&addr, sizeof(addr));
-  if (reti < 0) {
+  if (reti == -1) {
     log(LL_WARN, true, "main", "unable to bind the socket");
     return false;
   }

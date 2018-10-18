@@ -10,7 +10,7 @@
 
 #include "common/log.h"
 #include "common/payload.h"
-#include "ures/proto.h"
+#include "ures/funcs.h"
 #include "ures/types.h"
 
 

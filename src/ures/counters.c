@@ -7,7 +7,7 @@
 #include <inttypes.h>
 
 #include "common/log.h"
-#include "ures/proto.h"
+#include "ures/funcs.h"
 #include "ures/types.h"
 
 

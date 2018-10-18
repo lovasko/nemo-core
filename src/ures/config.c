@@ -12,7 +12,7 @@
 
 #include "common/log.h"
 #include "common/parse.h"
-#include "ures/proto.h"
+#include "ures/funcs.h"
 #include "ures/types.h"
 #include "ures/version.h"
 

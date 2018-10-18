@@ -16,33 +16,29 @@
 #include "ures/types.h"
 
 
-// Config.
+// Configuration.
 bool parse_config(struct config* cf, int argc, char* argv[]);
 void log_config(const struct config* cf);
 
 // Counters.
-void reset_counters(struct counters* cts);
-void log_counters(const char* ipv, const struct counters* cts);
+void reset_counters(struct proto* pr);
+void log_counters(const struct proto* pr);
 
 // Event.
-bool handle_event(struct counters* cts,
-                  int sock,
-                  const char* ipv,
+bool handle_event(struct proto* pr,
                   const struct plugin* pins,
                   const uint64_t npins,
                   const struct config* cf);
 
 // Loop.
-bool respond_loop(struct counters* cts4,
-                  struct counters* cts6,
-                  int sock4,
-                  int sock6,
+bool respond_loop(struct proto* p4,
+                  struct proto* p6,
                   const struct plugin* pins,
                   const uint64_t npins,
                   const struct config* cf);
   
 // Payload.
-bool verify_payload(struct counters* cts,
+bool verify_payload(struct proto* pr,
                     const ssize_t n,
                     const struct payload* pl);
 bool update_payload(struct payload* pl,
@@ -69,7 +65,7 @@ bool install_signal_handlers(void);
 void create_signal_mask(sigset_t* mask);
 
 // Socket.
-bool create_socket4(int* sock, const struct config* cf);
-bool create_socket6(int* sock, const struct config* cf);
+bool create_socket4(struct proto* pr, const struct config* cf);
+bool create_socket6(struct proto* pr, const struct config* cf);
 
 #endif

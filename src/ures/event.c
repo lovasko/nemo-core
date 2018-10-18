@@ -16,18 +16,16 @@
 /// Receive datagrams on both IPv4 and IPv6.
 /// @return success/failure indication
 ///
-/// @param[out] cts  event counters
+/// @param[out] pr   protocol connection
 /// @param[out] addr IPv4/IPv6 address
 /// @param[out] pl   payload
 /// @param[in]  msg  message headers
-/// @param[in]  sock socket
 /// @param[in]  cf   configuration
 static bool
-receive_datagram(struct counters* cts,
+receive_datagram(struct proto* pr,
                  struct sockaddr_storage* addr,
                  struct payload* pl,
                  struct msghdr* msg,
-                 int sock,
                  const struct config* cf)
 {
   struct iovec data;
@@ -41,16 +39,16 @@ receive_datagram(struct counters* cts,
   data.iov_len  = sizeof(*pl);
 
   // Prepare the message.
-  msg->msg_name       = addr;
-  msg->msg_namelen    = sizeof(*addr);
-  msg->msg_iov        = &data;
-  msg->msg_iovlen     = 1;
+  msg->msg_name    = addr;
+  msg->msg_namelen = sizeof(*addr);
+  msg->msg_iov     = &data;
+  msg->msg_iovlen  = 1;
 
   // Receive the message and handle potential errors.
-  n = recvmsg(sock, msg, MSG_DONTWAIT | MSG_TRUNC);
+  n = recvmsg(pr->pr_sock, msg, MSG_DONTWAIT | MSG_TRUNC);
   if (n < 0) {
     log(LL_WARN, true, "main", "receiving has failed");
-    cts->ct_reni++;
+    pr->pr_reni++;
 
     if (cf->cf_err == true)
       return false;
@@ -60,7 +58,7 @@ receive_datagram(struct counters* cts,
   decode_payload(pl);
 
   // Verify the payload correctness.
-  retb = verify_payload(cts, n, pl);
+  retb = verify_payload(pr, n, pl);
   if (retb == false) {
     log(LL_WARN, false, "main", "invalid payload content");
     return false;
@@ -72,14 +70,12 @@ receive_datagram(struct counters* cts,
 /// Send a payload to the defined address.
 /// @return success/failure indication
 ///
-/// @param[out] cts  event counters
-/// @param[in]  sock socket
+/// @param[out] pr   protocol connection
 /// @param[in]  pl   payload
 /// @param[in]  addr IPv4/IPv6 address
 /// @param[in]  cf   configuration
 static bool
-send_datagram(struct counters* cts,
-              int sock,
+send_datagram(struct proto* pr,
               struct payload* pl,
               struct sockaddr_storage* addr,
               const struct config* cf)
@@ -106,10 +102,10 @@ send_datagram(struct counters* cts,
   encode_payload(pl);
 
   // Send the datagram.
-  n = sendmsg(sock, &msg, MSG_DONTWAIT);
+  n = sendmsg(pr->pr_sock, &msg, MSG_DONTWAIT);
   if (n < 0) {
     log(LL_WARN, true, "main", "unable to send datagram");
-    cts->ct_seni++;
+    pr->pr_seni++;
 
     if (cf->cf_err == true)
       return false;
@@ -129,16 +125,12 @@ send_datagram(struct counters* cts,
 /// Handle the event of an incoming datagram.
 /// @return success/failure indication
 ///
-/// @param[out] cts   event counters
-/// @param[in]  sock  socket
-/// @param[in]  ipv   IP version
+/// @param[out] pr    protocol connection
 /// @param[in]  pins  array of plugins
 /// @param[in]  npins number of plugins
 /// @param[in]  cf    configuration
 bool
-handle_event(struct counters* cts,
-             int sock,
-             const char* ipv,
+handle_event(struct proto* pr,
              const struct plugin* pins,
              const uint64_t npins,
              const struct config* cf)
@@ -149,6 +141,8 @@ handle_event(struct counters* cts,
   struct msghdr msg;
   uint8_t cdata[512];
 
+  log(LL_TRACE, false, "main", "handling event on the %s socket", pr->pr_name);
+
   // Assign a buffer for storing the control messages received as part of the
   // datagram. This data is later passed to other functions for reporting the
   // relevant data.
@@ -156,9 +150,9 @@ handle_event(struct counters* cts,
   msg.msg_controllen = sizeof(cdata);
 
   // Receive a request.
-  retb = receive_datagram(cts, &addr, &pl, &msg, sock, cf);
+  retb = receive_datagram(pr, &addr, &pl, &msg, cf);
   if (retb == false) {
-    log(LL_WARN, false, "main", "unable to receive datagram on the %s socket", ipv);
+    log(LL_WARN, false, "main", "unable to receive datagram on the socket");
 
     // We do not continue with the response, given the receiving of the
     // request has failed. If the op_err option was selected, all network
@@ -186,9 +180,9 @@ handle_event(struct counters* cts,
     return true;
 
   // Send a response back.
-  retb = send_datagram(cts, sock, &pl, &addr, cf);
+  retb = send_datagram(pr, &pl, &addr, cf);
   if (retb == false) {
-    log(LL_WARN, false, "main", "unable to send datagram on the %s socket", ipv);
+    log(LL_WARN, false, "main", "unable to send datagram on the socket");
 
     // Following the same logic as above in the receive stage.
     return !cf->cf_err;

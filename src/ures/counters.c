@@ -11,42 +11,49 @@
 #include "ures/types.h"
 
 
-/// Reset all counters to zero.
+/// Reset all protocol event counters to zero.
 ///
-/// @param[out] cts counters
+/// @param[out] pr protocol connection
 void
-reset_counters(struct counters* cts)
+reset_counters(struct proto* pr)
 {
-  cts->ct_rall = 0;
-  cts->ct_reni = 0;
-  cts->ct_resz = 0;
-  cts->ct_remg = 0;
-  cts->ct_repv = 0;
-  cts->ct_rety = 0;
-  cts->ct_sall = 0;
-  cts->ct_seni = 0;
+  pr->pr_rall = 0;
+  pr->pr_reni = 0;
+  pr->pr_resz = 0;
+  pr->pr_remg = 0;
+  pr->pr_repv = 0;
+  pr->pr_rety = 0;
+  pr->pr_sall = 0;
+  pr->pr_seni = 0;
 }
 
 /// Log all counters using the information level.
 ///
-/// @param[in] ipv IP protocol version name
-/// @param[in] cts counters
+/// @param[in] pr protocol connection
 void 
-log_counters(const char* ipv, const struct counters* cts)
+log_counters(const struct proto* pr)
 {
-  log(LL_DEBUG, false, "main", "%s overall received: %" PRIu64, ipv,
-    cts->ct_rall);
+  log(LL_DEBUG, false, "main", "%s overall received: %" PRIu64,
+    pr->pr_name, pr->pr_rall);
+
   log(LL_DEBUG, false, "main", "%s receive network-related errors: %" PRIu64,
-    ipv, cts->ct_reni);
+    pr->pr_name, pr->pr_reni);
+
   log(LL_DEBUG, false, "main", "%s receive datagram size mismatches: %" PRIu64,
-    ipv, cts->ct_resz);
-  log(LL_DEBUG, false, "main", "%s receive payload magic mismatches: %"
-    PRIu64, ipv, cts->ct_remg);
-  log(LL_DEBUG, false, "main", "%s receive payload version mismatches: %"
-    PRIu64, ipv, cts->ct_repv);
+    pr->pr_name, pr->pr_resz);
+
+  log(LL_DEBUG, false, "main", "%s receive payload magic mismatches: %" PRIu64,
+    pr->pr_name, pr->pr_remg);
+
+  log(LL_DEBUG, false, "main", "%s receive payload version mismatches: %" PRIu64,
+    pr->pr_name, pr->pr_repv);
+
   log(LL_DEBUG, false, "main", "%s receive payload type mismatches: %" PRIu64,
-    ipv, cts->ct_rety);
-  log(LL_DEBUG, false, "main", "%s overall sent: %" PRIu64, ipv, cts->ct_sall);
-  log(LL_DEBUG, false, "main", "%s send network-related errors: %" PRIu64, ipv,
-    cts->ct_seni);
+    pr->pr_name, pr->pr_rety);
+
+  log(LL_DEBUG, false, "main", "%s overall sent: %" PRIu64,
+    pr->pr_name, pr->pr_sall);
+
+  log(LL_DEBUG, false, "main", "%s send network-related errors: %" PRIu64,
+    pr->pr_name, pr->pr_seni);
 }

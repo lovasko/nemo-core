@@ -26,12 +26,12 @@ extern volatile bool susr1;
 /// @global sterm
 /// @global susr1
 ///
-/// @param[in] cts4 IPv4 event counters
-/// @param[in] cts6 IPv6 event counters
-/// @param[in] cf   configuration
+/// @param[in] p4 IPv4 protocol
+/// @param[in] p6 IPv6 protocol
+/// @param[in] cf configuration
 static bool
-handle_interrupt(const struct counters* cts4,
-                 const struct counters* cts6,
+handle_interrupt(const struct proto* p4,
+                 const struct proto* p6,
                  const struct config* cf)
 {
   log(LL_TRACE, false, "main", "handling interrupt");
@@ -51,8 +51,8 @@ handle_interrupt(const struct counters* cts4,
   // Print logging information and continue the process upon receiving SIGUSR1.
   if (susr1 == true) {
     log_config(cf);
-    if (cf->cf_ipv4 == true) log_counters("IPv4", cts4);
-    if (cf->cf_ipv6 == true) log_counters("IPv6", cts6);
+    if (cf->cf_ipv4 == true) log_counters(p4);
+    if (cf->cf_ipv6 == true) log_counters(p6);
 
     // Reset the signal indicator, so that following signal handling will avoid
     // the false positive.
@@ -71,18 +71,14 @@ handle_interrupt(const struct counters* cts4,
 /// @global sterm
 /// @global susr1
 ///
-/// @param[out] cts4  IPv4 event counters
-/// @param[out] cts6  IPv6 event counters
-/// @param[in]  sock4 IPv4 socket
-/// @param[in]  sock6 IPv6 socket
+/// @param[out] p4    IPv4 protocol
+/// @param[out] p6    IPv6 protocol
 /// @param[in]  pins  array of plugins
 /// @param[in]  npins number of plugins
 /// @param[in]  cf    configuration
 bool
-respond_loop(struct counters* cts4,
-             struct counters* cts6,
-             int sock4,
-             int sock6,
+respond_loop(struct proto* p4,
+             struct proto* p6,
              const struct plugin* pins,
              const uint64_t npins,
              const struct config* cf)
@@ -101,8 +97,8 @@ respond_loop(struct counters* cts4,
 
   // Add sockets to the event list.
   FD_ZERO(&rfd);
-  if (cf->cf_ipv4 == true) FD_SET(sock4, &rfd);
-  if (cf->cf_ipv6 == true) FD_SET(sock6, &rfd);
+  if (cf->cf_ipv4 == true) FD_SET(p4->pr_sock, &rfd);
+  if (cf->cf_ipv6 == true) FD_SET(p6->pr_sock, &rfd);
 
   // Compute the file descriptor count.
   ndfs = (cf->cf_ipv4 == true && cf->cf_ipv6 == true) ? 5 : 4;
@@ -119,7 +115,7 @@ respond_loop(struct counters* cts4,
     if (reti == -1) {
       // Check for interrupt (possibly due to a signal).
       if (errno == EINTR) {
-        retb = handle_interrupt(cts4, cts6, cf);
+        retb = handle_interrupt(p4, p6, cf);
         if (retb == true)
           continue;
 
@@ -132,9 +128,9 @@ respond_loop(struct counters* cts4,
 
     // Handle incoming IPv4 datagrams.
     if (cf->cf_ipv4 == true) {
-      reti = FD_ISSET(sock4, &rfd);
+      reti = FD_ISSET(p4->pr_sock, &rfd);
       if (reti > 0) {
-        retb = handle_event(cts4, sock4, "IPv4", pins, npins, cf);
+        retb = handle_event(p4, pins, npins, cf);
         if (retb == false)
           return false;
       }
@@ -142,9 +138,9 @@ respond_loop(struct counters* cts4,
 
     // Handle incoming IPv6 datagrams.
     if (cf->cf_ipv6 == true) {
-      reti = FD_ISSET(sock6, &rfd);
+      reti = FD_ISSET(p6->pr_sock, &rfd);
       if (reti > 0) {
-        retb = handle_event(cts6, sock6, "IPv6", pins, npins, cf);
+        retb = handle_event(p6, pins, npins, cf);
         if (retb == false)
           return false;
       }

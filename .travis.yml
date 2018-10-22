@@ -1,15 +1,19 @@
 language: c
 compiler:
-- clang
-- gcc
+ - clang
+ - gcc
+
 sudo: required
 script: make
+
 env:
   global:
-   - secure: FjVL6HME24GSWyUnvZJUQ2c3/tzRMgmR4EF8k9HN6g8m1Io8nKWpOcz31V7GNV3Ve5J6/jk7jYjlfiavpOs+d4yhDV6QNsTKMvyCVWBwx0FrzyRjvN4yORspBBt2fs42VNTSZ7nFmdUbCL7d4b5Zvv2LHjT/DeZxTPLdItfDK08qVbWhn5C+Qz5UOdzMUYEQf+A4cQyGl/Xs8sVu0XCiVCgb+2pMyc75nBupIHu2HKDvl+3sYh85sxvochVraKOb2OB7wzV5TeNxyBSBJoMIWz5LUIgvY2qsPVZjwgdSK4a6opMJMa1Aufpa+SOR4irOGh4Qx4h4cz4I4cxwH8f5QAZuD3XQnn5FOyN4y9cwa83NIO30ZEZ6CG50AuzBo5xxFseVVTnsHr5l3OpPiIr8kSO+S9sAwUzaBYj4QkGU4w6TluLna0uU3tJheQ1DE/krV6HjwyApt2pQppt7Lf9erp+5UcBwWt1tph3LEYuv/61dHlJB/l263znIZfS40Q3nj/EKpWvNtJX1vd5Ya+5Lzo5Fqd909lzs/GUBKrkjmjBu2n74YaHPkPtQMalJvW3UHLEeZeLkXV50wb7j3JKqVzVWp5S2UkFVMBx4NHVpVL57+PJLYLmTWGyGWY5KokcZ/fNtuxQTgSTI/6I4KdQ9T1X8jLA25hN9bbneB2YgN5A=
+   - secure: "MCjmSQxFGPV3JJDnzh8TlvcawVzYpwOwKZmgDg7+w1b3sb5VjQGzI5sBzD4d+fQR0NGGUVChM6OlqFhG1aOokKl6OiU7K2f+VW8RIRNoLFzCQPTG1W4zDSeHGEGZ/+LSn6OypSyybYqX65tXFr/AttzDd1yS+JXmF/rpFq1cbEnoKMx6eakrswqUF7kY+w01ZgLYGEpIpxDm3SPcQR+CUB42mjgODmK5RzErp10RPTfou2eQenD6NVak5wr9L9tyewe37NJYdPc4iQ8P7Sak8Ou0g+XcL/Kn+QtxQIxQFx6IFPASzwIn2bCcU/b9UN68ASOQWvOQUz7cOfP8z4fHPPDwL45G26LtFXUbwo9q+CyYLaA5NYdDio0jod+7H7yHUhbR0FoGDCcHPRwqoKOrq9ffrMjd6XCTv3pYm8rU4bewaAGQHD79dHLiTdnoLJuF44qIHDqDjTod1+Sd/ocTF7GQzsV6bbckrYuAgzsuZDCBouPjqVDTsSJv90NXhIfPceZjRzhH26twa1vmNoqya/t8elqIXM0JYFZkh2JZ+UUrCpX9AmLUfJDbQpdPx/iLU9GlWijmbVcxx/GrHGhFH851QzbjmdgcLZeUwpf8JuXauLzJQJOXS6pHq5r3pE1CDV37GQlwTWyxAMFe46LAwP85IoeeAfNA9DjWcSH5we8="
+	 
 before_install:
-- echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN
+ - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN
   CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+
 addons:
   coverity_scan:
     project:

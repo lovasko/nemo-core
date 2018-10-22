@@ -160,3 +160,50 @@ create_socket6(struct proto* pr, const struct config* cf)
 
   return true;
 }
+
+/// Obtain the port assigned to the socket during binding. This functions works
+/// for both versions of the IP protocol.
+/// @return sucess/failure indication
+///
+/// @param[out] pn port number
+/// @param[in]  pr protocol connection
+bool
+get_assigned_port(uint16_t* pn, const struct proto* pr)
+{
+  int reti;
+  struct sockaddr_storage ss;
+  struct sockaddr_in* s4;
+  struct sockaddr_in6* s6;
+  socklen_t len;
+
+  len = sizeof(ss);
+
+  // Request the socket details.
+  reti = getsockname(pr->pr_sock, (struct sockaddr*)&ss, &len);
+  if (reti == -1) {
+    log(LL_WARN, true, "main", "unable to obtain address of the %s socket",
+      pr->pr_name);
+    return false;
+  }
+  
+  // Assign an invalid number as the result.
+  *pn = 0;
+
+  // Obtain the address details based on the protocol family.
+  if (ss.ss_family == PF_INET) {
+    s4 = (struct sockaddr_in*)&ss;
+    *pn = s4->sin_port;
+  } 
+  if (ss.ss_family == PF_INET6) {
+    s6 = (struct sockaddr_in6*)&ss;
+    *pn = s6->sin6_port;
+  }
+
+  // Verify that the result is valid.
+  if (*pn == 0) {
+    log(LL_WARN, false, "main", "unable to retrieve the port number");
+    return false;
+  }
+
+  return true;
+}

@@ -1,5 +1,6 @@
 # nemo-core
-Unicast network testing and monitoring toolset.
+Network monitoring.
+[![Build Status](https://travis-ci.org/lovasko/nemo-core.svg?branch=master)](https://travis-ci.org/lovasko/nemo-core)
 
 ## Introduction
 The `nemo-core` project consists of two programs - the _requester_ and the

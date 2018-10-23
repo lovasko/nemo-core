@@ -90,6 +90,9 @@ main(int argc, char* argv[])
   if (retb == false)
     log(LL_ERROR, false, "main", "responding loop has been terminated");
 
+  if (cf.cf_ipv4 == true) delete_socket(&p4);
+  if (cf.cf_ipv6 == true) delete_socket(&p6);
+
   // Terminate plugins.
   terminate_plugins(pins, npins);
 

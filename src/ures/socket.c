@@ -8,6 +8,8 @@
 
 #include <netinet/in.h>
 
+#include <unistd.h>
+
 #include "common/log.h"
 #include "ures/funcs.h"
 #include "ures/types.h"
@@ -175,4 +177,17 @@ create_socket6(struct proto* pr, const struct config* cf)
   }
 
   return true;
+}
+
+/// Delete the protocol socket.
+///
+/// @param[in] pr protocol connection
+void
+delete_socket(const struct proto* pr)
+{
+  int reti;
+
+  reti = close(pr->pr_sock);
+  if (reti == -1)
+    log(LL_WARN, true, "main", "unable to close the %s socket", pr->pr_name);
 }

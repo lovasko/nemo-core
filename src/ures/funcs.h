@@ -67,5 +67,6 @@ void create_signal_mask(sigset_t* mask);
 // Socket.
 bool create_socket4(struct proto* pr, const struct config* cf);
 bool create_socket6(struct proto* pr, const struct config* cf);
+void delete_socket(const struct proto* pr);
 
 #endif

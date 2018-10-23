@@ -1,6 +1,7 @@
 # nemo-core
 Network monitoring.
 [![Build Status](https://travis-ci.org/lovasko/nemo-core.svg?branch=master)](https://travis-ci.org/lovasko/nemo-core)
+[![Coverity Scan](https://scan.coverity.com/projects/16148/badge.svg)](https://scan.coverity.com/projects/lovasko-nemo-core)
 
 ## Introduction
 The `nemo-core` project consists of two programs - the _requester_ and the

@@ -1071,6 +1071,13 @@ main(int argc, char* argv[])
     return EXIT_FAILURE;
   }
 
+  // Verify that the compiled payload is exactly the expected size in bytes.
+  if (sizeof(struct payload) != NEMO_PAYLOAD_SIZE) {
+    log(LL_ERROR, false, "main", "wrong payload size: expected %d, actual %z",
+      NEMO_PAYLOAD_SIZE, sizeof(struct payload));
+    return EXIT_FAILURE;
+  }
+
   // Optionally turn the process into a daemon.
   if (op_dmon == true) {
     retb = turn_into_daemon();

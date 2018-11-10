@@ -9,6 +9,7 @@
 
 #include "common/daemon.h"
 #include "common/log.h"
+#include "common/payload.h"
 #include "ures/funcs.h"
 #include "ures/types.h"
 
@@ -28,6 +29,13 @@ main(int argc, char* argv[])
   retb = parse_config(&cf, argc, argv);
   if (retb == false) {
     log(LL_ERROR, false, "main", "unable to parse the configuration");
+    return EXIT_FAILURE;
+  }
+
+  // Verify that the compiled payload is exactly the expected size in bytes.
+  if (sizeof(struct payload) != NEMO_PAYLOAD_SIZE) {
+    log(LL_ERROR, false, "main", "wrong payload size: expected %d, actual %z",
+      NEMO_PAYLOAD_SIZE, sizeof(struct payload));
     return EXIT_FAILURE;
   }
 

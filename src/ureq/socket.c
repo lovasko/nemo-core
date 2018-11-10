@@ -47,7 +47,6 @@ create_socket4(struct proto* pr, const struct config* cf)
   // Bind the socket to the selected port and local address.
   (void)memset(&addr, 0, sizeof(addr));
   addr.sin_family      = AF_INET;
-  addr.sin_port        = htons((uint16_t)cf->cf_port);
   addr.sin_addr.s_addr = INADDR_ANY;
   reti = bind(pr->pr_sock, (struct sockaddr*)&addr, sizeof(addr));
   if (reti == -1) {
@@ -127,7 +126,6 @@ create_socket6(struct proto* pr, const struct config* cf)
   // Bind the socket to the selected port and local address.
   (void)memset(&addr, 0, sizeof(addr));
   addr.sin6_family = AF_INET6;
-  addr.sin6_port   = htons((uint16_t)cf->cf_port);
   addr.sin6_addr   = in6addr_any;
   reti = bind(pr->pr_sock, (struct sockaddr*)&addr, sizeof(addr));
   if (reti == -1) {

@@ -18,6 +18,8 @@
 #define NEMO_PAYLOAD_MAGIC 0x6e656d6f
 #define NEMO_PAYLOAD_VERSION        2
 
+// Memory size.
+#define NEMO_PAYLOAD_SIZE 96
 
 // Diagnostic payload.
 struct payload {

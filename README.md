@@ -1,6 +1,8 @@
 # nemo-core
-Network monitoring.
+Lightweight network monitoring for POSIX systems.
+
 [![Build Status](https://travis-ci.org/lovasko/nemo-core.svg?branch=master)](https://travis-ci.org/lovasko/nemo-core)
+
 [![Coverity Scan](https://scan.coverity.com/projects/16148/badge.svg)](https://scan.coverity.com/projects/lovasko-nemo-core)
 
 ## Introduction

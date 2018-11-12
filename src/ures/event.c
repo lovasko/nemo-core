@@ -43,6 +43,7 @@ receive_datagram(struct proto* pr,
   msg->msg_namelen = sizeof(*addr);
   msg->msg_iov     = &data;
   msg->msg_iovlen  = 1;
+  msg->msg_flags   = 0;
 
   // Receive the message and handle potential errors.
   n = recvmsg(pr->pr_sock, msg, MSG_DONTWAIT | MSG_TRUNC);
@@ -97,6 +98,7 @@ send_datagram(struct proto* pr,
   msg.msg_iovlen     = 1;
   msg.msg_control    = NULL;
   msg.msg_controllen = 0;
+  msg.msg_flags      = 0;
 
   // Convert the payload to its on-wire format.
   encode_payload(pl);

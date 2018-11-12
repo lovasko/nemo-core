@@ -41,7 +41,7 @@ print_usage(void)
     "  Payload version: %d\n\n"
 
     "Usage:\n"
-    "  nres [-46dehmnqv] [-a OBJ] [-k KEY] [-p NUM] [-r RBS] [-s SBS] "
+    "  ures [-46dehmnqv] [-a OBJ] [-k KEY] [-p NUM] [-r RBS] [-s SBS] "
     "[-t TTL]\n\n"
 
     "Options:\n"

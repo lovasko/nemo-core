@@ -3,12 +3,12 @@
 .\"
 .\" Distributed under the terms of the 2-clause BSD License. The full
 .\" license is in the file LICENSE, distributed as part of this software.
-.Dd Sep 23, 2018
+.Dd Nov 12, 2018
 .Dt NEMO 8
 .Os UNIX
 .Sh NAME
-.Nm nres 
-.Nd unicast heartbeat responder 
+.Nm ures
+.Nd unicast responder
 .Sh SYNOPSIS
 .Nm
 .Op Fl 4
@@ -32,7 +32,7 @@ The
 .Nm
 utility awaits for incoming unicast UDP datagrams and issues replies accordingly. It can
 be used in conjunction with the
-.Xr nreq 8
+.Xr ureq 8
 utility to test, debug and verify network configurations.
 .Sh OPTIONS
 The utility accepts the following command-line options:
@@ -249,7 +249,7 @@ on failure.
 .Sh AUTHORS
 .An Daniel Lovasko Aq Mt daniel.lovasko@gmail.com
 .Sh SEE ALSO
-.Xr nreq 8 ,
+.Xr ureq 8 ,
 .Xr socket 2 ,
 .Xr send 2 ,
 .Xr recv 2 ,

@@ -126,7 +126,7 @@ log(const uint8_t lvl,
 
   // Prepare highlights for the message variables.
   (void)memset(hfmt, '\0', sizeof(hfmt));
-  if (log_col)
+  if (log_col == true)
     highlight(hfmt, fmt);
   else
     (void)memcpy(hfmt, fmt, strlen(fmt));

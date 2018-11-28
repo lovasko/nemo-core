@@ -21,6 +21,10 @@
 // Memory size.
 #define NEMO_PAYLOAD_SIZE 96
 
+// Internet protocol versions.
+#define NEMO_IP_VERSION_4 4
+#define NEMO_IP_VERSION_6 6
+
 // Diagnostic payload.
 struct payload {
   uint32_t pl_mgic;   ///< Magic identifier.

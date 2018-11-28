@@ -5,6 +5,10 @@
 // license is in the file LICENSE, distributed as part of this software.
 
 #include <stdbool.h>
+#include <signal.h>
+#include <string.h>
+
+#include "common/log.h"
 
 
 volatile bool sint;  ///< SIGINT flag.

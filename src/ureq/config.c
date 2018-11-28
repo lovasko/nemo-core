@@ -149,7 +149,7 @@ option_a(struct config* cf, const char* in)
     return false;
   }
 
-  cf->cf_plgs[i] = in;
+  cf->cf_pi[i] = in;
   i++;
 
   return true;
@@ -382,7 +382,7 @@ set_defaults(struct config* cf)
   intmax_t i;
 
   for (i = 0; i < PLUG_MAX; i++)
-    cf->cf_plgs[i] = NULL;
+    cf->cf_pi[i] = NULL;
   cf->cf_rbuf = DEF_RECEIVE_BUFFER;
   cf->cf_sbuf = DEF_SEND_BUFFER;
   cf->cf_err  = DEF_EXIT_ON_ERROR;

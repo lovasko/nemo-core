@@ -13,18 +13,34 @@ LDFLAGS = -lrt -lpthread -ldl
 all: bin/ureq bin/ures
 
 # unicast requester executable
-bin/ureq: obj/ureq/main.o      \
-          obj/common/convert.o \
+bin/ureq: obj/common/convert.o \
           obj/common/daemon.o  \
           obj/common/log.o     \
           obj/common/parse.o   \
-          obj/common/ttl.o
-	$(CC) obj/ureq/main.o        \
-	      obj/common/convert.o   \
+          obj/common/ttl.o     \
+          obj/ureq/config.o    \
+          obj/ureq/counters.o  \
+          obj/ureq/loop.o      \
+          obj/ureq/main.o      \
+          obj/ureq/payload.o   \
+          obj/ureq/report.o    \
+          obj/ureq/signal.o    \
+          obj/ureq/socket.o    \
+          obj/ureq/target.o    
+	$(CC) obj/common/convert.o   \
 	      obj/common/daemon.o    \
 	      obj/common/log.o       \
 	      obj/common/parse.o     \
 	      obj/common/ttl.o       \
+	      obj/ureq/config.o      \
+	      obj/ureq/counters.o    \
+	      obj/ureq/loop.o        \
+	      obj/ureq/main.o        \
+	      obj/ureq/payload.o     \
+	      obj/ureq/report.o      \
+	      obj/ureq/socket.o      \
+	      obj/ureq/signal.o      \
+	      obj/ureq/target.o      \
 	      -o bin/ureq $(LDFLAGS)
 
 # unicast responder executable
@@ -61,8 +77,32 @@ bin/ures: obj/common/convert.o \
 	      -o bin/ures $(LDFLAGS)
 
 # unicast requester object files
+obj/ureq/config.o: src/ureq/config.c
+	$(CC) $(CFLAGS) -c src/ureq/config.c    -o obj/ureq/config.o
+
+obj/ureq/counters.o: src/ureq/counters.c
+	$(CC) $(CFLAGS) -c src/ureq/counters.c  -o obj/ureq/counters.o
+
+obj/ureq/loop.o: src/ureq/loop.c
+	$(CC) $(CFLAGS) -c src/ureq/loop.c      -o obj/ureq/loop.o
+
 obj/ureq/main.o: src/ureq/main.c
 	$(CC) $(CFLAGS) -c src/ureq/main.c      -o obj/ureq/main.o
+
+obj/ureq/payload.o: src/ureq/payload.c
+	$(CC) $(CFLAGS) -c src/ureq/payload.c   -o obj/ureq/payload.o
+
+obj/ureq/report.o: src/ureq/report.c
+	$(CC) $(CFLAGS) -c src/ureq/report.c    -o obj/ureq/report.o
+
+obj/ureq/signal.o: src/ureq/signal.c
+	$(CC) $(CFLAGS) -c src/ureq/signal.c    -o obj/ureq/signal.o
+
+obj/ureq/socket.o: src/ureq/socket.c
+	$(CC) $(CFLAGS) -c src/ureq/socket.c    -o obj/ureq/socket.o
+
+obj/ureq/target.o: src/ureq/target.c
+	$(CC) $(CFLAGS) -c src/ureq/target.c    -o obj/ureq/target.o
 
 # unicast responder object files
 obj/ures/config.o: src/ures/config.c
@@ -119,7 +159,14 @@ clean:
 	rm -f obj/common/log.o
 	rm -f obj/common/parse.o
 	rm -f obj/common/ttl.o
+	rm -f obj/ureq/config.o
+	rm -f obj/ureq/counters.o
 	rm -f obj/ureq/main.o
+	rm -f obj/ureq/payload.o
+	rm -f obj/ureq/report.o
+	rm -f obj/ureq/signal.o
+	rm -f obj/ureq/socket.o
+	rm -f obj/ureq/target.o
 	rm -f obj/ures/config.o
 	rm -f obj/ures/counters.o
 	rm -f obj/ures/event.o

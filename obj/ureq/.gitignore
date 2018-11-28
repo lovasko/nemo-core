@@ -1,1 +1,9 @@
+config.o
+counters.o
+loop.o
 main.o
+payload.o
+report.o
+signal.o
+socket.o
+target.o

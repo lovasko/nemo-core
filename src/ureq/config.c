@@ -333,6 +333,17 @@ option_t(struct config* cf, const char* in)
   return parse_uint64(&cf->cf_ttl, in, 1, 255);
 }
 
+/// Set the update period for name resolution.
+/// @return success/failure indication
+///
+/// @param[out] cf cofiguration
+/// @param[in]  in argument input
+static bool
+option_u(struct config* cf, const char* in)
+{
+  return parse_scalar(&cf->cf_rld, in, "ns", parse_time_unit);
+}
+
 /// Increase the logging verbosity.
 /// @return success/failure indication
 ///
@@ -450,7 +461,7 @@ parse_config(struct config* cf, int argc, char* argv[])
   bool retb;
   uint64_t i;
   char optdsl[128];
-  struct option opts[19] = {
+  struct option opts[20] = {
     { '4',  false, option_4 },
     { '6',  false, option_6 },
     { 'a',  true , option_a },
@@ -468,6 +479,7 @@ parse_config(struct config* cf, int argc, char* argv[])
     { 'r',  true , option_r },
     { 's',  true , option_s },
     { 't',  true , option_t },
+    { 'u',  true,  option_u },
     { 'v',  false, option_v },
     { 'w',  true,  option_w }
   };
@@ -475,7 +487,7 @@ parse_config(struct config* cf, int argc, char* argv[])
   log(LL_INFO, false, "main", "parsing command-line options");
 
   (void)memset(optdsl, '\0', sizeof(optdsl));
-  generate_getopt_string(optdsl, opts, 19);
+  generate_getopt_string(optdsl, opts, 20);
 
   // Set optional arguments to sensible defaults.
   set_defaults(cf);
@@ -496,7 +508,7 @@ parse_config(struct config* cf, int argc, char* argv[])
     }
 
     // Find the relevant option.
-    for (i = 0; i < 19; i++) {
+    for (i = 0; i < 20; i++) {
       if (opts[i].op_name == (char)opt) {
         retb = opts[i].op_act(cf, optarg);
         if (retb == false) {

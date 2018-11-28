@@ -539,13 +539,27 @@ parse_config(struct config* cf, int argc, char* argv[])
 }
 
 /// Use the logging framework to output the selected option values used
-/// throughout the run of the program.
+/// throughout the run of the program. Moreover, it lists the implied
+/// configuration details, such as the local UDP port numbers.
 ///
 /// @param[in] cf configuration
 void
-log_config(const struct config* cf)
+log_config(const struct config* cf,
+           const struct proto* p4,
+           const struct proto* p6)
 {
-  log(LL_DEBUG, false, "main", "UDP port: %" PRIu64, cf->cf_port);
+  uint16_t port;
+  bool retb;
+
+  retb = get_assigned_port(&port, p4);
+  if (retb == true)
+    log(LL_DEBUG, false, "main", "local IPv4 UDP port: %" PRIu16, port);
+
+  retb = get_assigned_port(&port, p6);
+  if (retb == true)
+    log(LL_DEBUG, false, "main", "local IPv6 UDP port: %" PRIu16, port);
+
+  log(LL_DEBUG, false, "main", "responder UDP port: %" PRIu64, cf->cf_port);
   log(LL_DEBUG, false, "main", "unique key: %" PRIu64, cf->cf_key);
   log(LL_DEBUG, false, "main", "Time-To-Live: %" PRIu64, cf->cf_ttl);
   log(LL_DEBUG, false, "main", "receive buffer size: %" PRIu64 " bytes",

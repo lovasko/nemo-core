@@ -37,6 +37,7 @@
 #define DEF_SEND_BUFFER    2000000    ///< Socket send buffer memory size.
 #define DEF_SILENT         false      ///< Do not suppress reporting.
 #define DEF_BINARY         false      ///< CSV reporting by default.
+#define DEF_GROUP          false      ///< Do not group requests.
 
 /// Print the usage information to the standard output stream.
 static void
@@ -61,6 +62,7 @@ print_usage(void)
     "  -c CNT  Number of requests to issue. (def=%d)\n"
     "  -d      Run the process as a daemon.\n"
     "  -e      Stop the process on first network error.\n"
+    "  -g      Group requests at the start of each round.\n"
     "  -h      Print this help message.\n"
     "  -i DUR  Interval duration between published datagram rounds. (def=1s)\n"
     "  -k KEY  Key for the current run. (def=random)\n"
@@ -206,6 +208,20 @@ option_e(struct config* cf, const char* in)
 {
   (void)in;
   cf->cf_err = true;
+
+  return true;
+}
+
+/// Group
+/// @return success/failure indication
+///
+/// @param[out] cf configuration
+/// @param[in]  in argument input (unused)
+static bool
+option_g(struct config* cf, const char* in)
+{
+  (void)in;
+  cf->cf_grp = true;
 
   return true;
 }
@@ -395,6 +411,7 @@ set_defaults(struct config* cf)
   cf->cf_dmon = DEF_DAEMON;
   cf->cf_sil  = DEF_SILENT;
   cf->cf_bin  = DEF_BINARY;
+  cf->cf_grp  = DEF_GROUP;
   cf->cf_llvl = (log_lvl = DEF_LOG_LEVEL);
   cf->cf_lcol = (log_col = DEF_LOG_COLOR);
   cf->cf_key  = generate_key();
@@ -464,7 +481,7 @@ parse_config(struct config* cf, int argc, char* argv[])
   bool retb;
   uint64_t i;
   char optdsl[128];
-  struct option opts[20] = {
+  struct option opts[21] = {
     { '4',  false, option_4 },
     { '6',  false, option_6 },
     { 'a',  true , option_a },
@@ -472,6 +489,7 @@ parse_config(struct config* cf, int argc, char* argv[])
     { 'c',  true,  option_c },
     { 'd',  false, option_d },
     { 'e',  false, option_e },
+    { 'g',  false, option_g },
     { 'h',  false, option_h },
     { 'i',  true , option_i },
     { 'k',  true , option_k },
@@ -490,7 +508,7 @@ parse_config(struct config* cf, int argc, char* argv[])
   log(LL_INFO, false, "main", "parsing command-line options");
 
   (void)memset(optdsl, '\0', sizeof(optdsl));
-  generate_getopt_string(optdsl, opts, 20);
+  generate_getopt_string(optdsl, opts, 21);
 
   // Set optional arguments to sensible defaults.
   set_defaults(cf);
@@ -511,7 +529,7 @@ parse_config(struct config* cf, int argc, char* argv[])
     }
 
     // Find the relevant option.
-    for (i = 0; i < 20; i++) {
+    for (i = 0; i < 21; i++) {
       if (opts[i].op_name == (char)opt) {
         retb = opts[i].op_act(cf, optarg);
         if (retb == false) {

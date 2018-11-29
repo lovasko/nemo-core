@@ -449,6 +449,96 @@ contact_target(struct proto* p4,
   return true;
 }
 
+/// Single round of issued requests with small pauses after each request.
+/// @return success/failure indication
+///
+/// @param[out] p4  IPv4 protocol connection
+/// @param[out] p6  IPv6 protocol connection
+/// @param[in]  tg  array of network targets
+/// @param[in]  ntg number of network targets
+/// @param[in]  sn  sequence number
+/// @param[in]  cf  configuration
+static bool
+dispersed_round(struct proto* p4,
+                struct proto* p6,
+                const struct target* tg,
+                const uint64_t ntg,
+                const uint64_t snum,
+                const struct config* cf)
+{
+  uint64_t i;
+  uint64_t part;
+  bool retb;
+
+  // In case there are no targets, just sleep throughout the whole round.
+  if (ntg == 0) {
+    retb = wait_for_responses(p4, p6, cf->cf_int, cf);
+    if (retb == false) {
+      log(LL_WARN, false, "main", "unable to wait for responses");
+      return false;
+    }
+  }
+
+  // Compute the time to sleep between each request in the round. We can safely
+  // divide by the number of targets, as we have previously handled the case of
+  // no targets.
+  part = (cf->cf_int / ntg) + 1;
+
+  // Issue all requests.
+  for (i = 0; i < ntg; i++) {
+    retb = contact_target(p4, p6, snum, &tg[i], cf);
+    if (retb == false)
+      return false;
+
+    // Await responses the divided part of the round..
+    retb = wait_for_responses(p4, p6, part, cf);
+    if (retb == false) {
+      log(LL_WARN, false, "main", "unable to wait for responses");
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/// Single round of issued requests with no pauses after each request, followed
+/// by a single full pause.
+/// @return success/failure indication
+///
+/// @param[out] p4  IPv4 protocol connection
+/// @param[out] p6  IPv6 protocol connection
+/// @param[in]  tg  array of network targets
+/// @param[in]  ntg number of network targets
+/// @param[in]  sn  sequence number
+/// @param[in]  cf  configuration
+static bool
+grouped_round(struct proto* p4,
+              struct proto* p6,
+              const struct target* tg,
+              const uint64_t ntg,
+              const uint64_t snum,
+              const struct config* cf)
+{
+  uint64_t i;
+  bool retb;
+
+  // Issue all requests.
+  for (i = 0; i < ntg; i++) {
+    retb = contact_target(p4, p6, snum, &tg[i], cf);
+    if (retb == false)
+      return false;
+  }
+
+  // Await responses for the remainder of the interval.
+  retb = wait_for_responses(p4, p6, cf->cf_int, cf);
+  if (retb == false) {
+    log(LL_WARN, false, "main", "unable to wait for responses");
+    return false;
+  }
+
+  return true;
+}
+
 /// Main request loop.
 /// @return success/failure indication
 ///
@@ -463,7 +553,6 @@ request_loop(struct proto* p4,
              const struct config* cf)
 {
   uint64_t i;
-  uint64_t k;
   uint64_t ntg;
   uint64_t rld;
   uint64_t now;
@@ -493,19 +582,15 @@ request_loop(struct proto* p4,
       // Update the next refresh time.
       rld = now + cf->cf_rld;
     }
-    
-    // Issue all requests.
-    for (k = 0; k < ntg; k++) {
-      retb = contact_target(p4, p6, i, &tg[k], cf);
+
+    if (cf->cf_grp == true) {
+      retb = grouped_round(p4, p6, tg, ntg, i, cf);
       if (retb == false)
         return false;
-    }
-
-    // Await responses for the remainder of the interval.
-    retb = wait_for_responses(p4, p6, cf->cf_int, cf);
-    if (retb == false) {
-      log(LL_WARN, false, "main", "unable to wait for responses");
-      return false;
+    } else {
+      retb = dispersed_round(p4, p6, tg, ntg, i, cf);
+      if (retb == false)
+        return false;
     }
   }
 

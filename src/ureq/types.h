@@ -34,6 +34,7 @@ struct config {
   bool        cf_dmon;         ///< Daemon process.
   bool        cf_sil;          ///< Suppress reporting output.
   bool        cf_bin;          ///< Binary reporting mode.
+  bool        cf_grp;          ///< Group requests at the beginning of a round.
   bool        cf_ipv4;         ///< IPv4-only mode.
   bool        cf_ipv6;         ///< IPv6-only mode.
 };

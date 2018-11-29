@@ -25,6 +25,7 @@
 #define DEF_COUNT          5          ///< Number of published datagrams.
 #define DEF_INTERVAL       1000000000 ///< One second pause between payloads.
 #define DEF_FINAL_WAIT     2000000000 ///< Two second wait time for responses.
+#define DEF_UPDATE         60000000000 ///< One minute period of name resolution update.
 #define DEF_TIME_TO_LIVE   32         ///< IP Time-To-Live value.
 #define DEF_EXIT_ON_ERROR  false      ///< Process exit on publishing error.
 #define DEF_LOG_LEVEL      LL_WARN    ///< Log errors and warnings by default.
@@ -69,6 +70,7 @@ print_usage(void)
     "  -s SBS  Send memory buffer size.\n"
     "  -p NUM  UDP port to use for all endpoints. (def=%d)\n"
     "  -t TTL  Set the Time-To-Live for all published datagrams. (def=%d)\n"
+    "  -u DUR  Duration of the name resolution update period.\n"
     "  -v      Increase the verbosity of the logging output.\n"
     "  -w DUR  Wait time for responses after last request. (def=2s)\n",
     NEMO_REQ_VERSION_MAJOR,
@@ -388,6 +390,7 @@ set_defaults(struct config* cf)
   cf->cf_err  = DEF_EXIT_ON_ERROR;
   cf->cf_port = DEF_UDP_PORT;
   cf->cf_ttl  = DEF_TIME_TO_LIVE;
+  cf->cf_rld  = DEF_UPDATE;
   cf->cf_mono = DEF_MONOLOGUE;
   cf->cf_dmon = DEF_DAEMON;
   cf->cf_sil  = DEF_SILENT;

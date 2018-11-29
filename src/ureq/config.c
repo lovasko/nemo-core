@@ -543,10 +543,20 @@ parse_config(struct config* cf, int argc, char* argv[])
   }
 
   // Verify that there are no positional arguments.
-  if (optind != argc) {
-    log(LL_WARN, false, "main", "no arguments are expected");
+  if (optind == argc) {
+    log(LL_WARN, false, "main", "at least one target expected");
     return false;
   }
+
+  // Verify that the number of arguments is below the limit.
+  if (argc - optind > TARG_MAX) {
+    log(LL_WARN, false, "main", "too many arguments, maximum is %d", TARG_MAX);
+    return false;
+  }
+
+  // All remaining positional arguments are targets.
+  for (opt = optind; opt < argc; opt++)
+    cf->cf_tg[opt - optind] = argv[opt];
 
   retb = organize_protocols(cf);
   if (retb == false)

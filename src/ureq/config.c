@@ -53,7 +53,7 @@ print_usage(void)
     "       [-p NUM] [-t TTL] [-w DUR] target [target]...\n\n"
 
     "Arguments:\n"
-    "  target  IPv4/IPv6 address\n\n"
+    "  target  IPv4/IPv6 address or hostname\n\n"
 
     "Options:\n"
     "  -4      Use only the IPv4 protocol.\n"

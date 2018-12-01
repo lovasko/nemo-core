@@ -167,7 +167,7 @@ parse_target_string(struct target* tg,
     reti = inet_pton(AF_INET, tstr, &a4);
     if (reti == 1) {
       read_target4(&tg[0], &a4);
-      *tcnt = 0;
+      *tcnt = 1;
 
       log(LL_TRACE, false, "parsed %s target: %s", "IPv4", tstr);
       return true;
@@ -179,7 +179,7 @@ parse_target_string(struct target* tg,
     reti = inet_pton(AF_INET6, tstr, &a6);
     if (reti == 1) {
       read_target6(&tg[0], &a6);
-      *tcnt = 0;
+      *tcnt = 1;
 
       log(LL_TRACE, false, "parsed %s target: %s", "IPv6", tstr);
       return true;
@@ -225,9 +225,11 @@ normalize_targets(struct target* tg, uint64_t* nlen, const uint64_t olen)
   uint64_t idx;
   uint64_t lst;
 
-  // Early exit for empty or a trivial array.
-  if (olen == 0 || olen == 1)
+  // Early exit for an empty or a trivial array.
+  if (olen == 0 || olen == 1) {
+    *nlen = olen;
     return;
+  }
 
   // Pre-sort the array of targets. This operation is expected to run in
   // O(n * log n) time.

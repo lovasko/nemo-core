@@ -136,7 +136,7 @@ send_request(const uint64_t snum,
   ssize_t n;
   uint8_t lvl;
 
-  log(LL_TRACE, false, "main", "sending a request");
+  log(LL_TRACE, false, "sending a request");
 
   // Prepare payload data.
   data.iov_base = &pl;
@@ -161,7 +161,7 @@ send_request(const uint64_t snum,
   if (n == -1) {
     // Increase the seriousness of the incident in case we are going to fail.
     lvl = cf->cf_err == true ? LL_WARN : LL_DEBUG;
-    log(lvl, true, "main", "unable to send datagram");
+    log(lvl, true, "unable to send datagram");
 
     // Fail the procedure only if we have selected the exit-on-error attribute
     // to be true.
@@ -172,7 +172,7 @@ send_request(const uint64_t snum,
   if (n != (ssize_t)sizeof(pl)) {
     // Increase the seriousness of the incident in case we are going to fail.
     lvl = cf->cf_err == true ? LL_WARN : LL_DEBUG;
-    log(lvl, true, "main", "unable to send the whole payload");
+    log(lvl, true, "unable to send the whole payload");
 
     // Fail the procedure only if we have selected the exit-on-error attribute
     // to be true.
@@ -195,17 +195,17 @@ send_request(const uint64_t snum,
 static bool
 handle_interrupt(const struct proto* p4, const struct proto* p6, const struct config* cf)
 {
-  log(LL_TRACE, false, "main", "handling interrupt");
+  log(LL_TRACE, false, "handling interrupt");
 
   // Exit upon receiving SIGINT.
   if (sint == true) {
-    log(LL_WARN, false, "main", "received the %s signal", "SIGINT");
+    log(LL_WARN, false, "received the %s signal", "SIGINT");
     return false;
   }
 
   // Exit upon receiving SIGTERM.
   if (sterm == true) {
-    log(LL_WARN, false, "main", "received the %s signal", "SIGTERM");
+    log(LL_WARN, false, "received the %s signal", "SIGTERM");
     return false;
   }
 
@@ -221,7 +221,7 @@ handle_interrupt(const struct proto* p4, const struct proto* p6, const struct co
     return true;
   }
 
-  log(LL_WARN, false, "main", "unknown interrupt occurred");
+  log(LL_WARN, false, "unknown interrupt occurred");
   return false;
 }
 
@@ -254,7 +254,7 @@ receive_response(struct payload* pl, struct proto* pr, const struct config* cf)
   // Receive the message and handle potential errors.
   n = recvmsg(pr->pr_sock, &msg, MSG_DONTWAIT | MSG_TRUNC);
   if (n < 0) {
-    log(LL_WARN, true, "main", "receiving has failed");
+    log(LL_WARN, true, "receiving has failed");
     pr->pr_reni++;
 
     if (cf->cf_err == true)
@@ -267,7 +267,7 @@ receive_response(struct payload* pl, struct proto* pr, const struct config* cf)
   // Verify the payload correctness.
   retb = verify_payload(pr, n, pl);
   if (retb == false) {
-    log(LL_WARN, false, "main", "invalid payload content");
+    log(LL_WARN, false, "invalid payload content");
     return false;
   }
 
@@ -378,7 +378,7 @@ wait_for_responses(struct proto* p4,
 
   // Repeat the waiting process until the sufficient time has passed.
   while (cur < goal) {
-    log(LL_TRACE, false, "main", "waiting for responses");
+    log(LL_TRACE, false, "waiting for responses");
 
     // Compute the time left to wait for the responses.
     fnanos(&todo, goal - cur);
@@ -395,7 +395,7 @@ wait_for_responses(struct proto* p4,
         return false;
       }
 
-      log(LL_WARN, true, "main", "waiting for events failed");
+      log(LL_WARN, true, "waiting for events failed");
       return false;
     }
 
@@ -432,7 +432,7 @@ contact_target(struct proto* p4,
   if (cf->cf_ipv4 == true && tg->tg_ipv == NEMO_IP_VERSION_4) { 
     retb = send_request(snum, p4, tg, cf);
     if (retb == false) {
-      log(LL_WARN, false, "main", "unable to send a request");
+      log(LL_WARN, false, "unable to send a request");
       return false;
     }
   }
@@ -441,7 +441,7 @@ contact_target(struct proto* p4,
   if (cf->cf_ipv6 == true && tg->tg_ipv == NEMO_IP_VERSION_6) { 
     retb = send_request(snum, p6, tg, cf);
     if (retb == false) {
-      log(LL_WARN, false, "main", "unable to send a request");
+      log(LL_WARN, false, "unable to send a request");
       return false;
     }
   }
@@ -474,7 +474,7 @@ dispersed_round(struct proto* p4,
   if (ntg == 0) {
     retb = wait_for_responses(p4, p6, cf->cf_int, cf);
     if (retb == false) {
-      log(LL_WARN, false, "main", "unable to wait for responses");
+      log(LL_WARN, false, "unable to wait for responses");
       return false;
     }
   }
@@ -493,7 +493,7 @@ dispersed_round(struct proto* p4,
     // Await responses the divided part of the round..
     retb = wait_for_responses(p4, p6, part, cf);
     if (retb == false) {
-      log(LL_WARN, false, "main", "unable to wait for responses");
+      log(LL_WARN, false, "unable to wait for responses");
       return false;
     }
   }
@@ -532,7 +532,7 @@ grouped_round(struct proto* p4,
   // Await responses for the remainder of the interval.
   retb = wait_for_responses(p4, p6, cf->cf_int, cf);
   if (retb == false) {
-    log(LL_WARN, false, "main", "unable to wait for responses");
+    log(LL_WARN, false, "unable to wait for responses");
     return false;
   }
 
@@ -561,7 +561,7 @@ request_loop(struct proto* p4,
   // Load all targets at start.
   retb = load_targets(tg, &ntg, tmax, cf);
   if (retb == false) {
-    log(LL_WARN, false, "main", "unable to load targets");
+    log(LL_WARN, false, "unable to load targets");
     return false;
   }
 
@@ -575,7 +575,7 @@ request_loop(struct proto* p4,
     if (now > rld) {
       retb = load_targets(tg, &ntg, tmax, cf);
       if (retb == false) {
-        log(LL_WARN, false, "main", "unable to load targets");
+        log(LL_WARN, false, "unable to load targets");
         return false;
       }
 
@@ -597,7 +597,7 @@ request_loop(struct proto* p4,
   // Waiting for incoming responses after sending all requests.
   retb = wait_for_responses(p4, p6, cf->cf_wait, cf);
   if (retb == false) {
-    log(LL_WARN, false, "main", "unable to wait for final responses");
+    log(LL_WARN, false, "unable to wait for final responses");
     return false;
   }
 

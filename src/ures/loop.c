@@ -34,17 +34,17 @@ handle_interrupt(const struct proto* p4,
                  const struct proto* p6,
                  const struct config* cf)
 {
-  log(LL_TRACE, false, "main", "handling interrupt");
+  log(LL_TRACE, false, "handling interrupt");
 
   // Exit upon receiving SIGINT.
   if (sint == true) {
-    log(LL_WARN, false, "main", "received the %s signal", "SIGINT");
+    log(LL_WARN, false, "received the %s signal", "SIGINT");
     return false;
   }
 
   // Exit upon receiving SIGTERM.
   if (sterm == true) {
-    log(LL_WARN, false, "main", "received the %s signal", "SIGTERM");
+    log(LL_WARN, false, "received the %s signal", "SIGTERM");
     return false;
   }
 
@@ -60,7 +60,7 @@ handle_interrupt(const struct proto* p4,
     return true;
   }
 
-  log(LL_WARN, false, "main", "unknown interrupt occurred");
+  log(LL_WARN, false, "unknown interrupt occurred");
   return false;
 }
 
@@ -89,7 +89,7 @@ respond_loop(struct proto* p4,
   fd_set rfd;
   sigset_t mask;
 
-  log(LL_INFO, false, "main", "starting the response loop");
+  log(LL_INFO, false, "starting the response loop");
   log_config(cf);
 
   // Print the CSV header of the standard output.
@@ -108,7 +108,7 @@ respond_loop(struct proto* p4,
   create_signal_mask(&mask);
 
   while (true) {
-    log(LL_TRACE, false, "main", "waiting for incoming datagrams");
+    log(LL_TRACE, false, "waiting for incoming datagrams");
 
     // Wait for incoming datagram events.
     reti = pselect(ndfs, &rfd, NULL, NULL, NULL, &mask);
@@ -122,7 +122,7 @@ respond_loop(struct proto* p4,
         return false;
       }
 
-      log(LL_WARN, true, "main", "waiting for events failed");
+      log(LL_WARN, true, "waiting for events failed");
       return false;
     }
 

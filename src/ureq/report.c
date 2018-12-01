@@ -42,12 +42,12 @@ flush_report_stream(const struct config* cf)
   if (cf->cf_sil == true)
     return true;
 
-  log(LL_INFO, false, "main", "flushing standard output stream");
+  log(LL_INFO, false, "flushing standard output stream");
 
   // Flush all stdio buffers.
   reti = fflush(stdout);
   if (reti == -1) {
-    log(LL_WARN, true, "main", "unable to flush the standard output");
+    log(LL_WARN, true, "unable to flush the standard output");
     return false;
   }
 

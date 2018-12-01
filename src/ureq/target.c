@@ -101,7 +101,7 @@ resolve_name(struct target* tg,
     // the expected error format this way.
     (void)snprintf(estr, sizeof(estr), "unable to resolve name '%%s': %s",
       gai_strerror(reti));
-    log(lvl, false, "main", estr, name);
+    log(lvl, false, estr, name);
 
     if (cf->cf_err == true)
       return false;
@@ -112,7 +112,7 @@ resolve_name(struct target* tg,
   for (ai = ais; ai != NULL; ai = ai->ai_next) {
     // Verify that we are not exceeding the maximal number of targets.
     if (*tcnt == tmax) {
-      log(lvl, false, "main", "reached maximum number of targets per name: %"
+      log(lvl, false, "reached maximum number of targets per name: %"
         PRIu64, tmax);
 
       if (cf->cf_err == true)
@@ -169,7 +169,7 @@ parse_target_string(struct target* tg,
       read_target4(&tg[0], &a4);
       *tcnt = 0;
 
-      log(LL_TRACE, false, "main", "parsed %s target: %s", "IPv4", tstr);
+      log(LL_TRACE, false, "parsed %s target: %s", "IPv4", tstr);
       return true;
     }
   }
@@ -181,7 +181,7 @@ parse_target_string(struct target* tg,
       read_target6(&tg[0], &a6);
       *tcnt = 0;
 
-      log(LL_TRACE, false, "main", "parsed %s target: %s", "IPv6", tstr);
+      log(LL_TRACE, false, "parsed %s target: %s", "IPv6", tstr);
       return true;
     }
   }
@@ -191,7 +191,7 @@ parse_target_string(struct target* tg,
   if (reti == -1) {
     retb = resolve_name(tg, tcnt, tmax, tstr, cf);
     if (retb == false) {
-      log(LL_TRACE, false, "main", "unable to parse target '%s'", tstr);
+      log(LL_TRACE, false, "unable to parse target '%s'", tstr);
       return false;
     }
   }
@@ -282,7 +282,7 @@ load_targets(struct target* tg,
 
     // Verify that we are not reaching the overall limit on targets.
     if (tcnt2 + tall - 1 > tmax) {
-      log(lvl, false, "main", "unable to append more targets");
+      log(lvl, false, "unable to append more targets");
 
       if (cf->cf_err == true)
         return false;

@@ -32,7 +32,7 @@ receive_datagram(struct proto* pr,
   ssize_t n;
   bool retb;
 
-  log(LL_TRACE, false, "main", "receiving datagram");
+  log(LL_TRACE, false, "receiving datagram");
 
   // Prepare payload data.
   data.iov_base = pl;
@@ -48,7 +48,7 @@ receive_datagram(struct proto* pr,
   // Receive the message and handle potential errors.
   n = recvmsg(pr->pr_sock, msg, MSG_DONTWAIT | MSG_TRUNC);
   if (n < 0) {
-    log(LL_WARN, true, "main", "receiving has failed");
+    log(LL_WARN, true, "receiving has failed");
     pr->pr_reni++;
 
     if (cf->cf_err == true)
@@ -61,7 +61,7 @@ receive_datagram(struct proto* pr,
   // Verify the payload correctness.
   retb = verify_payload(pr, n, pl);
   if (retb == false) {
-    log(LL_WARN, false, "main", "invalid payload content");
+    log(LL_WARN, false, "invalid payload content");
     return false;
   }
 
@@ -85,7 +85,7 @@ send_datagram(struct proto* pr,
   struct msghdr msg;
   struct iovec data;
 
-  log(LL_TRACE, false, "main", "sending datagram");
+  log(LL_TRACE, false, "sending datagram");
 
   // Prepare payload data.
   data.iov_base = pl;
@@ -106,7 +106,7 @@ send_datagram(struct proto* pr,
   // Send the datagram.
   n = sendmsg(pr->pr_sock, &msg, MSG_DONTWAIT);
   if (n < 0) {
-    log(LL_WARN, true, "main", "unable to send datagram");
+    log(LL_WARN, true, "unable to send datagram");
     pr->pr_seni++;
 
     if (cf->cf_err == true)
@@ -115,7 +115,7 @@ send_datagram(struct proto* pr,
 
   // Verify the size of the sent datagram.
   if ((size_t)n != sizeof(*pl)) {
-    log(LL_WARN, false, "main", "wrong sent payload size");
+    log(LL_WARN, false, "wrong sent payload size");
 
     if (cf->cf_err == true)
       return false;
@@ -143,7 +143,7 @@ handle_event(struct proto* pr,
   struct msghdr msg;
   uint8_t cdata[512];
 
-  log(LL_TRACE, false, "main", "handling event on the %s socket", pr->pr_name);
+  log(LL_TRACE, false, "handling event on the %s socket", pr->pr_name);
 
   // Assign a buffer for storing the control messages received as part of the
   // datagram. This data is later passed to other functions for reporting the
@@ -154,7 +154,7 @@ handle_event(struct proto* pr,
   // Receive a request.
   retb = receive_datagram(pr, &addr, &pl, &msg, cf);
   if (retb == false) {
-    log(LL_WARN, false, "main", "unable to receive datagram on the socket");
+    log(LL_WARN, false, "unable to receive datagram on the socket");
 
     // We do not continue with the response, given the receiving of the
     // request has failed. If the op_err option was selected, all network
@@ -167,7 +167,7 @@ handle_event(struct proto* pr,
   // Update payload.
   retb = update_payload(&pl, &msg, cf);
   if (retb == false) {
-    log(LL_WARN, false, "main", "unable to update the payload");
+    log(LL_WARN, false, "unable to update the payload");
     return false;
   }
 
@@ -184,7 +184,7 @@ handle_event(struct proto* pr,
   // Send a response back.
   retb = send_datagram(pr, &pl, &addr, cf);
   if (retb == false) {
-    log(LL_WARN, false, "main", "unable to send datagram on the socket");
+    log(LL_WARN, false, "unable to send datagram on the socket");
 
     // Following the same logic as above in the receive stage.
     return !cf->cf_err;

@@ -28,12 +28,12 @@ create_socket4(struct proto* pr, const struct config* cf)
   struct sockaddr_in addr;
   int val;
 
-  log(LL_INFO, false, "main", "creating %s socket", "IPv4");
+  log(LL_INFO, false, "creating %s socket", "IPv4");
 
   // Create a UDP socket.
   pr->pr_sock = socket(AF_INET, SOCK_DGRAM, 0);
   if (pr->pr_sock == -1) {
-    log(LL_WARN, true, "main", "unable to initialise the socket");
+    log(LL_WARN, true, "unable to initialise the socket");
     return false;
   }
 
@@ -41,7 +41,7 @@ create_socket4(struct proto* pr, const struct config* cf)
   val = 1;
   reti = setsockopt(pr->pr_sock, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val));
   if (reti == -1) {
-    log(LL_WARN, true, "main", "unable to set the socket address reusable");
+    log(LL_WARN, true, "unable to set the socket address reusable");
     return false;
   }
 
@@ -52,7 +52,7 @@ create_socket4(struct proto* pr, const struct config* cf)
   addr.sin_addr.s_addr = INADDR_ANY;
   reti = bind(pr->pr_sock, (struct sockaddr*)&addr, sizeof(addr));
   if (reti == -1) {
-    log(LL_WARN, true, "main", "unable to bind the socket");
+    log(LL_WARN, true, "unable to bind the socket");
     return false;
   }
 
@@ -60,8 +60,7 @@ create_socket4(struct proto* pr, const struct config* cf)
   val = (int)cf->cf_rbuf;
   reti = setsockopt(pr->pr_sock, SOL_SOCKET, SO_RCVBUF, &val, sizeof(val));
   if (reti == -1) {
-    log(LL_WARN, true, "main", "unable to set the socket receive buffer "
-      "size to %d", val);
+    log(LL_WARN, true, "unable to set the socket receive buffer size to %d", val);
     return false;
   }
 
@@ -69,8 +68,7 @@ create_socket4(struct proto* pr, const struct config* cf)
   val = (int)cf->cf_sbuf;
   reti = setsockopt(pr->pr_sock, SOL_SOCKET, SO_SNDBUF, &val, sizeof(val));
   if (reti == -1) {
-    log(LL_WARN, true, "main", "unable to set the socket send buffer size "
-      "to %d", val);
+    log(LL_WARN, true, "unable to set the socket send buffer size to %d", val);
     return false;
   }
 
@@ -78,7 +76,7 @@ create_socket4(struct proto* pr, const struct config* cf)
   val = (int)cf->cf_ttl;
   reti = setsockopt(pr->pr_sock, IPPROTO_IP, IP_TTL, &val, sizeof(val));
   if (reti == -1) {
-    log(LL_WARN, true, "main", "unable to set the socket Time-To-Live to %d",
+    log(LL_WARN, true, "unable to set the socket Time-To-Live to %d",
       val);
     return false;
   }
@@ -87,7 +85,7 @@ create_socket4(struct proto* pr, const struct config* cf)
   val = 1;
   reti = setsockopt(pr->pr_sock, IPPROTO_IP, IP_RECVTTL, &val, sizeof(val));
   if (reti == -1) {
-    log(LL_WARN, true, "main", "unable to request Time-To-Live values on the "
+    log(LL_WARN, true, "unable to request Time-To-Live values on the "
       "socket");
     return false;
   }
@@ -107,12 +105,12 @@ create_socket6(struct proto* pr, const struct config* cf)
   struct sockaddr_in6 addr;
   int val;
 
-  log(LL_INFO, false, "main", "creating %s socket", "IPv6");
+  log(LL_INFO, false, "creating %s socket", "IPv6");
 
   // Create a UDP socket.
   pr->pr_sock = socket(AF_INET6, SOCK_DGRAM, 0);
   if (pr->pr_sock == -1) {
-    log(LL_WARN, true, "main", "unable to initialize the socket");
+    log(LL_WARN, true, "unable to initialize the socket");
     return false;
   }
 
@@ -120,7 +118,7 @@ create_socket6(struct proto* pr, const struct config* cf)
   val = 1;
   reti = setsockopt(pr->pr_sock, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val));
   if (reti == -1) {
-    log(LL_WARN, true, "main", "unable to set the socket address reusable");
+    log(LL_WARN, true, "unable to set the socket address reusable");
     return false;
   }
 
@@ -128,7 +126,7 @@ create_socket6(struct proto* pr, const struct config* cf)
   val = 1;
   reti = setsockopt(pr->pr_sock, IPPROTO_IPV6, IPV6_V6ONLY, &val, sizeof(val));
   if (reti == -1) {
-    log(LL_WARN, true, "main", "unable to disable IPv4 traffic on the socket");
+    log(LL_WARN, true, "unable to disable IPv4 traffic on the socket");
     return false;
   }
 
@@ -139,7 +137,7 @@ create_socket6(struct proto* pr, const struct config* cf)
   addr.sin6_addr   = in6addr_any;
   reti = bind(pr->pr_sock, (struct sockaddr*)&addr, sizeof(addr));
   if (reti == -1) {
-    log(LL_WARN, true, "main", "unable to bind the socket");
+    log(LL_WARN, true, "unable to bind the socket");
     return false;
   }
 
@@ -147,7 +145,7 @@ create_socket6(struct proto* pr, const struct config* cf)
   val = (int)cf->cf_rbuf;
   reti = setsockopt(pr->pr_sock, SOL_SOCKET, SO_RCVBUF, &val, sizeof(val));
   if (reti == -1) {
-    log(LL_WARN, true, "main", "unable to set the receive buffer size to %d",
+    log(LL_WARN, true, "unable to set the receive buffer size to %d",
       val);
     return false;
   }
@@ -156,7 +154,7 @@ create_socket6(struct proto* pr, const struct config* cf)
   val = (int)cf->cf_sbuf;
   reti = setsockopt(pr->pr_sock, SOL_SOCKET, SO_SNDBUF, &val, sizeof(val));
   if (reti == -1) {
-    log(LL_WARN, true, "main", "unable to set the send buffer size to %d",
+    log(LL_WARN, true, "unable to set the send buffer size to %d",
       val);
     return false;
   }
@@ -166,7 +164,7 @@ create_socket6(struct proto* pr, const struct config* cf)
   reti = setsockopt(pr->pr_sock, IPPROTO_IPV6, IPV6_UNICAST_HOPS, &val,
     sizeof(val));
   if (reti == -1) {
-    log(LL_WARN, true, "main", "unable to set hop count to %d", val);
+    log(LL_WARN, true, "unable to set hop count to %d", val);
     return false;
   }
 
@@ -175,7 +173,7 @@ create_socket6(struct proto* pr, const struct config* cf)
   reti = setsockopt(pr->pr_sock, IPPROTO_IPV6, IPV6_RECVHOPLIMIT, &val,
     sizeof(val));
   if (reti == -1) {
-    log(LL_WARN, true, "main", "unable to request hop count values");
+    log(LL_WARN, true, "unable to request hop count values");
     return false;
   }
 
@@ -192,5 +190,5 @@ delete_socket(const struct proto* pr)
 
   reti = close(pr->pr_sock);
   if (reti == -1)
-    log(LL_WARN, true, "main", "unable to close the %s socket", pr->pr_name);
+    log(LL_WARN, true, "unable to close the %s socket", pr->pr_name);
 }

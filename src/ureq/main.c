@@ -24,13 +24,13 @@ main(int argc, char* argv[])
   // Parse command-line options.
   retb = parse_config(&cf, argc, argv);
   if (retb == false) {
-    log(LL_ERROR, false, "main", "unable to parse command-line options");
+    log(LL_ERROR, false, "unable to parse command-line options");
     return EXIT_FAILURE;
   }
 
   // Verify that the compiled payload is exactly the expected size in bytes.
   if (sizeof(struct payload) != NEMO_PAYLOAD_SIZE) {
-    log(LL_ERROR, false, "main", "wrong payload size: expected %d, actual %z",
+    log(LL_ERROR, false, "wrong payload size: expected %d, actual %z",
       NEMO_PAYLOAD_SIZE, sizeof(struct payload));
     return EXIT_FAILURE;
   }
@@ -39,7 +39,7 @@ main(int argc, char* argv[])
   if (cf.cf_dmon == true) {
     retb = turn_into_daemon();
     if (retb == false) {
-      log(LL_ERROR, false, "main", "unable to turn process into daemon");
+      log(LL_ERROR, false, "unable to turn process into daemon");
       return EXIT_FAILURE;
     }
   }
@@ -47,28 +47,28 @@ main(int argc, char* argv[])
   // Install signal handlers.
   retb = install_signal_handlers();
   if (retb == false) {
-    log(LL_ERROR, false, "main", "unable to install signal handlers");
+    log(LL_ERROR, false, "unable to install signal handlers");
     return EXIT_FAILURE;
   }
 
   // Create the IPv4 socket.
   retb = create_socket4(&p4, &cf);
   if (retb == false) {
-    log(LL_ERROR, false, "main", "unable to create the IPv4 socket");
+    log(LL_ERROR, false, "unable to create the IPv4 socket");
     return EXIT_FAILURE;
   }
 
   // Create the IPv6 socket.
   retb = create_socket6(&p6, &cf);
   if (retb == false) {
-    log(LL_ERROR, false, "main", "unable to create the IPv6 socket");
+    log(LL_ERROR, false, "unable to create the IPv6 socket");
     return EXIT_FAILURE;
   }
 
   // Start issuing requests and waiting for responses.
   retb = request_loop(&p4, &p6, tg, TARG_MAX, &cf);
   if (retb == false) {
-    log(LL_ERROR, false, "main", "the request loop has ended unexpectedly");
+    log(LL_ERROR, false, "the request loop has ended unexpectedly");
     return EXIT_FAILURE;
   }
 

@@ -64,7 +64,7 @@ install_signal_handlers(void)
   struct sigaction sa;
   int reti;
 
-  log(LL_INFO, false, "main", "installing signal handlers");
+  log(LL_INFO, false, "installing signal handlers");
 
   // Reset the signal indicator.
   sint  = false;
@@ -82,24 +82,21 @@ install_signal_handlers(void)
   // Install signal handler for SIGINT.
   reti = sigaction(SIGINT, &sa, NULL);
   if (reti == -1) {
-    log(LL_WARN, true, "main", "unable to add signal handler for %s",
-        "SIGINT");
+    log(LL_WARN, true, "unable to add signal handler for %s", "SIGINT");
     return false;
   }
 
   // Install signal handler for SIGTERM.
   reti = sigaction(SIGTERM, &sa, NULL);
   if (reti == -1) {
-    log(LL_WARN, true, "main", "unable to add signal handler for %s",
-        "SIGTERM");
+    log(LL_WARN, true, "unable to add signal handler for %s", "SIGTERM");
     return false;
   }
 
   // Install signal handler for SIGUSR1.
   reti = sigaction(SIGUSR1, &sa, NULL);
   if (reti == -1) {
-    log(LL_WARN, true, "main", "unable to add signal handler for %s",
-        "SIGUSR1");
+    log(LL_WARN, true, "unable to add signal handler for %s", "SIGUSR1");
     return false;
   }
 

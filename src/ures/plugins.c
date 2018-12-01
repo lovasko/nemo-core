@@ -41,7 +41,7 @@ report_error(const char* name)
   (void)memset(err, '\0', sizeof(err));
   (void)strncpy(err, "unable to open %s:", 64);
   (void)strncat(err, dlerror(), 63);
-  log(LL_WARN, false, "main", err, name);
+  log(LL_WARN, false, err, name);
 }
 
 /// Dynamically load the shared objects and extract all necessary symbols that
@@ -116,14 +116,13 @@ read_loop(const struct plugin* pin)
     
     // Check for errors.
     if (retss == -1) {
-      log(LL_WARN, true, "main", "unable to read payload from a pipe");
+      log(LL_WARN, true, "unable to read payload from a pipe");
       return;
     }
 
     // Check whether a full payload was dequeued.
     if (retss != (ssize_t)sizeof(pl)) {
-      log(LL_WARN, false, "main", "unable to read full payload from a "
-        "pipe");
+      log(LL_WARN, false, "unable to read full payload from a pipe");
       return;
     }
 
@@ -150,8 +149,7 @@ close_pipe_end(const struct plugin* pin)
   if (pin->pi_pid == 0) {
     reti = close(pin->pi_pipe[1]);
     if (reti == -1) {
-      log(LL_WARN, true, "main", "unable to close the writing end of the "
-        "pipe");
+      log(LL_WARN, true, "unable to close the writing end of the pipe");
       return false;
     }
   } else {
@@ -160,8 +158,7 @@ close_pipe_end(const struct plugin* pin)
     // plugins.
     reti = close(pin->pi_pipe[0]);
     if (reti == -1) {
-      log(LL_WARN, true, "main", "unable to close the reading end of the "
-        "pipe");
+      log(LL_WARN, true, "unable to close the reading end of the pipe");
       return false;
     }
   }
@@ -185,7 +182,7 @@ start_plugins(struct plugin* pins, const uint64_t npins)
     // Create a pipe through which the processes will communicate.
     reti = pipe(pins[i].pi_pipe);
     if (reti == -1) {
-      log(LL_WARN, true, "main", "unable to create a pipe");
+      log(LL_WARN, true, "unable to create a pipe");
       return false;
     }
 
@@ -194,7 +191,7 @@ start_plugins(struct plugin* pins, const uint64_t npins)
 
     // Check for error first.
     if (pins[i].pi_pid == -1) {
-      log(LL_WARN, true, "main", "unable to start a plugin process");
+      log(LL_WARN, true, "unable to start a plugin process");
       return false;
     }
 
@@ -203,13 +200,12 @@ start_plugins(struct plugin* pins, const uint64_t npins)
     if (retb == false)
       return false;
 
-    // In case this code is executed in the child process start
-    // the main event loop.
+    // In case this code is executed in the child process start the main event
+    // loop.
     if (pins[i].pi_pid == 0) {
       retb = pins[i].pi_init();
       if (retb == false) {
-        log(LL_WARN, false, "main", "unable to initialise plugin %s",
-          pins[i].pi_name);
+        log(LL_WARN, false, "unable to initialise plugin %s", pins[i].pi_name);
         return false;
       }
 
@@ -244,12 +240,12 @@ notify_plugins(const struct plugin* pins,
 
     // Check for error.
     if (retss == -1)
-      log(LL_WARN, true, "main", "unable to send payload to plugin %s",
+      log(LL_WARN, true, "unable to send payload to plugin %s",
         pins[i].pi_name);
 
     // Check whether all expected data was written to the pipe.
     if (retss != (ssize_t)sizeof(*pl))
-      log(LL_WARN, false, "main", "unable to full payload to plugin %s",
+      log(LL_WARN, false, "unable to full payload to plugin %s",
         pins[i].pi_name);
   }
 }
@@ -273,6 +269,6 @@ terminate_plugins(const struct plugin* pins, const uint64_t npins)
   for (i = 0; i < npins; i++) {
     reti = close(pins[i].pi_pipe[1]);
     if (reti == -1)
-      log(LL_WARN, true, "main", "unable to close a pipe");
+      log(LL_WARN, true, "unable to close a pipe");
   }
 }

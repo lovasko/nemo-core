@@ -23,11 +23,11 @@
 bool
 verify_payload(struct proto* pr, const ssize_t n, const struct payload* pl)
 {
-  log(LL_TRACE, false, "main", "verifying payload");
+  log(LL_TRACE, false, "verifying payload");
 
   // Verify the size of the datagram.
   if ((size_t)n != sizeof(*pl)) {
-    log(LL_DEBUG, false, "main", "wrong datagram size, expected: %zd, actual: %zu",
+    log(LL_DEBUG, false, "wrong datagram size, expected: %zd, actual: %zu",
         sizeof(*pl), n);
     pr->pr_resz++;
     return false;
@@ -35,7 +35,7 @@ verify_payload(struct proto* pr, const ssize_t n, const struct payload* pl)
 
   // Verify the magic identifier.
   if (pl->pl_mgic != NEMO_PAYLOAD_MAGIC) {
-    log(LL_DEBUG, false, "main", "payload identifier unknown, expected: %"
+    log(LL_DEBUG, false, "payload identifier unknown, expected: %"
         PRIx32 ", actual: %" PRIx32, NEMO_PAYLOAD_MAGIC, pl->pl_mgic);
     pr->pr_remg++;
     return false;
@@ -43,7 +43,7 @@ verify_payload(struct proto* pr, const ssize_t n, const struct payload* pl)
 
   // Verify the payload version.
   if (pl->pl_fver != NEMO_PAYLOAD_VERSION) {
-    log(LL_DEBUG, false, "main", "unsupported payload version, expected: %"
+    log(LL_DEBUG, false, "unsupported payload version, expected: %"
         PRIu8 ", actual: %" PRIu8, NEMO_PAYLOAD_VERSION, pl->pl_fver);
     pr->pr_repv++;
     return false;
@@ -51,7 +51,7 @@ verify_payload(struct proto* pr, const ssize_t n, const struct payload* pl)
 
   // Verify the payload type.
   if (pl->pl_type != NEMO_PAYLOAD_TYPE_REQUEST) {
-    log(LL_DEBUG, false, "main", "unexpected payload type, expected: %"
+    log(LL_DEBUG, false, "unexpected payload type, expected: %"
         PRIu8 ", actual: %" PRIu8, NEMO_PAYLOAD_TYPE_REQUEST, pl->pl_type);
     pr->pr_rety++;
     return false;
@@ -75,7 +75,7 @@ update_payload(struct payload* pl, struct msghdr* msg, const struct config* cf)
   int ttl;
   bool retb;
 
-  log(LL_TRACE, false, "main", "updating payload");
+  log(LL_TRACE, false, "updating payload");
 
   // Change the message type.
   pl->pl_type = NEMO_PAYLOAD_TYPE_RESPONSE;
@@ -86,7 +86,7 @@ update_payload(struct payload* pl, struct msghdr* msg, const struct config* cf)
   // Obtain the steady (monotonic) clock time.
   reti = clock_gettime(CLOCK_MONOTONIC, &mts);
   if (reti == -1) {
-    log(LL_WARN, true, "main", "unable to obtain the steady time");
+    log(LL_WARN, true, "unable to obtain the steady time");
     return false;
   }
   tnanos(&pl->pl_mtm2, mts);
@@ -94,7 +94,7 @@ update_payload(struct payload* pl, struct msghdr* msg, const struct config* cf)
   // Obtain the system (real-time) clock time.
   reti = clock_gettime(CLOCK_REALTIME, &rts);
   if (reti == -1) {
-    log(LL_WARN, true, "main", "unable to obtain the system time");
+    log(LL_WARN, true, "unable to obtain the system time");
     return false;
   }
   tnanos(&pl->pl_rtm2, rts);
@@ -102,7 +102,7 @@ update_payload(struct payload* pl, struct msghdr* msg, const struct config* cf)
   // Retrieve the received Time-To-Live value.
   retb = retrieve_ttl(&ttl, msg);
   if (retb == false) {
-    log(LL_WARN, false, "main", "unable to extract IP Time-To-Live value");
+    log(LL_WARN, false, "unable to extract IP Time-To-Live value");
     pl->pl_ttl2 = 0;
   } else {
     pl->pl_ttl2 = (uint8_t)ttl;

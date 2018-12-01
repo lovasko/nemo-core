@@ -33,27 +33,27 @@ reset_counters(struct proto* pr)
 void 
 log_counters(const struct proto* pr)
 {
-  log(LL_DEBUG, false, "main", "%s overall received: %" PRIu64,
+  log(LL_DEBUG, false, "%s overall received: %" PRIu64,
     pr->pr_name, pr->pr_rall);
 
-  log(LL_DEBUG, false, "main", "%s receive network-related errors: %" PRIu64,
+  log(LL_DEBUG, false, "%s receive network-related errors: %" PRIu64,
     pr->pr_name, pr->pr_reni);
 
-  log(LL_DEBUG, false, "main", "%s receive datagram size mismatches: %" PRIu64,
+  log(LL_DEBUG, false, "%s receive datagram size mismatches: %" PRIu64,
     pr->pr_name, pr->pr_resz);
 
-  log(LL_DEBUG, false, "main", "%s receive payload magic mismatches: %" PRIu64,
+  log(LL_DEBUG, false, "%s receive payload magic mismatches: %" PRIu64,
     pr->pr_name, pr->pr_remg);
 
-  log(LL_DEBUG, false, "main", "%s receive payload version mismatches: %" PRIu64,
+  log(LL_DEBUG, false, "%s receive payload version mismatches: %" PRIu64,
     pr->pr_name, pr->pr_repv);
 
-  log(LL_DEBUG, false, "main", "%s receive payload type mismatches: %" PRIu64,
+  log(LL_DEBUG, false, "%s receive payload type mismatches: %" PRIu64,
     pr->pr_name, pr->pr_rety);
 
-  log(LL_DEBUG, false, "main", "%s overall sent: %" PRIu64,
+  log(LL_DEBUG, false, "%s overall sent: %" PRIu64,
     pr->pr_name, pr->pr_sall);
 
-  log(LL_DEBUG, false, "main", "%s send network-related errors: %" PRIu64,
+  log(LL_DEBUG, false, "%s send network-related errors: %" PRIu64,
     pr->pr_name, pr->pr_seni);
 }

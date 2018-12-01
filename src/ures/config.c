@@ -110,7 +110,7 @@ option_a(struct config* cf, const char* in)
   static uint64_t i = 0;
 
   if (i >= PLUG_MAX) {
-    log(LL_WARN, false, "main", "too many plugins, only %d allowed", PLUG_MAX);
+    log(LL_WARN, false, "too many plugins, only %d allowed", PLUG_MAX);
     return false;
   }
 
@@ -353,7 +353,7 @@ organize_protocols(struct config* cf)
 {
   // Check whether two exclusive modes were selected.
   if (cf->cf_ipv4 == true && cf->cf_ipv6 == true) {
-    log(LL_WARN, false, "main", "options -4 and -6 are mutually exclusive");
+    log(LL_WARN, false, "options -4 and -6 are mutually exclusive");
     return false;
   }
 
@@ -425,7 +425,7 @@ parse_config(struct config* cf, int argc, char* argv[])
     { 'v',  false, option_v }
   };
 
-  log(LL_INFO, false, "main", "parsing command-line options");
+  log(LL_INFO, false, "parsing command-line options");
 
   (void)memset(optdsl, '\0', sizeof(optdsl));
   generate_getopt_string(optdsl, opts, 16);
@@ -443,7 +443,7 @@ parse_config(struct config* cf, int argc, char* argv[])
     // Unknown option.
     if (opt == '?') {
       print_usage();
-      log(LL_WARN, false, "main", "unknown option %c", optopt);
+      log(LL_WARN, false, "unknown option '%c'", optopt);
 
       return false;
     }
@@ -453,7 +453,7 @@ parse_config(struct config* cf, int argc, char* argv[])
       if (opts[i].op_name == (char)opt) {
         retb = opts[i].op_act(cf, optarg);
         if (retb == false) {
-          log(LL_WARN, false, "main", "action for option '%c' failed", opt);
+          log(LL_WARN, false, "action for option '%c' failed", opt);
           return false;
         }
 
@@ -464,7 +464,7 @@ parse_config(struct config* cf, int argc, char* argv[])
 
   // Verify that there are no positional arguments.
   if (optind != argc) {
-    log(LL_WARN, false, "main", "no arguments are expected");
+    log(LL_WARN, false, "no arguments are expected");
     return false;
   }
 
@@ -486,17 +486,15 @@ parse_config(struct config* cf, int argc, char* argv[])
 void
 log_config(const struct config* cf)
 {
-  log(LL_DEBUG, false, "main", "UDP port: %" PRIu64, cf->cf_port);
-  log(LL_DEBUG, false, "main", "unique key: %" PRIu64, cf->cf_key);
-  log(LL_DEBUG, false, "main", "Time-To-Live: %" PRIu64, cf->cf_ttl);
-  log(LL_DEBUG, false, "main", "receive buffer size: %" PRIu64 " bytes",
-    cf->cf_rbuf);
-  log(LL_DEBUG, false, "main", "send buffer size: %" PRIu64 " bytes",
-    cf->cf_sbuf);
-  log(LL_DEBUG, false, "main", "monologue mode: %s",
+  log(LL_DEBUG, false, "UDP port: %" PRIu64, cf->cf_port);
+  log(LL_DEBUG, false, "unique key: %" PRIu64, cf->cf_key);
+  log(LL_DEBUG, false, "Time-To-Live: %" PRIu64, cf->cf_ttl);
+  log(LL_DEBUG, false, "receive buffer size: %" PRIu64 " bytes", cf->cf_rbuf);
+  log(LL_DEBUG, false, "send buffer size: %" PRIu64 " bytes", cf->cf_sbuf);
+  log(LL_DEBUG, false, "monologue mode: %s",
     cf->cf_mono == true ? "yes" : "no");
-  log(LL_DEBUG, false, "main", "daemon process: %s",
+  log(LL_DEBUG, false, "daemon process: %s",
     cf->cf_dmon == true ? "yes" : "no");
-  log(LL_DEBUG, false, "main", "binary report: %s",
+  log(LL_DEBUG, false, "binary report: %s",
     cf->cf_dmon == true ? "yes" : "no");
 }

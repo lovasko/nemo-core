@@ -90,13 +90,11 @@ highlight(char* out, const char* inp)
 ///
 /// @param[in] lvl  logging level (one of LL_*)
 /// @param[in] perr append the errno string to end of the log line
-/// @param[in] name thread name
 /// @param[in] fmt  message to log
 /// @param[in] ...  arguments for the message
 void
 log(const uint8_t lvl,
     const bool perr,
-    const char* name,
     const char* fmt,
     ...)
 {
@@ -149,6 +147,6 @@ log(const uint8_t lvl,
     (void)memcpy(lstr, lname[lvl], strlen(lname[lvl]));
 
   // Print the final log line.
-  (void)fprintf(stderr, "[%s.%03" PRIu32 "] %s - %s: %s%s\n",
-     tstr, (uint32_t)tspec.tv_nsec / 1000000, lstr, name, msg, errmsg);
+  (void)fprintf(stderr, "[%s.%03" PRIu32 "] %s - %s%s\n",
+     tstr, (uint32_t)tspec.tv_nsec / 1000000, lstr, msg, errmsg);
 }

@@ -6,6 +6,7 @@
 
 #include <unistd.h>
 #include <dlfcn.h>
+#include <fcntl.h>
 #include <string.h>
 
 #include "common/log.h"
@@ -177,12 +178,29 @@ start_plugins(struct plugin* pins, const uint64_t npins)
   uint64_t i;
   int reti;
   bool retb;
+  int fl;
 
   for (i = 0; i < npins; i++) {
     // Create a pipe through which the processes will communicate.
     reti = pipe(pins[i].pi_pipe);
     if (reti == -1) {
       log(LL_WARN, true, "unable to create a pipe");
+      return false;
+    }
+
+    // Obtain the file status flags of the writing end of the pipe.
+    fl = fcntl(pins[i].pi_pipe[0], F_GETFL);
+    if (fl == -1) {
+      log(LL_WARN, true, "unable to obtain file status flags for pipe");
+      return false;
+    }
+
+    // Set the writing end of the pipe to be non-blocking, so that a slow
+    // plugin does not block the main program (and other plugins).
+    fl |= O_NONBLOCK;
+    reti = fcntl(pins[i].pi_pipe[0], F_SETFL, fl);
+    if (reti == -1) {
+      log(LL_WARN, true, "unable to set the pipe to be non-blocking");
       return false;
     }
 

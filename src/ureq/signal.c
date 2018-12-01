@@ -52,7 +52,7 @@ block_all_signals(void)
   (void)sigprocmask(SIG_SETMASK, &mask, NULL);
 }
 
-/// Install signal handlers for the SIGINT and SIGTER signals.
+/// Install signal handlers for the SIGINT, SIGTERM, and SIGUSR1 signals.
 /// @return success/failure indication
 ///
 /// @global sint

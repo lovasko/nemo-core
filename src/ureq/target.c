@@ -124,6 +124,7 @@ resolve_name(struct target* tg,
     // Convert the address to a IPv4 target.
     if (cf->cf_ipv4 == true && ai->ai_family == AF_INET) {
       read_target4(&tg[*tcnt], &((struct sockaddr_in*)ai->ai_addr)->sin_addr);
+      tg[*tcnt].tg_name = name;
       (*tcnt)++;
     }
 
@@ -167,6 +168,7 @@ parse_target_string(struct target* tg,
     reti = inet_pton(AF_INET, tstr, &a4);
     if (reti == 1) {
       read_target4(&tg[0], &a4);
+      tg[0].tg_name = NULL;
       *tcnt = 1;
 
       log(LL_TRACE, false, "parsed %s target: %s", "IPv4", tstr);
@@ -179,6 +181,7 @@ parse_target_string(struct target* tg,
     reti = inet_pton(AF_INET6, tstr, &a6);
     if (reti == 1) {
       read_target6(&tg[0], &a6);
+      tg[0].tg_name = NULL;
       *tcnt = 1;
 
       log(LL_TRACE, false, "parsed %s target: %s", "IPv6", tstr);

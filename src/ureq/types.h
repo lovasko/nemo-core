@@ -64,10 +64,11 @@ struct proto {
 
 /// Network endpoint.
 struct target {
-  uint64_t tg_laddr;  ///< Low address bits.
-  uint64_t tg_haddr;  ///< High address bits.
-  uint8_t  tg_ipv;    ///< IP address version.
-  uint8_t  tg_pad[7]; ///< Padding (unused).
+  const char* tg_name;   ///< Domain name.
+  uint64_t    tg_laddr;  ///< Low address bits.
+  uint64_t    tg_haddr;  ///< High address bits.
+  uint8_t     tg_ipv;    ///< IP address version.
+  uint8_t     tg_pad[7]; ///< Padding (unused).
 };
 
 #endif

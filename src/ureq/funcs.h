@@ -45,6 +45,7 @@ bool create_socket6(struct proto* pr, const struct config* cf);
 bool get_assigned_port(uint16_t* pn, const struct proto* pr);
 
 // Target.
+void log_targets(const struct target tg[], const uint64_t cnt);
 bool load_targets(struct target* tg,
                   uint64_t* cnt,
                   const uint64_t tmax,

@@ -17,6 +17,7 @@
 
 #include "ureq/funcs.h"
 #include "ureq/types.h"
+#include "common/convert.h"
 #include "common/log.h"
 
 
@@ -304,4 +305,38 @@ load_targets(struct target* tg,
   normalize_targets(tg, tcnt, tcnt2);
 
   return true;
+}
+
+/// Print all targets and their sources as debugging log entries. 
+///
+/// @param[in] tg  array of targets
+/// @param[in] cnt number of targets
+void
+log_targets(const struct target tg[], const uint64_t cnt)
+{
+  uint64_t i;
+  struct in_addr a4;
+  struct in6_addr a6;
+  char str[INET6_ADDRSTRLEN];
+
+  for (i = 0; i < cnt; i++) {
+    // Handle the IPv4 case.
+    if (tg[i].tg_ipv == NEMO_IP_VERSION_4) {
+      a4.s_addr = (uint32_t)tg[i].tg_laddr;
+      (void)inet_ntop(AF_INET, &a4, str, sizeof(str));
+    }
+
+    // Handle the IPv6 case.
+    if (tg[i].tg_ipv == NEMO_IP_VERSION_6) {
+      tipv6(&a6, tg[i].tg_laddr, tg[i].tg_haddr);
+      (void)inet_ntop(AF_INET6, &a6, str, sizeof(str));
+    }
+
+    // Print the target address. In case the target was resolved from a domain
+    // name, append the information.
+    if (tg[i].tg_name == NULL)
+      log(LL_DEBUG, false, "target address %s", str);
+    else
+      log(LL_DEBUG, false, "target address %s resolved from %s", str, tg[i].tg_name);
+  }
 }

@@ -490,7 +490,7 @@ dispersed_round(struct proto* p4,
     if (retb == false)
       return false;
 
-    // Await responses the divided part of the round..
+    // Await responses the divided part of the round.
     retb = wait_for_responses(p4, p6, part, cf);
     if (retb == false) {
       log(LL_WARN, false, "unable to wait for responses");

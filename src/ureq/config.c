@@ -401,6 +401,9 @@ set_defaults(struct config* cf)
 
   for (i = 0; i < PLUG_MAX; i++)
     cf->cf_pi[i] = NULL;
+  cf->cf_cnt  = DEF_COUNT;
+  cf->cf_int  = DEF_INTERVAL;
+  cf->cf_wait = DEF_FINAL_WAIT;
   cf->cf_rbuf = DEF_RECEIVE_BUFFER;
   cf->cf_sbuf = DEF_SEND_BUFFER;
   cf->cf_err  = DEF_EXIT_ON_ERROR;

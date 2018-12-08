@@ -371,9 +371,6 @@ wait_for_responses(struct proto* p4,
   sigset_t mask;
   bool retb;
 
-  // Print the CSV header of the standard output.
-  report_header(cf);
-
   // Ensure that all relevant events are registered.
   prepare_file_set(&rfd, &nfds, p4, p6, cf);
 
@@ -565,6 +562,12 @@ request_loop(struct proto* p4,
   uint64_t rld;
   uint64_t now;
   bool retb;
+
+  // Log the current configuration.
+  log_config(cf);
+
+  // Print the CSV header of the standard output.
+  report_header(cf);
 
   // Load all targets at start.
   retb = load_targets(tg, &ntg, tmax, cf);

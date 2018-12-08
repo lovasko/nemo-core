@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
+#include <inttypes.h>
 
 #include "common/convert.h"
 #include "common/log.h"
@@ -577,6 +578,8 @@ request_loop(struct proto* p4,
   rld = now + cf->cf_rld;
 
   for (i = 0; i < cf->cf_cnt; i++) {
+    log(LL_TRACE, false, "request round %" PRIu64 "/%" PRIu64, i + 1, cf->cf_cnt);
+
     // Check if name resolution needs to happen.
     now = mono_now();
     if (now > rld) {
@@ -602,6 +605,7 @@ request_loop(struct proto* p4,
   }
 
   // Waiting for incoming responses after sending all requests.
+  log(LL_TRACE, false, "waiting for final responses");
   retb = wait_for_responses(p4, p6, cf->cf_wait, cf);
   if (retb == false) {
     log(LL_WARN, false, "unable to wait for final responses");

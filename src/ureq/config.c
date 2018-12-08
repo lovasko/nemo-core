@@ -578,21 +578,8 @@ parse_config(struct config* cf, int argc, char* argv[])
 ///
 /// @param[in] cf configuration
 void
-log_config(const struct config* cf,
-           const struct proto* p4,
-           const struct proto* p6)
+log_config(const struct config* cf)
 {
-  uint16_t port;
-  bool retb;
-
-  retb = get_assigned_port(&port, p4);
-  if (retb == true)
-    log(LL_DEBUG, false, "local IPv4 UDP port: %" PRIu16, port);
-
-  retb = get_assigned_port(&port, p6);
-  if (retb == true)
-    log(LL_DEBUG, false, "local IPv6 UDP port: %" PRIu16, port);
-
   log(LL_DEBUG, false, "responder UDP port: %" PRIu64, cf->cf_port);
   log(LL_DEBUG, false, "unique key: %" PRIu64, cf->cf_key);
   log(LL_DEBUG, false, "Time-To-Live: %" PRIu64, cf->cf_ttl);

@@ -9,6 +9,7 @@
 #include <netinet/in.h>
 
 #include <string.h>
+#include <inttypes.h>
 
 #include "common/log.h"
 #include "ureq/funcs.h"
@@ -205,4 +206,15 @@ get_assigned_port(uint16_t* pn, const struct proto* pr)
   }
 
   return true;
+}
+
+void
+log_socket_port(const struct proto* pr)
+{
+  bool retb;
+  uint16_t port;
+
+  retb = get_assigned_port(&port, pr);
+  if (retb == true)
+    log(LL_DEBUG, false, "local %s UDP port: %" PRIu16, pr->pr_name, port);
 }

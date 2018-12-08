@@ -14,7 +14,7 @@
 
 // Configuration.
 bool parse_config(struct config* cf, int argc, char* argv[]);
-void log_config(const struct config* cf, const struct proto* p4, const struct proto* p6);
+void log_config(const struct config* cf);
 
 // Counters.
 void reset_counters(struct proto* pr);
@@ -43,6 +43,7 @@ void create_signal_mask(sigset_t* mask);
 bool create_socket4(struct proto* pr, const struct config* cf);
 bool create_socket6(struct proto* pr, const struct config* cf);
 bool get_assigned_port(uint16_t* pn, const struct proto* pr);
+void log_socket_port(const struct proto* pr);
 
 // Target.
 void log_targets(const struct target tg[], const uint64_t cnt);

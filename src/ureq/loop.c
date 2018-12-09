@@ -94,8 +94,8 @@ set_address(struct sockaddr_storage* ss, const struct target* tg, const struct c
 /// @param[in] tg network target
 /// @param[in] cf configuration
 static bool
-send_request(const uint64_t snum,
-             const struct proto* pr,
+send_request(struct proto* pr,
+             const uint64_t snum,
              const struct target* tg,
              const struct config* cf)
 {
@@ -133,6 +133,8 @@ send_request(const uint64_t snum,
     lvl = cf->cf_err == true ? LL_WARN : LL_DEBUG;
     log(lvl, true, "unable to send datagram");
 
+    pr->pr_seni++;
+
     // Fail the procedure only if we have selected the exit-on-error attribute
     // to be true.
     return !cf->cf_err;
@@ -144,10 +146,14 @@ send_request(const uint64_t snum,
     lvl = cf->cf_err == true ? LL_WARN : LL_DEBUG;
     log(lvl, true, "unable to send the whole payload");
 
+    pr->pr_seni++;
+
     // Fail the procedure only if we have selected the exit-on-error attribute
     // to be true.
     return !cf->cf_err;
   }
+
+  pr->pr_sall++;
 
   return true;
 }
@@ -404,7 +410,7 @@ contact_target(struct proto* p4,
 
   // Handle the IPv4 case.
   if (cf->cf_ipv4 == true && tg->tg_ipv == NEMO_IP_VERSION_4) { 
-    retb = send_request(snum, p4, tg, cf);
+    retb = send_request(p4, snum, tg, cf);
     if (retb == false) {
       log(LL_WARN, false, "unable to send a request");
       return false;
@@ -413,7 +419,7 @@ contact_target(struct proto* p4,
 
   // Handle the IPv6 case.
   if (cf->cf_ipv6 == true && tg->tg_ipv == NEMO_IP_VERSION_6) { 
-    retb = send_request(snum, p6, tg, cf);
+    retb = send_request(p6, snum, tg, cf);
     if (retb == false) {
       log(LL_WARN, false, "unable to send a request");
       return false;

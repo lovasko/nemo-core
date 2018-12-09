@@ -65,6 +65,8 @@ receive_datagram(struct proto* pr,
     return false;
   }
 
+  pr->pr_rall++;
+
   return true;
 }
 
@@ -116,10 +118,13 @@ send_datagram(struct proto* pr,
   // Verify the size of the sent datagram.
   if ((size_t)n != sizeof(*pl)) {
     log(LL_WARN, false, "wrong sent payload size");
+    pr->pr_seni++;
 
     if (cf->cf_err == true)
       return false;
   }
+
+  pr->pr_sall++;
 
   return true;
 }

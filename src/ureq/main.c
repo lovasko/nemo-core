@@ -55,6 +55,7 @@ main(int argc, char* argv[])
   if (cf.cf_ipv4 == true) {
     reset_counters(&p4);
     p4.pr_name = "IPv4";
+    p4.pr_ipv  = 4;
 
     retb = create_socket4(&p4, &cf);
     if (retb == false) {
@@ -67,6 +68,7 @@ main(int argc, char* argv[])
   if (cf.cf_ipv6 == true) {
     reset_counters(&p6);
     p6.pr_name = "IPv6";
+    p6.pr_ipv  = 6;
 
     retb = create_socket6(&p6, &cf);
     if (retb == false) {

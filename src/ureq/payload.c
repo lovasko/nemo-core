@@ -50,9 +50,9 @@ verify_payload(struct proto* pr, const ssize_t n, const struct payload* pl)
   }
 
   // Verify the payload type.
-  if (pl->pl_type != NEMO_PAYLOAD_TYPE_REQUEST) {
+  if (pl->pl_type != NEMO_PAYLOAD_TYPE_RESPONSE) {
     log(LL_DEBUG, false, "unexpected payload type, expected: %"
-        PRIu8 ", actual: %" PRIu8, NEMO_PAYLOAD_TYPE_REQUEST, pl->pl_type);
+        PRIu8 ", actual: %" PRIu8, NEMO_PAYLOAD_TYPE_RESPONSE, pl->pl_type);
     pr->pr_rety++;
     return false;
   }

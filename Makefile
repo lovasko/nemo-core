@@ -16,6 +16,7 @@ all: bin/ureq bin/ures
 bin/ureq: obj/common/convert.o \
           obj/common/daemon.o  \
           obj/common/log.o     \
+          obj/common/now.o     \
           obj/common/parse.o   \
           obj/common/ttl.o     \
           obj/ureq/config.o    \
@@ -30,6 +31,7 @@ bin/ureq: obj/common/convert.o \
 	$(CC) obj/common/convert.o   \
 	      obj/common/daemon.o    \
 	      obj/common/log.o       \
+	      obj/common/now.o       \
 	      obj/common/parse.o     \
 	      obj/common/ttl.o       \
 	      obj/ureq/config.o      \
@@ -47,6 +49,7 @@ bin/ureq: obj/common/convert.o \
 bin/ures: obj/common/convert.o \
           obj/common/daemon.o  \
           obj/common/log.o     \
+          obj/common/now.o     \
           obj/common/parse.o   \
           obj/common/ttl.o     \
           obj/ures/config.o    \
@@ -62,6 +65,7 @@ bin/ures: obj/common/convert.o \
 	$(CC) obj/common/convert.o   \
 	      obj/common/daemon.o    \
 	      obj/common/log.o       \
+	      obj/common/now.o       \
 	      obj/common/parse.o     \
 	      obj/common/ttl.o       \
 	      obj/ures/config.o      \
@@ -145,6 +149,9 @@ obj/common/daemon.o: src/common/daemon.c
 obj/common/log.o: src/common/log.c
 	$(CC) $(CFLAGS) -c src/common/log.c     -o obj/common/log.o
 
+obj/common/now.o: src/common/now.c
+	$(CC) $(CFLAGS) -c src/common/now.c     -o obj/common/now.o
+
 obj/common/parse.o: src/common/parse.c
 	$(CC) $(CFLAGS) -c src/common/parse.c   -o obj/common/parse.o
 
@@ -157,6 +164,7 @@ clean:
 	rm -f obj/common/convert.o
 	rm -f obj/common/daemon.o
 	rm -f obj/common/log.o
+	rm -f obj/common/now.o
 	rm -f obj/common/parse.o
 	rm -f obj/common/ttl.o
 	rm -f obj/ureq/config.o

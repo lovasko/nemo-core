@@ -161,6 +161,7 @@ clean:
 	rm -f obj/common/ttl.o
 	rm -f obj/ureq/config.o
 	rm -f obj/ureq/counters.o
+	rm -f obj/ureq/loop.o
 	rm -f obj/ureq/main.o
 	rm -f obj/ureq/payload.o
 	rm -f obj/ureq/report.o

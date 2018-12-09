@@ -27,7 +27,7 @@ bin/ureq: obj/common/convert.o \
           obj/ureq/report.o    \
           obj/ureq/signal.o    \
           obj/ureq/socket.o    \
-          obj/ureq/target.o    
+          obj/ureq/target.o
 	$(CC) obj/common/convert.o   \
 	      obj/common/daemon.o    \
 	      obj/common/log.o       \

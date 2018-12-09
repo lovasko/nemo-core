@@ -8,6 +8,7 @@
 
 #include "common/convert.h"
 #include "common/log.h"
+#include "common/now.h"
 #include "common/payload.h"
 #include "common/ttl.h"
 #include "ures/funcs.h"
@@ -69,9 +70,6 @@ verify_payload(struct proto* pr, const ssize_t n, const struct payload* pl)
 bool
 update_payload(struct payload* pl, struct msghdr* msg, const struct config* cf)
 {
-  struct timespec mts;
-  struct timespec rts;
-  int reti;
   int ttl;
   bool retb;
 
@@ -83,21 +81,11 @@ update_payload(struct payload* pl, struct msghdr* msg, const struct config* cf)
   // Sign the payload.
   pl->pl_resk = cf->cf_key;
 
-  // Obtain the steady (monotonic) clock time.
-  reti = clock_gettime(CLOCK_MONOTONIC, &mts);
-  if (reti == -1) {
-    log(LL_WARN, true, "unable to obtain the steady time");
-    return false;
-  }
-  tnanos(&pl->pl_mtm2, mts);
+  // Obtain the current monotonic clock value.
+  pl->pl_mtm2 = mono_now();
 
-  // Obtain the system (real-time) clock time.
-  reti = clock_gettime(CLOCK_REALTIME, &rts);
-  if (reti == -1) {
-    log(LL_WARN, true, "unable to obtain the system time");
-    return false;
-  }
-  tnanos(&pl->pl_rtm2, rts);
+  // Obtain the current real-time clock value.
+  pl->pl_rtm2 = real_now();
 
   // Retrieve the received Time-To-Live value.
   retb = retrieve_ttl(&ttl, msg);

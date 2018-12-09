@@ -21,6 +21,7 @@
 
 #include "common/convert.h"
 #include "common/log.h"
+#include "common/now.h"
 #include "common/payload.h"
 #include "ureq/funcs.h"
 #include "ureq/types.h"
@@ -29,38 +30,6 @@
 extern volatile bool sterm;
 extern volatile bool sint;
 extern volatile bool susr1;
-
-/// Get the current time for a particular clock type. This function ignores the
-/// return value of the clock call, as the storage timespec pointer is on a
-/// valid stack, and the real-time clock is expected to be on the system.
-/// @return current time in nanoseconds
-static uint64_t
-real_now(void)
-{
-  uint64_t ns;
-  struct timespec ts;
-
-  (void)clock_gettime(CLOCK_REALTIME, &ts);
-  tnanos(&ns, ts);
-
-  return ns;
-}
-
-/// Get the current time for a particular clock type. This function ignores the
-/// return value of the clock call, as the storage timespec pointer is on a
-/// valid stack, and the monotonic clock is expected to be on the system.
-/// @return current time in nanoseconds
-static uint64_t
-mono_now(void)
-{
-  uint64_t ns;
-  struct timespec ts;
-
-  (void)clock_gettime(CLOCK_MONOTONIC, &ts);
-  tnanos(&ns, ts);
-
-  return ns;
-}
 
 /// Fill the payload with default and selected data.
 ///

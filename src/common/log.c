@@ -103,7 +103,7 @@ log(const uint8_t lvl,
   char msg[NEMO_LOG_MAX_LENGTH];
   char errmsg[NEMO_LOG_MAX_LENGTH];
   struct tm tfmt;
-  struct timespec tspec;
+  time_t tspec;
   va_list args;
   int save;
   static const char* lname[] = {"ERROR", " WARN", " INFO", "DEBUG", "TRACE"};
@@ -118,9 +118,9 @@ log(const uint8_t lvl,
   save = errno;
 
   // Obtain and format the current time in GMT.
-  (void)clock_gettime(CLOCK_REALTIME, &tspec);
-  (void)gmtime_r(&tspec.tv_sec, &tfmt);
-  (void)strftime(tstr, sizeof(tstr), "%T", &tfmt);
+  tspec = time(NULL);
+  (void)gmtime_r(&tspec, &tfmt);
+  (void)strftime(tstr, sizeof(tstr), "%F %T", &tfmt);
 
   // Prepare highlights for the message variables.
   (void)memset(hfmt, '\0', sizeof(hfmt));
@@ -147,6 +147,5 @@ log(const uint8_t lvl,
     (void)memcpy(lstr, lname[lvl], strlen(lname[lvl]));
 
   // Print the final log line.
-  (void)fprintf(stderr, "[%s.%03" PRIu32 "] %s - %s%s\n",
-     tstr, (uint32_t)tspec.tv_nsec / 1000000, lstr, msg, errmsg);
+  (void)fprintf(stderr, "[%s] %s - %s%s\n", tstr, lstr, msg, errmsg);
 }

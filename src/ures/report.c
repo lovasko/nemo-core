@@ -67,7 +67,7 @@ report_event(const struct payload* pl, const struct config* cf)
   (void)memset(ttlstr,  '\0', sizeof(ttlstr));
 
   // Convert the IP address into a string.
-  if (pl->pl_pver == 4) {
+  if (pl->pl_pver == NEMO_IP_VERSION_4) {
     a4.s_addr = (uint32_t)pl->pl_laddr;
     inet_ntop(AF_INET, &a4, addrstr, sizeof(addrstr));
   } else {

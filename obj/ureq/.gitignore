@@ -1,9 +1,12 @@
 config.o
 counters.o
+event.o
 loop.o
 main.o
 payload.o
+relay.o
 report.o
+round.o
 signal.o
 socket.o
 target.o

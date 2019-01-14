@@ -21,10 +21,13 @@ bin/ureq: obj/common/convert.o \
           obj/common/ttl.o     \
           obj/ureq/config.o    \
           obj/ureq/counters.o  \
+          obj/ureq/event.o     \
           obj/ureq/loop.o      \
           obj/ureq/main.o      \
           obj/ureq/payload.o   \
+          obj/ureq/relay.o     \
           obj/ureq/report.o    \
+          obj/ureq/round.o     \
           obj/ureq/signal.o    \
           obj/ureq/socket.o    \
           obj/ureq/target.o
@@ -36,10 +39,13 @@ bin/ureq: obj/common/convert.o \
 	      obj/common/ttl.o       \
 	      obj/ureq/config.o      \
 	      obj/ureq/counters.o    \
+	      obj/ureq/event.o       \
 	      obj/ureq/loop.o        \
 	      obj/ureq/main.o        \
 	      obj/ureq/payload.o     \
+	      obj/ureq/relay.o       \
 	      obj/ureq/report.o      \
+	      obj/ureq/round.o       \
 	      obj/ureq/socket.o      \
 	      obj/ureq/signal.o      \
 	      obj/ureq/target.o      \
@@ -87,6 +93,9 @@ obj/ureq/config.o: src/ureq/config.c
 obj/ureq/counters.o: src/ureq/counters.c
 	$(CC) $(CFLAGS) -c src/ureq/counters.c  -o obj/ureq/counters.o
 
+obj/ureq/event.o: src/ureq/event.c
+	$(CC) $(CFLAGS) -c src/ureq/event.c     -o obj/ureq/event.o
+
 obj/ureq/loop.o: src/ureq/loop.c
 	$(CC) $(CFLAGS) -c src/ureq/loop.c      -o obj/ureq/loop.o
 
@@ -96,8 +105,14 @@ obj/ureq/main.o: src/ureq/main.c
 obj/ureq/payload.o: src/ureq/payload.c
 	$(CC) $(CFLAGS) -c src/ureq/payload.c   -o obj/ureq/payload.o
 
+obj/ureq/relay.o: src/ureq/relay.c
+	$(CC) $(CFLAGS) -c src/ureq/relay.c     -o obj/ureq/relay.o
+
 obj/ureq/report.o: src/ureq/report.c
 	$(CC) $(CFLAGS) -c src/ureq/report.c    -o obj/ureq/report.o
+
+obj/ureq/round.o: src/ureq/round.c
+	$(CC) $(CFLAGS) -c src/ureq/round.c    -o obj/ureq/round.o
 
 obj/ureq/signal.o: src/ureq/signal.c
 	$(CC) $(CFLAGS) -c src/ureq/signal.c    -o obj/ureq/signal.o
@@ -169,10 +184,13 @@ clean:
 	rm -f obj/common/ttl.o
 	rm -f obj/ureq/config.o
 	rm -f obj/ureq/counters.o
+	rm -f obj/ureq/event.o
 	rm -f obj/ureq/loop.o
 	rm -f obj/ureq/main.o
 	rm -f obj/ureq/payload.o
+	rm -f obj/ureq/relay.o
 	rm -f obj/ureq/report.o
+	rm -f obj/ureq/round.o
 	rm -f obj/ureq/signal.o
 	rm -f obj/ureq/socket.o
 	rm -f obj/ureq/target.o

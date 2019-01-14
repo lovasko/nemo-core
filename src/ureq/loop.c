@@ -69,7 +69,7 @@ request_loop(struct proto* p4,
   rld = now + cf->cf_rld;
 
   for (i = 0; i < cf->cf_cnt; i++) {
-    log(LL_TRACE, false, "request round %" PRIu64 "/%" PRIu64, i + 1, cf->cf_cnt);
+    log(LL_TRACE, false, "round %" PRIu64 "out of %" PRIu64, i + 1, cf->cf_cnt);
 
     // Check if name resolution needs to happen.
     now = mono_now();

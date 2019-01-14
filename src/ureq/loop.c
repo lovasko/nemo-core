@@ -95,11 +95,12 @@ request_loop(struct proto* p4,
     }
   }
 
-  // Waiting for incoming responses after sending all requests.
-  log(LL_TRACE, false, "waiting for final responses");
+  // Await events after issuing all requests. The intention is to wait for
+  // potential responses to the last few requests.
+  log(LL_TRACE, false, "waiting for final events");
   retb = wait_for_events(p4, p6, cf->cf_wait, cf);
   if (retb == false) {
-    log(LL_WARN, false, "unable to wait for final responses");
+    log(LL_WARN, false, "unable to wait for final events");
     return false;
   }
 

@@ -31,25 +31,26 @@ bin/ureq: obj/common/convert.o \
           obj/ureq/signal.o    \
           obj/ureq/socket.o    \
           obj/ureq/target.o
-	$(CC) obj/common/convert.o   \
-	      obj/common/daemon.o    \
-	      obj/common/log.o       \
-	      obj/common/now.o       \
-	      obj/common/parse.o     \
-	      obj/common/ttl.o       \
-	      obj/ureq/config.o      \
-	      obj/ureq/counters.o    \
-	      obj/ureq/event.o       \
-	      obj/ureq/loop.o        \
-	      obj/ureq/main.o        \
-	      obj/ureq/payload.o     \
-	      obj/ureq/relay.o       \
-	      obj/ureq/report.o      \
-	      obj/ureq/round.o       \
-	      obj/ureq/socket.o      \
-	      obj/ureq/signal.o      \
-	      obj/ureq/target.o      \
-	      -o bin/ureq $(LDFLAGS)
+	$(CC) -o bin/ureq    \
+  obj/common/convert.o \
+  obj/common/daemon.o  \
+  obj/common/log.o     \
+  obj/common/now.o     \
+  obj/common/parse.o   \
+  obj/common/ttl.o     \
+  obj/ureq/config.o    \
+  obj/ureq/counters.o  \
+  obj/ureq/event.o     \
+  obj/ureq/loop.o      \
+  obj/ureq/main.o      \
+  obj/ureq/payload.o   \
+  obj/ureq/relay.o     \
+  obj/ureq/report.o    \
+  obj/ureq/round.o     \
+  obj/ureq/socket.o    \
+  obj/ureq/signal.o    \
+  obj/ureq/target.o    \
+  $(LDFLAGS)
 
 # unicast responder executable
 bin/ures: obj/common/convert.o \
@@ -68,23 +69,24 @@ bin/ures: obj/common/convert.o \
           obj/ures/report.o    \
           obj/ures/signal.o    \
           obj/ures/socket.o
-	$(CC) obj/common/convert.o   \
-	      obj/common/daemon.o    \
-	      obj/common/log.o       \
-	      obj/common/now.o       \
-	      obj/common/parse.o     \
-	      obj/common/ttl.o       \
-	      obj/ures/config.o      \
-	      obj/ures/counters.o    \
-	      obj/ures/event.o       \
-	      obj/ures/loop.o        \
-	      obj/ures/main.o        \
-	      obj/ures/payload.o     \
-	      obj/ures/plugins.o     \
-	      obj/ures/report.o      \
-	      obj/ures/signal.o      \
-	      obj/ures/socket.o      \
-	      -o bin/ures $(LDFLAGS)
+	$(CC) -o bin/ures    \
+  obj/common/convert.o \
+  obj/common/daemon.o  \
+  obj/common/log.o     \
+  obj/common/now.o     \
+  obj/common/parse.o   \
+  obj/common/ttl.o     \
+  obj/ures/config.o    \
+  obj/ures/counters.o  \
+  obj/ures/event.o     \
+  obj/ures/loop.o      \
+  obj/ures/main.o      \
+  obj/ures/payload.o   \
+  obj/ures/plugins.o   \
+  obj/ures/report.o    \
+  obj/ures/signal.o    \
+  obj/ures/socket.o    \
+  $(LDFLAGS)
 
 # unicast requester object files
 obj/ureq/config.o: src/ureq/config.c

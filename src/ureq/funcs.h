@@ -20,6 +20,12 @@ void log_config(const struct config* cf);
 void reset_counters(struct proto* pr);
 void log_counters(const struct proto* pr);
 
+// Event.
+bool wait_for_events(struct proto* p4,
+                     struct proto* p6,
+                     const uint64_t dur,
+                     const struct config* cf);
+
 // Loop.
 bool request_loop(struct proto* p4,
                   struct proto* p6,
@@ -34,6 +40,30 @@ bool verify_payload(const struct proto* pr, const ssize_t n, const struct payloa
 void report_header(const struct config* cf);
 void report_event(const struct payload* pl, const struct config* cf);
 bool flush_report_stream(const struct config* cf);
+
+// Relay.
+bool send_request(struct proto* pr,
+                  const uint64_t snum,
+                  const struct target* tg,
+                  const struct config* cf);
+bool receive_response(struct payload* pl,
+                      struct proto* pr,
+                      const struct config* cf);
+
+// Round.
+bool dispersed_round(struct proto* p4,
+                     struct proto* p6,
+                     const struct target* tg,
+                     const uint64_t ntg,
+                     const uint64_t snum,
+                     const struct config* cf);
+bool grouped_round(struct proto* p4,
+                   struct proto* p6,
+                   const struct target* tg,
+                   const uint64_t ntg,
+                   const uint64_t snum,
+                   const struct config* cf);
+
 
 // Signal.
 bool install_signal_handlers(void);

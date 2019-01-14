@@ -31,7 +31,6 @@ extern volatile bool sterm;
 extern volatile bool sint;
 extern volatile bool susr1;
 
-
 /// Main request loop.
 /// @return success/failure indication
 ///

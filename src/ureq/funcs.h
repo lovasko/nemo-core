@@ -63,7 +63,6 @@ bool grouped_round(struct proto* p4,
                    const uint64_t snum,
                    const struct config* cf);
 
-
 // Signal.
 bool install_signal_handlers(void);
 void create_signal_mask(sigset_t* mask);

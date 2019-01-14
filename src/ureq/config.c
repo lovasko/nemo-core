@@ -22,6 +22,7 @@
 
 
 // Default values for optional arguments.
+#define DEF_TARGET_COUNT   64         ///< Maximum of 64 targets.
 #define DEF_COUNT          5          ///< Number of published datagrams.
 #define DEF_INTERVAL       1000000000 ///< One second pause between payloads.
 #define DEF_FINAL_WAIT     2000000000 ///< Two second wait time for responses.
@@ -65,6 +66,7 @@ print_usage(void)
     "  -g      Group requests at the start of each round.\n"
     "  -h      Print this help message.\n"
     "  -i DUR  Interval duration between published datagram rounds. (def=1s)\n"
+    "  -j CNT  Upper limit on network target count. (def=%d)\n"
     "  -k KEY  Key for the current run. (def=random)\n"
     "  -m      Do not react to responses (monologue mode).\n"
     "  -n      Turn off colors in logging messages.\n"
@@ -79,6 +81,7 @@ print_usage(void)
     NEMO_REQ_VERSION_MINOR,
     NEMO_REQ_VERSION_PATCH,
     NEMO_PAYLOAD_VERSION,
+    DEF_TARGET_COUNT,
     DEF_COUNT,
     DEF_UDP_PORT,
     DEF_TIME_TO_LIVE);
@@ -254,6 +257,12 @@ option_i(struct config* cf, const char* in)
   return parse_scalar(&cf->cf_int, in, "ns", parse_time_unit);
 }
 
+static bool
+option_j(struct config* cf, const char* in)
+{
+  return parse_uint64(&cf->cf_ntg, in, 1, UINT64_MAX);
+}
+
 /// Set a unique key to identify the flow.
 /// @return success/failure indication
 ///
@@ -401,6 +410,7 @@ set_defaults(struct config* cf)
 
   for (i = 0; i < PLUG_MAX; i++)
     cf->cf_pi[i] = NULL;
+  cf->cf_ntg  = DEF_TARGET_COUNT;
   cf->cf_cnt  = DEF_COUNT;
   cf->cf_int  = DEF_INTERVAL;
   cf->cf_wait = DEF_FINAL_WAIT;
@@ -484,7 +494,7 @@ parse_config(struct config* cf, int argc, char* argv[])
   bool retb;
   uint64_t i;
   char optdsl[128];
-  struct option opts[21] = {
+  struct option opts[22] = {
     { '4',  false, option_4 },
     { '6',  false, option_6 },
     { 'a',  true , option_a },
@@ -495,6 +505,7 @@ parse_config(struct config* cf, int argc, char* argv[])
     { 'g',  false, option_g },
     { 'h',  false, option_h },
     { 'i',  true , option_i },
+    { 'j',  true , option_j },
     { 'k',  true , option_k },
     { 'm',  false, option_m },
     { 'n',  false, option_n },
@@ -511,7 +522,7 @@ parse_config(struct config* cf, int argc, char* argv[])
   log(LL_INFO, false, "parsing command-line options");
 
   (void)memset(optdsl, '\0', sizeof(optdsl));
-  generate_getopt_string(optdsl, opts, 21);
+  generate_getopt_string(optdsl, opts, 22);
 
   // Set optional arguments to sensible defaults.
   set_defaults(cf);
@@ -532,7 +543,7 @@ parse_config(struct config* cf, int argc, char* argv[])
     }
 
     // Find the relevant option.
-    for (i = 0; i < 21; i++) {
+    for (i = 0; i < 22; i++) {
       if (opts[i].op_name == (char)opt) {
         retb = opts[i].op_act(cf, optarg);
         if (retb == false) {
@@ -552,12 +563,18 @@ parse_config(struct config* cf, int argc, char* argv[])
   }
 
   // Verify that the number of arguments is below the limit.
-  if (argc - optind > TARG_MAX) {
-    log(LL_WARN, false, "too many arguments, maximum is %d", TARG_MAX);
+  if ((uint64_t)(argc - optind) > cf->cf_ntg) {
+    log(LL_WARN, false, "too many arguments, maximum is %d", cf->cf_ntg);
     return false;
   }
 
   // All remaining positional arguments are targets.
+  cf->cf_tg = calloc(cf->cf_ntg, sizeof(char*));
+  if (cf->cf_tg == NULL) {
+    log(LL_WARN, true, "unable to allocate memory for targets");
+    return false;
+  }
+
   for (opt = optind; opt < argc; opt++)
     cf->cf_tg[opt - optind] = argv[opt];
 

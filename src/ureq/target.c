@@ -261,7 +261,6 @@ normalize_targets(struct target* tg, uint64_t* nlen, const uint64_t olen)
 bool
 load_targets(struct target* tg,
              uint64_t* tcnt,
-             const uint64_t tmax,
              const struct config* cf)
 {
   uint64_t idx;
@@ -287,7 +286,7 @@ load_targets(struct target* tg,
     normalize_targets(tg2, &tcnt2, tcnt1);
 
     // Verify that we are not reaching the overall limit on targets.
-    if (tcnt2 + tall - 1 > tmax) {
+    if (tcnt2 + tall - 1 > cf->cf_ntg) {
       log(lvl, false, "unable to append more targets");
 
       if (cf->cf_err == true)

@@ -42,7 +42,6 @@ bool
 request_loop(struct proto* p4,
              struct proto* p6,
              struct target* tg,
-             const uint64_t tmax,
              const struct config* cf)
 {
   uint64_t i;
@@ -58,7 +57,7 @@ request_loop(struct proto* p4,
   report_header(cf);
 
   // Load all targets at start.
-  retb = load_targets(tg, &ntg, tmax, cf);
+  retb = load_targets(tg, &ntg, cf);
   if (retb == false) {
     log(LL_WARN, false, "unable to load targets");
     return false;
@@ -74,7 +73,7 @@ request_loop(struct proto* p4,
     // Check if name resolution needs to happen.
     now = mono_now();
     if (now > rld) {
-      retb = load_targets(tg, &ntg, tmax, cf);
+      retb = load_targets(tg, &ntg, cf);
       if (retb == false) {
         log(LL_WARN, false, "unable to load targets");
         return false;

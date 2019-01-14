@@ -17,7 +17,8 @@
 /// Configuration.
 struct config {
   const char* cf_pi[PLUG_MAX]; ///< Attached plugins.
-  const char* cf_tg[TARG_MAX]; ///< Network targets.
+  const char** cf_tg;          ///< Network targets.
+  uint64_t    cf_ntg;          ///< Number of network targets.
   uint64_t    cf_cnt;          ///< Number of emitted payload rounds.
   uint64_t    cf_int;          ///< Inter-payload sleep interval.
   uint64_t    cf_wait;         ///< Wait time after last request.

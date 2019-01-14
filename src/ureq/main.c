@@ -4,6 +4,8 @@
 // Distributed under the terms of the 2-clause BSD License. The full
 // license is in the file LICENSE, distributed as part of this software.
 
+#include <stdlib.h>
+
 #include "common/daemon.h"
 #include "common/log.h"
 #include "common/payload.h"
@@ -15,7 +17,7 @@
 int
 main(int argc, char* argv[])
 {
-  struct target tg[TARG_MAX];
+  struct target* tg;
   struct config cf;
   struct proto p4;
   struct proto p6;
@@ -77,12 +79,23 @@ main(int argc, char* argv[])
     }
   }
 
+  // Allocate the targets.
+  tg = calloc(cf.cf_ntg, sizeof(*tg));
+  if (tg == NULL) {
+    log(LL_ERROR, true, "unable to allocate memory for targets");
+    return false;
+  }
+
   // Start issuing requests and waiting for responses.
-  retb = request_loop(&p4, &p6, tg, TARG_MAX, &cf);
+  retb = request_loop(&p4, &p6, tg, &cf);
   if (retb == false) {
     log(LL_ERROR, false, "the request loop has ended unexpectedly");
     return EXIT_FAILURE;
   }
+
+  // Deallocate target arrays.
+  free(tg);
+  free(cf.cf_tg);
 
   return EXIT_SUCCESS;
 }

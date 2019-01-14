@@ -30,7 +30,6 @@ bool wait_for_events(struct proto* p4,
 bool request_loop(struct proto* p4,
                   struct proto* p6,
                   struct target* tg,
-                  const uint64_t tmax,
                   const struct config* cf);
 
 // Payload.
@@ -79,5 +78,4 @@ void log_socket_port(const struct proto* pr);
 void log_targets(const struct target tg[], const uint64_t cnt);
 bool load_targets(struct target* tg,
                   uint64_t* cnt,
-                  const uint64_t tmax,
                   const struct config* cf);

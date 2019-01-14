@@ -68,7 +68,9 @@ set_address(struct sockaddr_storage* ss,
     sin.sin_family      = AF_INET;
     sin.sin_port        = htons((uint16_t)cf->cf_port);
     sin.sin_addr.s_addr = (uint32_t)tg->tg_laddr;
+
     (void)memcpy(ss, &sin, sizeof(sin));
+    return;
   }
 
   if (tg->tg_ipv == NEMO_IP_VERSION_6) {
@@ -76,8 +78,14 @@ set_address(struct sockaddr_storage* ss,
     sin6.sin6_family = AF_INET6;
     sin6.sin6_port   = htons((uint16_t)cf->cf_port);
     tipv6(&sin6.sin6_addr, tg->tg_laddr, tg->tg_haddr);
+
     (void)memcpy(ss, &sin6, sizeof(sin6));
+    return;
   }
+
+  // This is to silence a warning about unused memory, which could happen if
+  // the `tg_ipv` was incorrect for one of the targets.
+  (void)memset(ss, 0, sizeof(*ss));
 }
 
 /// Send a request to a network target.

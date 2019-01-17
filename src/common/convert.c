@@ -17,7 +17,7 @@ void
 fnanos(struct timespec* ts, const uint64_t ns)
 {
   ts->tv_sec  = (time_t)(ns / 1000000000ULL);
-  ts->tv_nsec = ns % 1000000000ULL;
+  ts->tv_nsec = (long)(ns % 1000000000ULL);
 }
 
 /// Convert time in second and nanoseconds into only nanoseconds.
@@ -40,8 +40,8 @@ htonll(const uint64_t x)
   uint32_t hi;
   uint32_t lo;
 
-  hi = x >> 32;
-  lo = x & 0xffffffff;
+  hi = (uint32_t)(x >> 32);
+  lo = (uint32_t)(x & 0xffffffff);
 
   return (uint64_t)htonl(lo) | ((uint64_t)htonl(hi) << 32);
 }
@@ -56,8 +56,8 @@ ntohll(const uint64_t x)
   uint32_t hi;
   uint32_t lo;
 
-  hi = x >> 32;
-  lo = x & 0xffffffff;
+  hi = (uint32_t)(x >> 32);
+  lo = (uint32_t)(x & 0xffffffff);
 
   return (uint64_t)ntohl(lo) | ((uint64_t)ntohl(hi) << 32);
 }

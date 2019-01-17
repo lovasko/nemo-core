@@ -41,8 +41,7 @@ print_usage(void)
     "  Payload version: %d\n\n"
 
     "Usage:\n"
-    "  ures [-46dehmnqv] [-a OBJ] [-k KEY] [-p NUM] [-r RBS] [-s SBS] "
-    "[-t TTL]\n\n"
+    "  ures [OPTIONS]\n\n"
 
     "Options:\n"
     "  -4      Use only the IPv4 protocol.\n"

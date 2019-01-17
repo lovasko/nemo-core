@@ -4,6 +4,9 @@
 // Distributed under the terms of the 2-clause BSD License. The full
 // license is in the file LICENSE, distributed as part of this software.
 
+#include <sys/types.h>
+#include <sys/wait.h>
+
 #include <unistd.h>
 #include <dlfcn.h>
 #include <fcntl.h>
@@ -268,6 +271,26 @@ notify_plugins(const struct plugin* pins,
   }
 }
 
+/// Log debugging information about an exit of a child process (plugin).
+///
+/// @param[in] wst wait status
+static void
+log_exit_details(const int wst)
+{
+  // Check for orderly exit.
+  if (WIFEXITED(wst)) {
+    log(LL_DEBUG, false, "process exited with code: %d", WEXITSTATUS(wst));
+    return;
+  }
+
+  // Check whether it was killed by a signal.
+  if (WIFSIGNALED(wst)) {
+    log(LL_DEBUG, false, "process killed by signal: %s",
+      strsignal(WTERMSIG(wst)));
+    return;
+  }
+}
+
 /// Terminate all plugins. This is done by closing the appropriate pipe,
 /// causing the read loop to terminate. This in turn triggers the clean-up
 /// procedure defined for the plugin. The main process waits for the process
@@ -280,6 +303,7 @@ terminate_plugins(const struct plugin* pins, const uint64_t npins)
 {
   uint64_t i;
   int reti;
+  int wst;
 
   // The loop does not terminate when a particular clean-up routine fails,
   // as the process is already about to terminate. This way all plugins get
@@ -288,5 +312,18 @@ terminate_plugins(const struct plugin* pins, const uint64_t npins)
     reti = close(pins[i].pi_pipe[1]);
     if (reti == -1)
       log(LL_WARN, true, "unable to close a pipe");
+  }
+
+  // Once the pipe was closed, the main loop of the plugin process should come
+  // to end. The final wait on the child process will ensure that the resource
+  // usage data gets included in the final report for the main process.
+  for (i = 0; i < npins; i++) {
+    reti = waitpid(pins[i].pi_pid, &wst, 0);
+    if (reti == -1) {
+      log(LL_WARN, true, "unable to wait for plugin %s", pins[i].pi_name);
+      continue;
+    }
+
+   log_exit_details(wst);
   }
 }

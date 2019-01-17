@@ -71,23 +71,15 @@ ntohll(const uint64_t x)
 void
 fipv6(uint64_t* lo, uint64_t* hi, const struct in6_addr addr)
 {
-  *lo = (uint64_t)addr.s6_addr[0]
-      | (uint64_t)addr.s6_addr[1]  << 8
-      | (uint64_t)addr.s6_addr[2]  << 16
-      | (uint64_t)addr.s6_addr[3]  << 24
-      | (uint64_t)addr.s6_addr[4]  << 32
-      | (uint64_t)addr.s6_addr[5]  << 40
-      | (uint64_t)addr.s6_addr[6]  << 48
-      | (uint64_t)addr.s6_addr[7]  << 56;
+  uint8_t i;
 
-  *hi = (uint64_t)addr.s6_addr[8]
-      | (uint64_t)addr.s6_addr[9]  << 8
-      | (uint64_t)addr.s6_addr[10] << 16
-      | (uint64_t)addr.s6_addr[11] << 24
-      | (uint64_t)addr.s6_addr[12] << 32
-      | (uint64_t)addr.s6_addr[13] << 40
-      | (uint64_t)addr.s6_addr[14] << 48
-      | (uint64_t)addr.s6_addr[15] << 56;
+  *lo = 0;
+  for (i = 0; i < 8; i++)
+    *lo |= (uint64_t)addr.s6_addr[i]     << (i * 8);
+
+  *hi = 0;
+  for (i = 0; i < 8; i++)
+    *hi |= (uint64_t)addr.s6_addr[i + 8] << (i * 8);
 }
 
 /// Convert two 64-bit unsigned integers into the standard IPv6 address
@@ -99,23 +91,13 @@ fipv6(uint64_t* lo, uint64_t* hi, const struct in6_addr addr)
 void
 tipv6(struct in6_addr* addr, const uint64_t lo, const uint64_t hi)
 {
-  addr->s6_addr[0]  = lo & 0x00000000000000ffULL;
-  addr->s6_addr[1]  = lo & 0x000000000000ff00ULL;
-  addr->s6_addr[2]  = lo & 0x0000000000ff0000ULL;
-  addr->s6_addr[3]  = lo & 0x00000000ff000000ULL;
-  addr->s6_addr[4]  = lo & 0x000000ff00000000ULL;
-  addr->s6_addr[5]  = lo & 0x0000ff0000000000ULL;
-  addr->s6_addr[6]  = lo & 0x00ff000000000000ULL;
-  addr->s6_addr[7]  = lo & 0xff00000000000000ULL;
+  uint8_t i;
 
-  addr->s6_addr[8]  = hi & 0x00000000000000ffULL;
-  addr->s6_addr[9]  = hi & 0x000000000000ff00ULL;
-  addr->s6_addr[10] = hi & 0x0000000000ff0000ULL;
-  addr->s6_addr[11] = hi & 0x00000000ff000000ULL;
-  addr->s6_addr[12] = hi & 0x000000ff00000000ULL;
-  addr->s6_addr[13] = hi & 0x0000ff0000000000ULL;
-  addr->s6_addr[14] = hi & 0x00ff000000000000ULL;
-  addr->s6_addr[15] = hi & 0xff00000000000000ULL;
+  for (i = 0; i < 8; i++)
+    addr->s6_addr[i]     = (uint8_t)(lo >> (8 * i)) & 0xff;
+
+  for (i = 0; i < 8; i++)
+    addr->s6_addr[i + 8] = (uint8_t)(hi >> (8 * i)) & 0xff;
 }
 
 /// Encode the payload to the on-wire format. This function only deals with the

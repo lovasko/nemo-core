@@ -14,8 +14,10 @@
 volatile bool sint;  ///< SIGINT flag.
 volatile bool sterm; ///< SIGTERM flag.
 volatile bool susr1; ///< SIGUSR1 flag.
+volatile bool shup;  ///< SIGHUP flag.
 
-/// Signal handler for the SIGINT and SIGTERM signals.
+
+/// Signal handler for the SIGINT, SIGTERM, SIGUSR1, and SIGHUP signals.
 ///
 /// This handler does not perform any action, just toggles the indicator
 /// for the signal. The actual signal handling is done by the respond_loop
@@ -24,6 +26,7 @@ volatile bool susr1; ///< SIGUSR1 flag.
 /// @global sint
 /// @global sterm
 /// @global susr1
+/// @global shup
 ///
 /// @param[in] sig signal number
 static void
@@ -32,6 +35,7 @@ signal_handler(int sig)
   if (sig == SIGINT)  { sint  = true; }
   if (sig == SIGTERM) { sterm = true; }
   if (sig == SIGUSR1) { susr1 = true; }
+  if (sig == SIGHUP)  { shup  = true; }
 }
 
 /// Block the delivery of all signals, except the two signals that can not be
@@ -52,12 +56,14 @@ block_all_signals(void)
   (void)sigprocmask(SIG_SETMASK, &mask, NULL);
 }
 
-/// Install signal handlers for the SIGINT, SIGTERM, and SIGUSR1 signals.
+/// Install signal handlers for the SIGINT, SIGTERM, SIGUSR1, and SIGHUP
+/// signals.
 /// @return success/failure indication
 ///
 /// @global sint
 /// @global sterm
 /// @global susr1
+/// @global shup
 bool
 install_signal_handlers(void)
 {
@@ -69,6 +75,8 @@ install_signal_handlers(void)
   // Reset the signal indicator.
   sint  = false;
   sterm = false;
+  susr1 = false;
+  shup  = false;
 
   // This action makes sure that no system calls or execution context will get
   // interrupted by a signal. The pselect(2) call explicitly enables the
@@ -100,10 +108,18 @@ install_signal_handlers(void)
     return false;
   }
 
+  // Install signal handler for SIGHUP.
+  reti = sigaction(SIGHUP, &sa, NULL);
+  if (reti == -1) {
+    log(LL_WARN, true, "unable to add signal handler for %s", "SIGHUP");
+    return false;
+  }
+
   return true;
 }
 
-/// Create a signal mask that enables the SIGINT, SIGTERM, and SIGUSR1 signals.
+/// Create a signal mask that enables the SIGINT, SIGTERM, SIGUSR1, and SIGHUP
+/// signals.
 ///
 /// @param[out] mask signal mask applied while waiting
 void
@@ -115,4 +131,5 @@ create_signal_mask(sigset_t* mask)
   (void)sigdelset(mask, SIGINT);
   (void)sigdelset(mask, SIGTERM);
   (void)sigdelset(mask, SIGUSR1);
+  (void)sigdelset(mask, SIGHUP);
 }

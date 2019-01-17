@@ -26,6 +26,7 @@
 extern volatile bool sterm;
 extern volatile bool sint;
 extern volatile bool susr1;
+extern volatile bool shup;
 
 /// Handle a network event by attempting to receive responses on all available sockets.
 /// @return success/failure indication

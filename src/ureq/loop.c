@@ -30,9 +30,12 @@
 extern volatile bool sterm;
 extern volatile bool sint;
 extern volatile bool susr1;
+extern volatile bool shup;
 
 /// Main request loop.
 /// @return success/failure indication
+///
+/// @global shup
 ///
 /// @param[in] p4 IPv4 protocol connection
 /// @param[in] p6 IPv6 protocol connection
@@ -69,12 +72,21 @@ request_loop(struct proto* p4,
   for (i = 0; i < cf->cf_cnt; i++) {
     log(LL_TRACE, false, "round %" PRIu64 "out of %" PRIu64, i + 1, cf->cf_cnt);
 
-    // Check if name resolution needs to happen.
+    // Check if name resolution needs to happen. This code contains a possible
+    // race condition, in case a repeated SIGHUP signal appears between the
+    // comparison and the clearing the `shup` flag. This is a conscious
+    // decision, since the target re-loading is already in progress and will
+    // therefore happen imminently, but only once (in case of two or more
+    // SIGHUPs in immediate consequence).
     now = mono_now();
-    if (now > rld) {
+    if (now > rld || shup == true) {
+      // Clear the SIGHUP flag.
+      shup = false;
+
+      // Re-load targets.
       retb = load_targets(tg, &ntg, cf);
       if (retb == false) {
-        log(LL_WARN, false, "unable to load targets");
+        log(LL_WARN, false, "unable to re-load targets");
         return false;
       }
 

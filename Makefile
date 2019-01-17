@@ -114,7 +114,7 @@ obj/ureq/report.o: src/ureq/report.c
 	$(CC) $(CFLAGS) -c src/ureq/report.c    -o obj/ureq/report.o
 
 obj/ureq/round.o: src/ureq/round.c
-	$(CC) $(CFLAGS) -c src/ureq/round.c    -o obj/ureq/round.o
+	$(CC) $(CFLAGS) -c src/ureq/round.c     -o obj/ureq/round.o
 
 obj/ureq/signal.o: src/ureq/signal.c
 	$(CC) $(CFLAGS) -c src/ureq/signal.c    -o obj/ureq/signal.o

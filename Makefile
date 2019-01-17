@@ -6,7 +6,7 @@
 
 CC = cc
 FTM = -D_BSD_SOURCE -D_XOPEN_SOURCE -D_POSIX_C_SOURCE=200809L -D_DEFAULT_SOURCE
-CHECKS = -Wall -Wextra -fstrict-aliasing
+CHECKS = -Wall -Wextra -Wconversion -fstrict-aliasing
 CFLAGS = -fno-builtin -std=c99 -Werror $(CHECKS) $(FTM) -Isrc/
 LDFLAGS = -lrt -ldl
 

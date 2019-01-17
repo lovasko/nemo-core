@@ -41,7 +41,7 @@ fill_payload(struct payload *pl,
   pl->pl_type  = NEMO_PAYLOAD_TYPE_REQUEST;
   pl->pl_port  = (uint16_t)cf->cf_port;
   pl->pl_ttl1  = (uint8_t)cf->cf_ttl;
-  pl->pl_pver  = pr->pr_ipv;
+  pl->pl_pver  = (uint8_t)pr->pr_ipv;
   pl->pl_snum  = snum;
   pl->pl_slen  = cf->cf_cnt;
   pl->pl_reqk  = cf->cf_key;

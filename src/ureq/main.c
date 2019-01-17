@@ -80,7 +80,7 @@ main(int argc, char* argv[])
   }
 
   // Allocate the targets.
-  tg = calloc(cf.cf_ntg, sizeof(*tg));
+  tg = calloc((size_t)cf.cf_ntg, sizeof(*tg));
   if (tg == NULL) {
     log(LL_ERROR, true, "unable to allocate memory for targets");
     return false;

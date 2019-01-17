@@ -162,7 +162,7 @@ parse_target_string(struct target* tg,
   struct in6_addr a6;
 
   // Prepare the target structure.
-  (void)memset(tg, 0, sizeof(tg[0]) * tmax);
+  (void)memset(tg, 0, sizeof(tg[0]) * (size_t)tmax);
 
   // Try parsing the address as numeric IPv4 address.
   if (cf->cf_ipv4 == true) {
@@ -237,7 +237,7 @@ normalize_targets(struct target* tg, uint64_t* nlen, const uint64_t olen)
 
   // Pre-sort the array of targets. This operation is expected to run in
   // O(n * log n) time.
-  qsort(tg, olen, sizeof(tg[0]), compare_targets);
+  qsort(tg, (size_t)olen, sizeof(tg[0]), compare_targets);
 
   // Traverse the array once while removing duplicate elements. It is possible
   // to execute this in O(n) time due to the sorting of the array beforehand.
@@ -296,7 +296,7 @@ load_targets(struct target* tg,
     }
 
     // Append the obtained targets to the overall list.
-    (void)memcpy(tg + tall, tg2, tcnt2 * sizeof(tg2[0]));
+    (void)memcpy(tg + tall, tg2, (size_t)tcnt2 * sizeof(tg2[0]));
     tall += tcnt2;
   }
  

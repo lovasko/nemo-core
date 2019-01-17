@@ -260,7 +260,13 @@ option_i(struct config* cf, const char* in)
 static bool
 option_j(struct config* cf, const char* in)
 {
-  return parse_uint64(&cf->cf_ntg, in, 1, UINT64_MAX);
+  // The maximal number of targets is such that an array of `struct target`
+  // would be allocatable in memory. This would suggest the solution of
+  // choosing SIZE_MAX divided by the size of the struct, but we need to
+  // protect against the case where `uint64_t` is a smaller type than `size_t`.
+  return parse_uint64(&cf->cf_ntg, in, 1,
+    ((SIZE_MAX < UINT64_MAX ? SIZE_MAX : UINT64_MAX)
+      / sizeof(struct target)) - 1);
 }
 
 /// Set a unique key to identify the flow.
@@ -569,7 +575,7 @@ parse_config(struct config* cf, int argc, char* argv[])
   }
 
   // All remaining positional arguments are targets.
-  cf->cf_tg = calloc(cf->cf_ntg, sizeof(char*));
+  cf->cf_tg = calloc((size_t)cf->cf_ntg, sizeof(char*));
   if (cf->cf_tg == NULL) {
     log(LL_WARN, true, "unable to allocate memory for targets");
     return false;

@@ -279,13 +279,13 @@ log_exit_details(const int wst)
 {
   // Check for orderly exit.
   if (WIFEXITED(wst)) {
-    log(LL_DEBUG, false, "process exited with code: %d", WEXITSTATUS(wst));
+    log(LL_DEBUG, false, "plugin exited with code: %d", WEXITSTATUS(wst));
     return;
   }
 
   // Check whether it was killed by a signal.
   if (WIFSIGNALED(wst)) {
-    log(LL_DEBUG, false, "process killed by signal: %s",
+    log(LL_DEBUG, false, "plugin killed by signal: %s",
       strsignal(WTERMSIG(wst)));
     return;
   }

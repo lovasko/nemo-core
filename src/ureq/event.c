@@ -19,14 +19,10 @@
 #include "common/log.h"
 #include "common/convert.h"
 #include "common/now.h"
+#include "common/signal.h"
 #include "ureq/funcs.h"
 #include "ureq/types.h"
 
-
-extern volatile bool sterm;
-extern volatile bool sint;
-extern volatile bool susr1;
-extern volatile bool shup;
 
 /// Handle a network event by attempting to receive responses on all available sockets.
 /// @return success/failure indication

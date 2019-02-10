@@ -11,6 +11,7 @@
 #include "common/plugin.h"
 #include "common/log.h"
 #include "common/payload.h"
+#include "common/signal.h"
 #include "ures/funcs.h"
 #include "ures/types.h"
 

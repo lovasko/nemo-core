@@ -10,7 +10,6 @@
 #include <sys/socket.h>
 
 #include <stdlib.h>
-#include <signal.h>
 
 #include "common/payload.h"
 #include "common/plugin.h"
@@ -50,10 +49,6 @@ bool update_payload(struct payload* pl,
 void report_header(const struct config* cf);
 void report_event(const struct payload* pl, const struct config* cf);
 bool flush_report_stream(const struct config* cf);
-
-// Signal.
-bool install_signal_handlers(void);
-void create_signal_mask(sigset_t* mask);
 
 // Socket.
 bool create_socket4(struct proto* pr, const struct config* cf);

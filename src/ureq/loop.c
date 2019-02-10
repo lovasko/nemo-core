@@ -23,14 +23,10 @@
 #include "common/log.h"
 #include "common/now.h"
 #include "common/payload.h"
+#include "common/signal.h"
 #include "ureq/funcs.h"
 #include "ureq/types.h"
 
-
-extern volatile bool sterm;
-extern volatile bool sint;
-extern volatile bool susr1;
-extern volatile bool shup;
 
 /// Main request loop.
 /// @return success/failure indication

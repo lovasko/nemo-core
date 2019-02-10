@@ -6,7 +6,6 @@
 
 #include <stdlib.h>
 #include <stdint.h>
-#include <signal.h>
 
 #include "common/payload.h"
 #include "ureq/types.h"
@@ -62,10 +61,6 @@ bool grouped_round(struct proto* p4,
                    const uint64_t ntg,
                    const uint64_t snum,
                    const struct config* cf);
-
-// Signal.
-bool install_signal_handlers(void);
-void create_signal_mask(sigset_t* mask);
 
 // Socket.
 bool create_socket4(struct proto* pr, const struct config* cf);

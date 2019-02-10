@@ -5,9 +5,10 @@
 // license is in the file LICENSE, distributed as part of this software.
 
 #include <stdbool.h>
-#include <signal.h>
 #include <string.h>
+#include <signal.h>
 
+#include "common/signal.h"
 #include "common/log.h"
 
 
@@ -15,7 +16,6 @@ volatile bool sint;  ///< SIGINT flag.
 volatile bool sterm; ///< SIGTERM flag.
 volatile bool susr1; ///< SIGUSR1 flag.
 volatile bool shup;  ///< SIGHUP flag.
-
 
 /// Signal handler for the SIGINT, SIGTERM, SIGUSR1, and SIGHUP signals.
 ///
@@ -28,14 +28,25 @@ volatile bool shup;  ///< SIGHUP flag.
 /// @global susr1
 /// @global shup
 ///
-/// @param[in] sig signal number
+/// @param[in] sn signal number
 static void
-signal_handler(int sig)
+signal_handler(int sn)
 {
-  if (sig == SIGINT)  { sint  = true; }
-  if (sig == SIGTERM) { sterm = true; }
-  if (sig == SIGUSR1) { susr1 = true; }
-  if (sig == SIGHUP)  { shup  = true; }
+  if (sn == SIGINT) {
+    sint = true;
+  }
+
+  if (sn == SIGTERM) {
+    sterm = true;
+  }
+
+  if (sn == SIGUSR1) {
+    susr1 = true;
+  }
+
+  if (sn == SIGHUP) {
+    shup = true;
+  }
 }
 
 /// Block the delivery of all signals, except the two signals that can not be

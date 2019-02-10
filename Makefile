@@ -18,6 +18,7 @@ bin/ureq: obj/common/convert.o \
           obj/common/log.o     \
           obj/common/now.o     \
           obj/common/parse.o   \
+          obj/common/signal.o  \
           obj/common/ttl.o     \
           obj/ureq/config.o    \
           obj/ureq/counters.o  \
@@ -28,7 +29,6 @@ bin/ureq: obj/common/convert.o \
           obj/ureq/relay.o     \
           obj/ureq/report.o    \
           obj/ureq/round.o     \
-          obj/ureq/signal.o    \
           obj/ureq/socket.o    \
           obj/ureq/target.o
 	$(CC) -o bin/ureq    \
@@ -37,6 +37,7 @@ bin/ureq: obj/common/convert.o \
   obj/common/log.o     \
   obj/common/now.o     \
   obj/common/parse.o   \
+  obj/common/signal.o  \
   obj/common/ttl.o     \
   obj/ureq/config.o    \
   obj/ureq/counters.o  \
@@ -48,7 +49,6 @@ bin/ureq: obj/common/convert.o \
   obj/ureq/report.o    \
   obj/ureq/round.o     \
   obj/ureq/socket.o    \
-  obj/ureq/signal.o    \
   obj/ureq/target.o    \
   $(LDFLAGS)
 
@@ -59,6 +59,7 @@ bin/ures: obj/common/convert.o \
           obj/common/now.o     \
           obj/common/parse.o   \
           obj/common/plugin.o  \
+          obj/common/signal.o  \
           obj/common/ttl.o     \
           obj/ures/config.o    \
           obj/ures/counters.o  \
@@ -67,7 +68,6 @@ bin/ures: obj/common/convert.o \
           obj/ures/main.o      \
           obj/ures/payload.o   \
           obj/ures/report.o    \
-          obj/ures/signal.o    \
           obj/ures/socket.o
 	$(CC) -o bin/ures    \
   obj/common/convert.o \
@@ -76,6 +76,7 @@ bin/ures: obj/common/convert.o \
   obj/common/now.o     \
   obj/common/parse.o   \
   obj/common/plugin.o  \
+  obj/common/signal.o  \
   obj/common/ttl.o     \
   obj/ures/config.o    \
   obj/ures/counters.o  \
@@ -84,7 +85,6 @@ bin/ures: obj/common/convert.o \
   obj/ures/main.o      \
   obj/ures/payload.o   \
   obj/ures/report.o    \
-  obj/ures/signal.o    \
   obj/ures/socket.o    \
   $(LDFLAGS)
 
@@ -116,9 +116,6 @@ obj/ureq/report.o: src/ureq/report.c
 obj/ureq/round.o: src/ureq/round.c
 	$(CC) $(CFLAGS) -c src/ureq/round.c     -o obj/ureq/round.o
 
-obj/ureq/signal.o: src/ureq/signal.c
-	$(CC) $(CFLAGS) -c src/ureq/signal.c    -o obj/ureq/signal.o
-
 obj/ureq/socket.o: src/ureq/socket.c
 	$(CC) $(CFLAGS) -c src/ureq/socket.c    -o obj/ureq/socket.o
 
@@ -147,9 +144,6 @@ obj/ures/payload.o: src/ures/payload.c
 obj/ures/report.o: src/ures/report.c
 	$(CC) $(CFLAGS) -c src/ures/report.c    -o obj/ures/report.o
 
-obj/ures/signal.o: src/ures/signal.c
-	$(CC) $(CFLAGS) -c src/ures/signal.c    -o obj/ures/signal.o
-
 obj/ures/socket.o: src/ures/socket.c
 	$(CC) $(CFLAGS) -c src/ures/socket.c    -o obj/ures/socket.o
 
@@ -172,6 +166,9 @@ obj/common/parse.o: src/common/parse.c
 obj/common/plugin.o: src/common/plugin.c
 	$(CC) $(CFLAGS) -c src/common/plugin.c  -o obj/common/plugin.o
 
+obj/common/signal.o: src/common/signal.c
+	$(CC) $(CFLAGS) -c src/common/signal.c  -o obj/common/signal.o
+
 obj/common/ttl.o: src/common/ttl.c
 	$(CC) $(CFLAGS) -c src/common/ttl.c     -o obj/common/ttl.o
 
@@ -184,6 +181,7 @@ clean:
 	rm -f obj/common/now.o
 	rm -f obj/common/parse.o
 	rm -f obj/common/plugin.o
+	rm -f obj/common/signal.o
 	rm -f obj/common/ttl.o
 	rm -f obj/ureq/config.o
 	rm -f obj/ureq/counters.o
@@ -194,7 +192,6 @@ clean:
 	rm -f obj/ureq/relay.o
 	rm -f obj/ureq/report.o
 	rm -f obj/ureq/round.o
-	rm -f obj/ureq/signal.o
 	rm -f obj/ureq/socket.o
 	rm -f obj/ureq/target.o
 	rm -f obj/ures/config.o
@@ -204,5 +201,4 @@ clean:
 	rm -f obj/ures/main.o
 	rm -f obj/ures/payload.o
 	rm -f obj/ures/report.o
-	rm -f obj/ures/signal.o
 	rm -f obj/ures/socket.o

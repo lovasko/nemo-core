@@ -4,4 +4,5 @@ log.o
 now.o
 parse.o
 plugin.o
+signal.o
 ttl.o

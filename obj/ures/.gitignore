@@ -5,5 +5,4 @@ loop.o
 main.o
 payload.o
 report.o
-signal.o
 socket.o

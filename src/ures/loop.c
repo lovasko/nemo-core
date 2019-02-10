@@ -11,13 +11,10 @@
 #include <signal.h>
 
 #include "common/log.h"
+#include "common/signal.h"
 #include "ures/funcs.h"
 #include "ures/types.h"
 
-
-extern volatile bool sterm;
-extern volatile bool sint;
-extern volatile bool susr1;
 
 /// Handle the incoming signal.
 /// @return exit/continue decision

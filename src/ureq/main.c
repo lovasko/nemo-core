@@ -9,6 +9,7 @@
 #include "common/daemon.h"
 #include "common/log.h"
 #include "common/payload.h"
+#include "common/signal.h"
 #include "ureq/funcs.h"
 #include "ureq/types.h"
 

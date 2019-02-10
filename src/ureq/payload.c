@@ -10,8 +10,8 @@
 #include "common/log.h"
 #include "common/payload.h"
 #include "common/ttl.h"
-#include "ures/funcs.h"
-#include "ures/types.h"
+#include "ureq/funcs.h"
+#include "ureq/types.h"
 
 
 /// Verify the incoming payload for correctness.

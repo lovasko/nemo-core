@@ -7,8 +7,6 @@
 #ifndef NEMO_RES_TYPES_H
 #define NEMO_RES_TYPES_H
 
-#include <sys/types.h>
-
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -41,18 +39,6 @@ struct option {
   bool op_arg;                      ///< Has argument?
   bool (*op_act)(struct config* cf, ///< Action to perform.
                  const char* inp);
-};
-
-/// Event callback plugin.
-struct plugin {
-  const char* pi_name;                      ///< Name.
-  void*       pi_hndl;                      ///< Shared object handle.
-  bool      (*pi_init)(void);               ///< Initialisation procedure.
-  bool      (*pi_evnt)(uint64_t, uint64_t,
-                       uint64_t, uint64_t); ///< Response event procedure.
-  bool      (*pi_free)(void);               ///< Clean-up procedure.
-  pid_t       pi_pid;                       ///< Process ID of the sandbox.
-  int         pi_pipe[2];                   ///< Payload notification channel.
 };
 
 /// Internet protocol connection.

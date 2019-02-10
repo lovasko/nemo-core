@@ -14,6 +14,7 @@
 
 #include "common/log.h"
 #include "common/payload.h"
+#include "common/plugin.h"
 #include "ures/funcs.h"
 #include "ures/types.h"
 
@@ -21,17 +22,17 @@
 /// Count the number of selected plugins.
 /// @return number of plugins
 ///
-/// @param[in] cf configuration
+/// @param[in] so shared object file paths
 static uint64_t
-count_plugins(const struct config* cf)
+count_plugins(const char* so[])
 {
-  uint64_t res;
+  uint64_t i;
 
-  for (res = 0; res < PLUG_MAX; res++)
-    if (cf->cf_plgs[res] == NULL)
+  for (i = 0; i < PLUG_MAX; i++)
+    if (so[i] == NULL)
       break;
 
-  return res;
+  return i;
 }
 
 /// Report an error related to the dynamic library subsystem.
@@ -52,50 +53,48 @@ report_error(const char* name)
 /// define the plugin from it.
 /// @return success/failure indication
 ///
-/// @param[out] pins  array of plugins
-/// @param[out] npins number of plugins
-/// @param[in]  cf    configuration
+/// @param[out] pi  plugins
+/// @param[out] npi number of plugins
+/// @param[in]  so  shared object file paths
 bool
-load_plugins(struct plugin* pins,
-             uint64_t* npins,
-             const struct config* cf)
+load_plugins(struct plugin* pi, uint64_t* npi, const char* so[])
 {
   uint64_t i;
 
-  *npins = count_plugins(cf);
+  *npi = count_plugins(so);
 
-  for (i = 0; i < *npins; i++) {
+  for (i = 0; i < *npi; i++) {
     // Open the shared object library.
-    pins[i].pi_hndl = dlopen(cf->cf_plgs[i], RTLD_NOW);
-    if (pins[i].pi_hndl == NULL) {
-      report_error(cf->cf_plgs[i]);
+    pi[i].pi_hndl = dlopen(so[i], RTLD_NOW);
+    if (pi[i].pi_hndl == NULL) {
+      report_error(so[i]);
       return false;
     }
 
     // Load the plugin name.
-    pins[i].pi_name = dlsym(pins[i].pi_hndl, "nemo_name");
-    if (pins[i].pi_name == NULL) {
+    pi[i].pi_name = dlsym(pi[i].pi_hndl, "nemo_name");
+    if (pi[i].pi_name == NULL) {
       report_error("nemo_name");
       return false;
     }
 
     // Load the initialisation procedure.
-    pins[i].pi_init = dlsym(pins[i].pi_hndl, "nemo_init");
-    if (pins[i].pi_init == NULL) {
+    pi[i].pi_init = dlsym(pi[i].pi_hndl, "nemo_init");
+    if (pi[i].pi_init == NULL) {
       report_error("nemo_init");
       return false;
     }
 
     // Load the main procedure to execute upon the response event.
-    pins[i].pi_evnt = dlsym(pins[i].pi_hndl, "nemo_evnt");
-    if (pins[i].pi_evnt == NULL) {
+    pi[i].pi_evnt = dlsym(pi[i].pi_hndl, "nemo_evnt");
+    if (pi[i].pi_evnt == NULL) {
       report_error("nemo_evnt");
       return false;
     }
 
     // Load the clean-up procedure.
-    pins[i].pi_free = dlsym(pins[i].pi_hndl, "nemo_free");
-    if (pins[i].pi_free == NULL) {
+    pi[i].pi_free = dlsym(pi[i].pi_hndl, "nemo_free");
+    if (pi[i].pi_free == NULL) {
       report_error("nemo_free");
       return false;
     }
@@ -107,16 +106,16 @@ load_plugins(struct plugin* pins,
 /// Continuously read payloads from the pipe, blocking when no data is
 /// available.
 ///
-/// @param[in] pin plugin
+/// @param[in] pi plugin
 static void
-read_loop(const struct plugin* pin)
+read_loop(const struct plugin* pi)
 {
   struct payload pl;
   ssize_t retss;
 
   while (true) {
     // Read a payload from the pipe.
-    retss = read(pin->pi_pipe[0], &pl, sizeof(pl));
+    retss = read(pi->pi_pipe[0], &pl, sizeof(pl));
     
     // Check for errors.
     if (retss == -1) {
@@ -131,7 +130,7 @@ read_loop(const struct plugin* pin)
     }
 
     // Execute the plugin event action based on the payload content.
-    pin->pi_evnt(pl.pl_reqk, pl.pl_reqk, pl.pl_reqk, pl.pl_reqk);
+    pi->pi_evnt(pl.pl_reqk, pl.pl_reqk, pl.pl_reqk, pl.pl_reqk);
   }
 }
 
@@ -173,26 +172,26 @@ close_pipe_end(const struct plugin* pin)
 /// Start all plugins.
 /// @return success/failure indication
 ///
-/// @param[out] pins  array of plugins
-/// @param[in]  npins number of plugins
+/// @param[out] pi  array of plugins
+/// @param[in]  npi number of plugins
 bool
-start_plugins(struct plugin* pins, const uint64_t npins)
+start_plugins(struct plugin* pi, const uint64_t npi)
 {
   uint64_t i;
   int reti;
   bool retb;
   int fl;
 
-  for (i = 0; i < npins; i++) {
+  for (i = 0; i < npi; i++) {
     // Create a pipe through which the processes will communicate.
-    reti = pipe(pins[i].pi_pipe);
+    reti = pipe(pi[i].pi_pipe);
     if (reti == -1) {
       log(LL_WARN, true, "unable to create a pipe");
       return false;
     }
 
     // Obtain the file status flags of the writing end of the pipe.
-    fl = fcntl(pins[i].pi_pipe[0], F_GETFL);
+    fl = fcntl(pi[i].pi_pipe[0], F_GETFL);
     if (fl == -1) {
       log(LL_WARN, true, "unable to obtain file status flags for pipe");
       return false;
@@ -201,39 +200,40 @@ start_plugins(struct plugin* pins, const uint64_t npins)
     // Set the writing end of the pipe to be non-blocking, so that a slow
     // plugin does not block the main program (and other plugins).
     fl |= O_NONBLOCK;
-    reti = fcntl(pins[i].pi_pipe[0], F_SETFL, fl);
+    reti = fcntl(pi[i].pi_pipe[0], F_SETFL, fl);
     if (reti == -1) {
       log(LL_WARN, true, "unable to set the pipe to be non-blocking");
       return false;
     }
 
     // Create a new process.
-    pins[i].pi_pid = fork();
+    pi[i].pi_pid = fork();
 
     // Check for error first.
-    if (pins[i].pi_pid == -1) {
+    if (pi[i].pi_pid == -1) {
       log(LL_WARN, true, "unable to start a plugin process");
       return false;
     }
 
     // Close the appropriate end of the pipe in each process.
-    retb = close_pipe_end(&pins[i]);
+    retb = close_pipe_end(&pi[i]);
     if (retb == false)
       return false;
 
     // In case this code is executed in the child process start the main event
     // loop.
-    if (pins[i].pi_pid == 0) {
-      retb = pins[i].pi_init();
+    if (pi[i].pi_pid == 0) {
+      retb = pi[i].pi_init();
       if (retb == false) {
-        log(LL_WARN, false, "unable to initialise plugin %s", pins[i].pi_name);
+        log(LL_WARN, false, "unable to initialise plugin %s", pi[i].pi_name);
         return false;
       }
 
-      // 
-      read_loop(&pins[i]);
+      // Start the main process loop that awaits incoming payloads.
+      read_loop(&pi[i]);
 
-      pins[i].pi_free();
+      // Perform the final clean-up and exit the process.
+      pi[i].pi_free();
       exit(EXIT_SUCCESS);
     }
   }
@@ -245,48 +245,47 @@ start_plugins(struct plugin* pins, const uint64_t npins)
 /// to the plugin process. The plugin process has a continuous read loop and
 /// executes the appropriate plugin action.
 ///
-/// @param[in] pins  array of plugins
-/// @param[in] npins number of plugins
-/// @param[in] pl    payload
+/// @param[in] pi  array of plugins
+/// @param[in] npi number of plugins
+/// @param[in] pl  payload
 void
-notify_plugins(const struct plugin* pins,
-               const uint64_t npins,
+notify_plugins(const struct plugin* pi,
+               const uint64_t npi,
                const struct payload* pl)
 {
   uint64_t i;
   ssize_t retss;
 
-  for (i = 0; i < npins; i++) {
-    retss = write(pins[i].pi_pipe[0], pl, sizeof(*pl));
+  for (i = 0; i < npi; i++) {
+    retss = write(pi[i].pi_pipe[0], pl, sizeof(*pl));
 
     // Check for error.
     if (retss == -1)
-      log(LL_WARN, true, "unable to send payload to plugin %s",
-        pins[i].pi_name);
+      log(LL_WARN, true, "unable to send payload to plugin %s", pi[i].pi_name);
 
     // Check whether all expected data was written to the pipe.
     if (retss != (ssize_t)sizeof(*pl))
-      log(LL_WARN, false, "unable to full payload to plugin %s",
-        pins[i].pi_name);
+      log(LL_WARN, false, "unable to send full payload to plugin %s",
+        pi[i].pi_name);
   }
 }
 
 /// Log debugging information about an exit of a child process (plugin).
 ///
-/// @param[in] wst wait status
+/// @param[in] ws wait status
 static void
-log_exit_details(const int wst)
+log_exit_details(const int ws)
 {
   // Check for orderly exit.
-  if (WIFEXITED(wst)) {
-    log(LL_DEBUG, false, "plugin exited with code: %d", WEXITSTATUS(wst));
+  if (WIFEXITED(ws)) {
+    log(LL_DEBUG, false, "plugin exited with code: %d", WEXITSTATUS(ws));
     return;
   }
 
   // Check whether it was killed by a signal.
-  if (WIFSIGNALED(wst)) {
+  if (WIFSIGNALED(ws)) {
     log(LL_DEBUG, false, "plugin killed by signal: %s",
-      strsignal(WTERMSIG(wst)));
+      strsignal(WTERMSIG(ws)));
     return;
   }
 }
@@ -296,20 +295,20 @@ log_exit_details(const int wst)
 /// procedure defined for the plugin. The main process waits for the process
 /// to finish.
 ///
-/// @param[in] pins  array of plugins
-/// @param[in] npins number of plugins
+/// @param[in] pi  array of plugins
+/// @param[in] npi number of plugins
 void
-terminate_plugins(const struct plugin* pins, const uint64_t npins)
+terminate_plugins(const struct plugin* pi, const uint64_t npi)
 {
   uint64_t i;
   int reti;
-  int wst;
+  int ws;
 
   // The loop does not terminate when a particular clean-up routine fails,
   // as the process is already about to terminate. This way all plugins get
   // a chance to perform an orderly clean-up.
-  for (i = 0; i < npins; i++) {
-    reti = close(pins[i].pi_pipe[1]);
+  for (i = 0; i < npi; i++) {
+    reti = close(pi[i].pi_pipe[1]);
     if (reti == -1)
       log(LL_WARN, true, "unable to close a pipe");
   }
@@ -317,13 +316,13 @@ terminate_plugins(const struct plugin* pins, const uint64_t npins)
   // Once the pipe was closed, the main loop of the plugin process should come
   // to end. The final wait on the child process will ensure that the resource
   // usage data gets included in the final report for the main process.
-  for (i = 0; i < npins; i++) {
-    reti = waitpid(pins[i].pi_pid, &wst, 0);
+  for (i = 0; i < npi; i++) {
+    reti = waitpid(pi[i].pi_pid, &ws, 0);
     if (reti == -1) {
-      log(LL_WARN, true, "unable to wait for plugin %s", pins[i].pi_name);
+      log(LL_WARN, true, "unable to wait for plugin %s", pi[i].pi_name);
       continue;
     }
 
-   log_exit_details(wst);
+   log_exit_details(ws);
   }
 }

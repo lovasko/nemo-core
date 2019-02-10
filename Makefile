@@ -58,6 +58,7 @@ bin/ures: obj/common/convert.o \
           obj/common/log.o     \
           obj/common/now.o     \
           obj/common/parse.o   \
+          obj/common/plugin.o  \
           obj/common/ttl.o     \
           obj/ures/config.o    \
           obj/ures/counters.o  \
@@ -65,7 +66,6 @@ bin/ures: obj/common/convert.o \
           obj/ures/loop.o      \
           obj/ures/main.o      \
           obj/ures/payload.o   \
-          obj/ures/plugins.o   \
           obj/ures/report.o    \
           obj/ures/signal.o    \
           obj/ures/socket.o
@@ -75,6 +75,7 @@ bin/ures: obj/common/convert.o \
   obj/common/log.o     \
   obj/common/now.o     \
   obj/common/parse.o   \
+  obj/common/plugin.o  \
   obj/common/ttl.o     \
   obj/ures/config.o    \
   obj/ures/counters.o  \
@@ -82,7 +83,6 @@ bin/ures: obj/common/convert.o \
   obj/ures/loop.o      \
   obj/ures/main.o      \
   obj/ures/payload.o   \
-  obj/ures/plugins.o   \
   obj/ures/report.o    \
   obj/ures/signal.o    \
   obj/ures/socket.o    \
@@ -144,9 +144,6 @@ obj/ures/main.o: src/ures/main.c
 obj/ures/payload.o: src/ures/payload.c
 	$(CC) $(CFLAGS) -c src/ures/payload.c   -o obj/ures/payload.o
 
-obj/ures/plugins.o: src/ures/plugins.c
-	$(CC) $(CFLAGS) -c src/ures/plugins.c   -o obj/ures/plugins.o
-
 obj/ures/report.o: src/ures/report.c
 	$(CC) $(CFLAGS) -c src/ures/report.c    -o obj/ures/report.o
 
@@ -172,6 +169,9 @@ obj/common/now.o: src/common/now.c
 obj/common/parse.o: src/common/parse.c
 	$(CC) $(CFLAGS) -c src/common/parse.c   -o obj/common/parse.o
 
+obj/common/plugin.o: src/common/plugin.c
+	$(CC) $(CFLAGS) -c src/common/plugin.c  -o obj/common/plugin.o
+
 obj/common/ttl.o: src/common/ttl.c
 	$(CC) $(CFLAGS) -c src/common/ttl.c     -o obj/common/ttl.o
 
@@ -183,6 +183,7 @@ clean:
 	rm -f obj/common/log.o
 	rm -f obj/common/now.o
 	rm -f obj/common/parse.o
+	rm -f obj/common/plugin.o
 	rm -f obj/common/ttl.o
 	rm -f obj/ureq/config.o
 	rm -f obj/ureq/counters.o
@@ -202,7 +203,6 @@ clean:
 	rm -f obj/ures/loop.o
 	rm -f obj/ures/main.o
 	rm -f obj/ures/payload.o
-	rm -f obj/ures/plugins.o
 	rm -f obj/ures/report.o
 	rm -f obj/ures/signal.o
 	rm -f obj/ures/socket.o

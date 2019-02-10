@@ -8,6 +8,7 @@
 #include <stdint.h>
 
 #include "common/daemon.h"
+#include "common/plugin.h"
 #include "common/log.h"
 #include "common/payload.h"
 #include "ures/funcs.h"
@@ -56,7 +57,7 @@ main(int argc, char* argv[])
   }
 
   // Start plugins.
-  retb = load_plugins(pins, &npins, &cf);
+  retb = load_plugins(pins, &npins, cf.cf_plgs);
   if (retb == false) {
     log(LL_ERROR, false, "unable to load all plugins");
     return EXIT_FAILURE;

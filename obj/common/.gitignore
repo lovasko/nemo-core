@@ -3,4 +3,5 @@ daemon.o
 log.o
 now.o
 parse.o
+plugin.o
 ttl.o

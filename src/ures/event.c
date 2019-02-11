@@ -8,10 +8,50 @@
 
 #include "common/convert.h"
 #include "common/log.h"
+#include "common/now.h"
+#include "common/ttl.h"
 #include "common/payload.h"
 #include "ures/funcs.h"
 #include "ures/types.h"
 
+
+/// Update payload with local diagnostic information.
+/// @return success/failure indication
+///
+/// @param[out] pl  payload
+/// @param[in]  msg message header
+/// @param[in]  cf  configuration
+static bool
+update_payload(struct payload* pl, struct msghdr* msg, const struct config* cf)
+{
+  int ttl;
+  bool retb;
+
+  log(LL_TRACE, false, "updating payload");
+
+  // Change the message type.
+  pl->pl_type = NEMO_PAYLOAD_TYPE_RESPONSE;
+
+  // Sign the payload.
+  pl->pl_resk = cf->cf_key;
+
+  // Obtain the current monotonic clock value.
+  pl->pl_mtm2 = mono_now();
+
+  // Obtain the current real-time clock value.
+  pl->pl_rtm2 = real_now();
+
+  // Retrieve the received Time-To-Live value.
+  retb = retrieve_ttl(&ttl, msg);
+  if (retb == false) {
+    log(LL_WARN, false, "unable to extract IP Time-To-Live value");
+    pl->pl_ttl2 = 0;
+  } else {
+    pl->pl_ttl2 = (uint8_t)ttl;
+  }
+
+  return true;
+}
 
 /// Receive datagrams on both IPv4 and IPv6.
 /// @return success/failure indication
@@ -59,7 +99,7 @@ receive_datagram(struct proto* pr,
   decode_payload(pl);
 
   // Verify the payload correctness.
-  retb = verify_payload(pr, n, pl);
+  retb = verify_payload(pr, n, pl, NEMO_PAYLOAD_TYPE_REQUEST);
   if (retb == false) {
     log(LL_WARN, false, "invalid payload content");
     return false;

@@ -18,6 +18,7 @@ bin/ureq: obj/common/convert.o \
           obj/common/log.o     \
           obj/common/now.o     \
           obj/common/parse.o   \
+          obj/common/payload.o \
           obj/common/signal.o  \
           obj/common/ttl.o     \
           obj/ureq/config.o    \
@@ -25,7 +26,6 @@ bin/ureq: obj/common/convert.o \
           obj/ureq/event.o     \
           obj/ureq/loop.o      \
           obj/ureq/main.o      \
-          obj/ureq/payload.o   \
           obj/ureq/relay.o     \
           obj/ureq/report.o    \
           obj/ureq/round.o     \
@@ -37,6 +37,7 @@ bin/ureq: obj/common/convert.o \
   obj/common/log.o     \
   obj/common/now.o     \
   obj/common/parse.o   \
+  obj/common/payload.o \
   obj/common/signal.o  \
   obj/common/ttl.o     \
   obj/ureq/config.o    \
@@ -44,7 +45,6 @@ bin/ureq: obj/common/convert.o \
   obj/ureq/event.o     \
   obj/ureq/loop.o      \
   obj/ureq/main.o      \
-  obj/ureq/payload.o   \
   obj/ureq/relay.o     \
   obj/ureq/report.o    \
   obj/ureq/round.o     \
@@ -58,6 +58,7 @@ bin/ures: obj/common/convert.o \
           obj/common/log.o     \
           obj/common/now.o     \
           obj/common/parse.o   \
+          obj/common/payload.o \
           obj/common/plugin.o  \
           obj/common/signal.o  \
           obj/common/ttl.o     \
@@ -75,6 +76,7 @@ bin/ures: obj/common/convert.o \
   obj/common/log.o     \
   obj/common/now.o     \
   obj/common/parse.o   \
+  obj/common/payload.o \
   obj/common/plugin.o  \
   obj/common/signal.o  \
   obj/common/ttl.o     \
@@ -83,7 +85,6 @@ bin/ures: obj/common/convert.o \
   obj/ures/event.o     \
   obj/ures/loop.o      \
   obj/ures/main.o      \
-  obj/ures/payload.o   \
   obj/ures/report.o    \
   obj/ures/socket.o    \
   $(LDFLAGS)
@@ -103,9 +104,6 @@ obj/ureq/loop.o: src/ureq/loop.c
 
 obj/ureq/main.o: src/ureq/main.c
 	$(CC) $(CFLAGS) -c src/ureq/main.c      -o obj/ureq/main.o
-
-obj/ureq/payload.o: src/ureq/payload.c
-	$(CC) $(CFLAGS) -c src/ureq/payload.c   -o obj/ureq/payload.o
 
 obj/ureq/relay.o: src/ureq/relay.c
 	$(CC) $(CFLAGS) -c src/ureq/relay.c     -o obj/ureq/relay.o
@@ -138,9 +136,6 @@ obj/ures/loop.o: src/ures/loop.c
 obj/ures/main.o: src/ures/main.c
 	$(CC) $(CFLAGS) -c src/ures/main.c      -o obj/ures/main.o
 
-obj/ures/payload.o: src/ures/payload.c
-	$(CC) $(CFLAGS) -c src/ures/payload.c   -o obj/ures/payload.o
-
 obj/ures/report.o: src/ures/report.c
 	$(CC) $(CFLAGS) -c src/ures/report.c    -o obj/ures/report.o
 
@@ -163,6 +158,9 @@ obj/common/now.o: src/common/now.c
 obj/common/parse.o: src/common/parse.c
 	$(CC) $(CFLAGS) -c src/common/parse.c   -o obj/common/parse.o
 
+obj/common/payload.o: src/common/payload.c
+	$(CC) $(CFLAGS) -c src/common/payload.c -o obj/common/payload.o
+
 obj/common/plugin.o: src/common/plugin.c
 	$(CC) $(CFLAGS) -c src/common/plugin.c  -o obj/common/plugin.o
 
@@ -180,6 +178,7 @@ clean:
 	rm -f obj/common/log.o
 	rm -f obj/common/now.o
 	rm -f obj/common/parse.o
+	rm -f obj/common/payload.o
 	rm -f obj/common/plugin.o
 	rm -f obj/common/signal.o
 	rm -f obj/common/ttl.o
@@ -188,7 +187,6 @@ clean:
 	rm -f obj/ureq/event.o
 	rm -f obj/ureq/loop.o
 	rm -f obj/ureq/main.o
-	rm -f obj/ureq/payload.o
 	rm -f obj/ureq/relay.o
 	rm -f obj/ureq/report.o
 	rm -f obj/ureq/round.o
@@ -199,6 +197,5 @@ clean:
 	rm -f obj/ures/event.o
 	rm -f obj/ures/loop.o
 	rm -f obj/ures/main.o
-	rm -f obj/ures/payload.o
 	rm -f obj/ures/report.o
 	rm -f obj/ures/socket.o

@@ -18,6 +18,7 @@
 #include "common/log.h"
 #include "common/convert.h"
 #include "common/now.h"
+#include "common/payload.h"
 #include "ureq/funcs.h"
 #include "ureq/types.h"
 
@@ -199,7 +200,7 @@ receive_response(struct payload* pl, struct proto* pr, const struct config* cf)
   decode_payload(pl);
 
   // Verify the payload correctness.
-  retb = verify_payload(pr, n, pl);
+  retb = verify_payload(pr, n, pl, NEMO_PAYLOAD_TYPE_RESPONSE);
   if (retb == false) {
     log(LL_WARN, false, "invalid payload content");
     return false;

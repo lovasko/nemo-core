@@ -3,7 +3,6 @@ counters.o
 event.o
 loop.o
 main.o
-payload.o
 relay.o
 report.o
 round.o

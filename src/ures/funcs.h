@@ -37,14 +37,6 @@ bool respond_loop(struct proto* p4,
                   const struct plugin* pi,
                   const uint64_t npi,
                   const struct config* cf);
-  
-// Payload.
-bool verify_payload(struct proto* pr,
-                    const ssize_t n,
-                    const struct payload* pl);
-bool update_payload(struct payload* pl,
-                    struct msghdr* msg,
-                    const struct config* cf);
 
 // Report.
 void report_header(const struct config* cf);

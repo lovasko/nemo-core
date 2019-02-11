@@ -32,9 +32,6 @@ bool request_loop(struct proto* p4,
                   struct target* tg,
                   const struct config* cf);
 
-// Payload.
-bool verify_payload(struct proto* pr, const ssize_t n, const struct payload* pl);
-
 // Report.
 void report_header(const struct config* cf);
 void report_event(const struct payload* pl, const struct config* cf);

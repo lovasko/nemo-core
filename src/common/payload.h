@@ -7,7 +7,11 @@
 #ifndef NEMO_COMMON_PAYLOAD_H
 #define NEMO_COMMON_PAYLOAD_H
 
+#include <stdbool.h>
 #include <stdint.h>
+#include <stddef.h>
+
+#include "common/proto.h"
 
 
 /// Message types.
@@ -47,5 +51,12 @@ struct payload {
   uint64_t pl_mtm2;   ///< Steady time of response.
   uint64_t pl_rtm2;   ///< System time of response.
 };
+
+void encode_payload(struct payload* pl);
+void decode_payload(struct payload* pl);
+bool verify_payload(struct proto* pr,
+                    const ssize_t n,
+                    const struct payload* pl,
+                    const uint8_t et);
 
 #endif

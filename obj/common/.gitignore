@@ -3,6 +3,7 @@ daemon.o
 log.o
 now.o
 parse.o
+payload.o
 plugin.o
 signal.o
 ttl.o

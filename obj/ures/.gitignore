@@ -3,6 +3,5 @@ counters.o
 event.o
 loop.o
 main.o
-payload.o
 report.o
 socket.o

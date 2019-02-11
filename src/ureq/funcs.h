@@ -8,6 +8,7 @@
 #include <stdint.h>
 
 #include "common/payload.h"
+#include "common/proto.h"
 #include "ureq/types.h"
 
 

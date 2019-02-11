@@ -13,6 +13,7 @@
 
 #include "common/payload.h"
 #include "common/plugin.h"
+#include "common/proto.h"
 #include "ures/types.h"
 
 

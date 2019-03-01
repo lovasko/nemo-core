@@ -67,7 +67,6 @@ bin/ures: obj/common/convert.o \
           obj/ures/event.o     \
           obj/ures/loop.o      \
           obj/ures/main.o      \
-          obj/ures/payload.o   \
           obj/ures/report.o    \
           obj/ures/socket.o
 	$(CC) -o bin/ures    \

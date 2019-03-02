@@ -165,39 +165,47 @@ parse_target_string(struct target* tg,
   (void)memset(tg, 0, sizeof(tg[0]) * (size_t)tmax);
 
   // Try parsing the address as numeric IPv4 address.
-  if (cf->cf_ipv4 == true) {
-    reti = inet_pton(AF_INET, tstr, &a4);
-    if (reti == 1) {
-      read_target4(&tg[0], &a4);
-      tg[0].tg_name = NULL;
-      *tcnt = 1;
-
-      log(LL_TRACE, false, "parsed %s target: %s", "IPv4", tstr);
-      return true;
+  reti = inet_pton(AF_INET, tstr, &a4);
+  if (reti == 1) {
+    // Verify that we accept IPv4 protocol addresses.
+    if (cf->cf_ipv4 == false) {
+      log(LL_WARN, "target %s is a %s address, which is not selected",
+        tstr, "IPv4");
+      return false;
     }
+
+    read_target4(&tg[0], &a4);
+    tg[0].tg_name = NULL;
+    *tcnt = 1;
+
+    log(LL_TRACE, false, "parsed %s target: %s", "IPv4", tstr);
+    return true;
   }
 
   // Try parsing the address as numeric IPv6 address.
-  if (cf->cf_ipv6 == true) {
-    reti = inet_pton(AF_INET6, tstr, &a6);
-    if (reti == 1) {
-      read_target6(&tg[0], &a6);
-      tg[0].tg_name = NULL;
-      *tcnt = 1;
-
-      log(LL_TRACE, false, "parsed %s target: %s", "IPv6", tstr);
-      return true;
+  reti = inet_pton(AF_INET6, tstr, &a6);
+  if (reti == 1) {
+    // Verify that we accept IPv4 protocol addresses.
+    if (cf->cf_ipv6 == false) {
+      log(LL_WARN, "target %s is a %s address, which is not selected",
+        tstr, "IPv6");
+      return false;
     }
+
+    read_target6(&tg[0], &a6);
+    tg[0].tg_name = NULL;
+    *tcnt = 1;
+
+    log(LL_TRACE, false, "parsed %s target: %s", "IPv6", tstr);
+    return true;
   }
 
   // As none of the two address families were applicable, we assume that the
   // string is a domain name.
-  if (reti == -1) {
-    retb = resolve_name(tg, tcnt, tmax, tstr, cf);
-    if (retb == false) {
-      log(LL_TRACE, false, "unable to parse target '%s'", tstr);
-      return false;
-    }
+  retb = resolve_name(tg, tcnt, tmax, tstr, cf);
+  if (retb == false) {
+    log(LL_TRACE, false, "unable to parse target '%s'", tstr);
+    return false;
   }
 
   return true;

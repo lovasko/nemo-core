@@ -169,7 +169,7 @@ parse_target_string(struct target* tg,
   if (reti == 1) {
     // Verify that we accept IPv4 protocol addresses.
     if (cf->cf_ipv4 == false) {
-      log(LL_WARN, "target %s is a %s address, which is not selected",
+      log(LL_WARN, false, "target %s is a %s address, which is not selected",
         tstr, "IPv4");
       return false;
     }
@@ -185,9 +185,9 @@ parse_target_string(struct target* tg,
   // Try parsing the address as numeric IPv6 address.
   reti = inet_pton(AF_INET6, tstr, &a6);
   if (reti == 1) {
-    // Verify that we accept IPv4 protocol addresses.
+    // Verify that we accept IPv6 protocol addresses.
     if (cf->cf_ipv6 == false) {
-      log(LL_WARN, "target %s is a %s address, which is not selected",
+      log(LL_WARN, false, "target %s is a %s address, which is not selected",
         tstr, "IPv6");
       return false;
     }

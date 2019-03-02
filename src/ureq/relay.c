@@ -180,6 +180,7 @@ receive_response(struct payload* pl, struct proto* pr, const struct config* cf)
   data.iov_len  = sizeof(*pl);
 
   // Prepare the message.
+  (void)memset(&msg, 0, sizeof(msg));
   msg.msg_name    = &addr;
   msg.msg_namelen = sizeof(addr);
   msg.msg_iov     = &data;

@@ -6,7 +6,6 @@
 
 #include <stdlib.h>
 
-#include "common/daemon.h"
 #include "common/log.h"
 #include "common/payload.h"
 #include "common/signal.h"
@@ -36,15 +35,6 @@ main(int argc, char* argv[])
     log(LL_ERROR, false, "wrong payload size: expected %d, actual %z",
       NEMO_PAYLOAD_SIZE, sizeof(struct payload));
     return EXIT_FAILURE;
-  }
-
-  // Optionally turn the process into a daemon.
-  if (cf.cf_dmon == true) {
-    retb = turn_into_daemon();
-    if (retb == false) {
-      log(LL_ERROR, false, "unable to turn process into daemon");
-      return EXIT_FAILURE;
-    }
   }
 
   // Install signal handlers.

@@ -32,7 +32,6 @@
 #define DEF_LOG_LEVEL      LL_WARN    ///< Log errors and warnings by default.
 #define DEF_LOG_COLOR      true       ///< Colors in the notification output.
 #define DEF_MONOLOGUE      false      ///< Responses are recorded by default.
-#define DEF_DAEMON         false      ///< Process stays within the terminal.
 #define DEF_UDP_PORT       23000      ///< UDP port number to use
 #define DEF_RECEIVE_BUFFER 2000000    ///< Socket receive buffer memory size.
 #define DEF_SEND_BUFFER    2000000    ///< Socket send buffer memory size.
@@ -51,7 +50,7 @@ print_usage(void)
     "  Payload version: %d\n\n"
 
     "Usage:\n"
-    "  nreq [-46dehmnv] [-c CNT] [-i DUR] [-k KEY] [-r RBS] [-s SBS]\n"
+    "  nreq [-46ehmnv] [-c CNT] [-i DUR] [-k KEY] [-r RBS] [-s SBS]\n"
     "       [-p NUM] [-t TTL] [-w DUR] target [target]...\n\n"
 
     "Arguments:\n"
@@ -61,7 +60,6 @@ print_usage(void)
     "  -4      Use only the IPv4 protocol.\n"
     "  -6      Use only the IPv6 protocol.\n"
     "  -c CNT  Number of requests to issue. (def=%d)\n"
-    "  -d      Run the process as a daemon.\n"
     "  -e      Stop the process on first network error.\n"
     "  -g      Group requests at the start of each round.\n"
     "  -h      Print this help message.\n"
@@ -185,20 +183,6 @@ static bool
 option_c(struct config* cf, const char* in)
 {
   return parse_uint64(&cf->cf_cnt, in, 0, UINT64_MAX);
-}
-
-/// Run the process as a system daemon.
-/// @return success/failure indication
-///
-/// @param[out] cf configuration
-/// @param[in]  in argument input (unused)
-static bool
-option_d(struct config* cf, const char* in)
-{
-  (void)in;
-  cf->cf_dmon = true;
-
-  return true;
 }
 
 /// Terminate the process on first network-related error.
@@ -427,7 +411,6 @@ set_defaults(struct config* cf)
   cf->cf_ttl  = DEF_TIME_TO_LIVE;
   cf->cf_rld  = DEF_UPDATE;
   cf->cf_mono = DEF_MONOLOGUE;
-  cf->cf_dmon = DEF_DAEMON;
   cf->cf_sil  = DEF_SILENT;
   cf->cf_bin  = DEF_BINARY;
   cf->cf_grp  = DEF_GROUP;
@@ -500,13 +483,12 @@ parse_config(struct config* cf, int argc, char* argv[])
   bool retb;
   uint64_t i;
   char optdsl[128];
-  struct option opts[22] = {
+  struct option opts[21] = {
     { '4',  false, option_4 },
     { '6',  false, option_6 },
     { 'a',  true , option_a },
     { 'b',  false, option_b },
     { 'c',  true,  option_c },
-    { 'd',  false, option_d },
     { 'e',  false, option_e },
     { 'g',  false, option_g },
     { 'h',  false, option_h },
@@ -528,7 +510,7 @@ parse_config(struct config* cf, int argc, char* argv[])
   log(LL_INFO, false, "parsing command-line options");
 
   (void)memset(optdsl, '\0', sizeof(optdsl));
-  generate_getopt_string(optdsl, opts, 22);
+  generate_getopt_string(optdsl, opts, 21);
 
   // Set optional arguments to sensible defaults.
   set_defaults(cf);
@@ -549,7 +531,7 @@ parse_config(struct config* cf, int argc, char* argv[])
     }
 
     // Find the relevant option.
-    for (i = 0; i < 22; i++) {
+    for (i = 0; i < 21; i++) {
       if (opts[i].op_name == (char)opt) {
         retb = opts[i].op_act(cf, optarg);
         if (retb == false) {
@@ -610,8 +592,6 @@ log_config(const struct config* cf)
   log(LL_DEBUG, false, "send buffer size: %" PRIu64 " bytes", cf->cf_sbuf);
   log(LL_DEBUG, false, "monologue mode: %s",
     cf->cf_mono == true ? "yes" : "no");
-  log(LL_DEBUG, false, "daemon process: %s",
-    cf->cf_dmon == true ? "yes" : "no");
   log(LL_DEBUG, false, "binary report: %s",
-    cf->cf_dmon == true ? "yes" : "no");
+    cf->cf_bin == true ? "yes" : "no");
 }

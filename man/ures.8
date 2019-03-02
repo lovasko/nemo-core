@@ -14,7 +14,6 @@
 .Op Fl 4
 .Op Fl 6
 .Op Fl a Ar obj
-.Op Fl d
 .Op Fl e
 .Op Fl h
 .Op Fl k Ar key
@@ -48,10 +47,6 @@ The network communication will only use the IP version 6. This option is mutuall
 .It Fl a Ar obj
 Specifies a shared object file that contains actions to execute triggered by
 program events (see ACTIONS).
-.
-.It Fl d
-Run the process as a daemon. All standard streams will be closed and the
-logging output will use the syslog(3) framework.
 .
 .It Fl e
 The process will terminate when the first network-related error is encountered.

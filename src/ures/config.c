@@ -26,7 +26,6 @@
 #define DEF_LOG_COLOR           true
 #define DEF_TIME_TO_LIVE        64
 #define DEF_MONOLOGUE           false
-#define DEF_DAEMON              false
 #define DEF_SILENT              false
 #define DEF_BINARY              false
 
@@ -48,7 +47,6 @@ print_usage(void)
     "  -6      Use only the IPv6 protocol.\n"
     "  -a OBJ  Attach a plugin from a shared object file.\n"
     "  -b      Reporting data to be in binary format.\n"
-    "  -d      Run the process as a daemon.\n"
     "  -e      Stop the process on first transmission error.\n"
     "  -h      Print this help message.\n"
     "  -k KEY  Key for the current run. (def=random)\n"
@@ -129,20 +127,6 @@ option_b(struct config* cf, const char* in)
 {
   (void)in;
   cf->cf_bin = true;
-
-  return true;
-}
-
-/// Run the process as a system daemon.
-/// @return success/failure indication
-///
-/// @param[out] cf configuration
-/// @param[in]  in argument input (unused)
-static bool
-option_d(struct config* cf, const char* in)
-{
-  (void)in;
-  cf->cf_dmon = true;
 
   return true;
 }
@@ -333,7 +317,6 @@ set_defaults(struct config* cf)
   cf->cf_port = DEF_UDP_PORT;
   cf->cf_ttl  = DEF_TIME_TO_LIVE;
   cf->cf_mono = DEF_MONOLOGUE;
-  cf->cf_dmon = DEF_DAEMON;
   cf->cf_sil  = DEF_SILENT;
   cf->cf_bin  = DEF_BINARY;
   cf->cf_llvl = (log_lvl = DEF_LOG_LEVEL);
@@ -405,12 +388,11 @@ parse_config(struct config* cf, int argc, char* argv[])
   bool retb;
   uint64_t i;
   char optdsl[128];
-  struct option opts[16] = {
+  struct option opts[15] = {
     { '4',  false, option_4 },
     { '6',  false, option_6 },
     { 'a',  true , option_a },
     { 'b',  false, option_b },
-    { 'd',  false, option_d },
     { 'e',  false, option_e },
     { 'h',  false, option_h },
     { 'k',  true , option_k },
@@ -427,7 +409,7 @@ parse_config(struct config* cf, int argc, char* argv[])
   log(LL_INFO, false, "parsing command-line options");
 
   (void)memset(optdsl, '\0', sizeof(optdsl));
-  generate_getopt_string(optdsl, opts, 16);
+  generate_getopt_string(optdsl, opts, 15);
 
   // Set optional arguments to sensible defaults.
   set_defaults(cf);
@@ -448,7 +430,7 @@ parse_config(struct config* cf, int argc, char* argv[])
     }
 
     // Find the relevant option.
-    for (i = 0; i < 16; i++) {
+    for (i = 0; i < 15; i++) {
       if (opts[i].op_name == (char)opt) {
         retb = opts[i].op_act(cf, optarg);
         if (retb == false) {
@@ -492,8 +474,6 @@ log_config(const struct config* cf)
   log(LL_DEBUG, false, "send buffer size: %" PRIu64 " bytes", cf->cf_sbuf);
   log(LL_DEBUG, false, "monologue mode: %s",
     cf->cf_mono == true ? "yes" : "no");
-  log(LL_DEBUG, false, "daemon process: %s",
-    cf->cf_dmon == true ? "yes" : "no");
   log(LL_DEBUG, false, "binary report: %s",
-    cf->cf_dmon == true ? "yes" : "no");
+    cf->cf_bin == true ? "yes" : "no");
 }

@@ -27,7 +27,6 @@ struct config {
   uint8_t     cf_llvl;           ///< Minimal log level.
   bool        cf_lcol;           ///< Log coloring policy.
   bool        cf_mono;           ///< Monologue mode (no responses).
-  bool        cf_dmon;           ///< Daemon process.
   bool        cf_sil;            ///< Standard output presence.
   bool        cf_bin;            ///< Binary reporting mode.
   uint8_t     cf_pad[7];         ///< Padding (unused).

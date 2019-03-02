@@ -14,7 +14,6 @@ all: bin/ureq bin/ures
 
 # unicast requester executable
 bin/ureq: obj/common/convert.o \
-          obj/common/daemon.o  \
           obj/common/log.o     \
           obj/common/now.o     \
           obj/common/parse.o   \
@@ -33,7 +32,6 @@ bin/ureq: obj/common/convert.o \
           obj/ureq/target.o
 	$(CC) -o bin/ureq    \
   obj/common/convert.o \
-  obj/common/daemon.o  \
   obj/common/log.o     \
   obj/common/now.o     \
   obj/common/parse.o   \
@@ -54,7 +52,6 @@ bin/ureq: obj/common/convert.o \
 
 # unicast responder executable
 bin/ures: obj/common/convert.o \
-          obj/common/daemon.o  \
           obj/common/log.o     \
           obj/common/now.o     \
           obj/common/parse.o   \
@@ -71,7 +68,6 @@ bin/ures: obj/common/convert.o \
           obj/ures/socket.o
 	$(CC) -o bin/ures    \
   obj/common/convert.o \
-  obj/common/daemon.o  \
   obj/common/log.o     \
   obj/common/now.o     \
   obj/common/parse.o   \
@@ -145,9 +141,6 @@ obj/ures/socket.o: src/ures/socket.c
 obj/common/convert.o: src/common/convert.c
 	$(CC) $(CFLAGS) -c src/common/convert.c -o obj/common/convert.o
 
-obj/common/daemon.o: src/common/daemon.c
-	$(CC) $(CFLAGS) -c src/common/daemon.c  -o obj/common/daemon.o
-
 obj/common/log.o: src/common/log.c
 	$(CC) $(CFLAGS) -c src/common/log.c     -o obj/common/log.o
 
@@ -173,7 +166,6 @@ clean:
 	rm -f bin/ureq
 	rm -f bin/ures
 	rm -f obj/common/convert.o
-	rm -f obj/common/daemon.o
 	rm -f obj/common/log.o
 	rm -f obj/common/now.o
 	rm -f obj/common/parse.o

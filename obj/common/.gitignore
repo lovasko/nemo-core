@@ -1,5 +1,4 @@
 convert.o
-daemon.o
 log.o
 now.o
 parse.o

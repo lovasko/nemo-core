@@ -116,10 +116,12 @@ resolve_name(struct target* tg,
       log(lvl, false, "reached maximum number of targets per name: %"
         PRIu64, tmax);
 
-      if (cf->cf_err == true)
+      if (cf->cf_err == true) {
+        freeaddrinfo(ais);
         return false;
-      else
+      } else {
         break;
+      }
     }
 
     // Convert the address to a IPv4 target.

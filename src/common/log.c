@@ -136,12 +136,12 @@ log(const uint8_t lvl,
 
   // Obtain the errno message.
   (void)memset(errmsg, '\0', sizeof(errmsg));
-  if (perr)
+  if (perr == true)
     (void)sprintf(errmsg, ": %s", strerror(save));
 
   // Format the level name.
   (void)memset(lstr, '\0', sizeof(lstr));
-  if (log_col)
+  if (log_col == true)
     (void)sprintf(lstr, "\x1b[%dm%s\x1b[0m", lcol[lvl], lname[lvl]);
   else
     (void)memcpy(lstr, lname[lvl], strlen(lname[lvl]));

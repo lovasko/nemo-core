@@ -50,8 +50,7 @@ print_usage(void)
     "  Payload version: %d\n\n"
 
     "Usage:\n"
-    "  nreq [-46ehmnv] [-c CNT] [-i DUR] [-k KEY] [-r RBS] [-s SBS]\n"
-    "       [-p NUM] [-t TTL] [-w DUR] target [target]...\n\n"
+    "  ureq [OPTIONS] target [target]...\n\n"
 
     "Arguments:\n"
     "  target  IPv4/IPv6 address or hostname\n\n"

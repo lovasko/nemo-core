@@ -6,6 +6,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -85,27 +86,47 @@ print_usage(void)
 }
 
 /// Generate a random key.
-/// @return random 64-bit unsigned integer (non-zero)
-static uint64_t
-generate_key(void)
+/// @return success/failure indication
+///
+/// @param[out] key random 64-bit unsigned integer
+static bool 
+generate_key(uint64_t* key)
 {
-  uint64_t key;
+  uint64_t data;
+  ssize_t retss;
+  int reti;
+  int dr;
 
-  // Seed the psuedo-random number generator. The generated key is not intended
-  // to be cryptographically safe - it is just intended to prevent publishers
-  // from the same host to share the same key. The only situation that this
-  // could still happen is if system PIDs loop over and cause the following
-  // equation: t1 + pid1 == t2 + pid2, which was ruled to be unlikely.
-  srand48(time(NULL) + getpid());
+  // Prepare the source of random data.
+  dr = open("/dev/random", O_RDONLY);
+  if (dr == -1) {
+    log(LL_WARN, true, "unable to open file %s", "/dev/random");
+    return false;
+  }
 
-  // Generate a random key and ensure it is not a zero. The zero value
-  // is internally used to represent the state where no filtering of keys
-  // is performed by the subscriber process.
-  do {
-    key = (uint64_t)lrand48() | ((uint64_t)lrand48() << 32);
-  } while (key == 0);
+  // Obtain a random key.
+  retss = read(dr, &data, sizeof(data));
+  if (retss != (ssize_t)sizeof(data)) {
+    log(LL_WARN, true, "unable to obtain random bytes");
+     
+    // Close the random source.
+    reti = close(dr);
+    if (reti == -1) {
+      log(LL_WARN, true, "unable to close file %s", "/dev/random");
+    }
 
-  return key;
+    return false;
+  }
+
+  // Close the random source.
+  reti = close(dr);
+  if (reti == -1) {
+    log(LL_WARN, true, "unable to close file %s", "/dev/random");
+    return false;
+  }
+
+  *key = data;
+  return true;
 }
 
 /// Select IPv4 protocol only.
@@ -390,12 +411,14 @@ option_w(struct config* cf, const char* in)
 }
 
 /// Assign default values to all options.
+/// @return success/failure indication
 ///
 /// @param[out] cf configuration
-static void
+static bool 
 set_defaults(struct config* cf)
 {
   intmax_t i;
+  bool retb;
 
   for (i = 0; i < PLUG_MAX; i++)
     cf->cf_pi[i] = NULL;
@@ -415,9 +438,16 @@ set_defaults(struct config* cf)
   cf->cf_grp  = DEF_GROUP;
   cf->cf_llvl = (log_lvl = DEF_LOG_LEVEL);
   cf->cf_lcol = (log_col = DEF_LOG_COLOR);
-  cf->cf_key  = generate_key();
   cf->cf_ipv4 = false;
   cf->cf_ipv6 = false;
+
+  retb = generate_key(&cf->cf_key);
+  if (retb == false) {
+    log(LL_WARN, false, "unable to generate a random key");
+    return false;
+  }
+
+  return true;
 }
 
 /// Sanitize the IPv4/IPv6 options.

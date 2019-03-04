@@ -25,37 +25,75 @@ bool    log_col; ///< Coloring policy.
 // Maximal length of a logging line.
 #define NEMO_LOG_MAX_LENGTH 128
 
+/// Append a string (possibly truncating it).
+/// @return new length of the string
+///
+/// @param[in] out output string
+/// @param[in] inp input string (NUL-terminated)
+/// @param[in] cur current length of the output string
+/// @param[in] max maximal length of the output string
+static size_t 
+append(char* out, const char* inp, const size_t cur, const size_t max)
+{
+  size_t rem; // Remaining space.
+  size_t len; // Length of the input string.
+  size_t act; // Actual addition length.
+
+  // Early exit if the string is already full. 
+  if (cur == max) {
+    return cur;
+  }
+
+  // Compute string lengths.
+  rem = max - cur;
+  len = strlen(inp);
+  act = len > rem ? len : rem;
+
+  // Copy the input string.
+  (void)strncpy(out + cur, inp, act);
+
+  return cur + act;
+}
+
 /// Add ASCII escape sequences to highlight every substitution in a
 /// printf-formatted string.
 ///
 /// @param[out] out highlighted string
 /// @param[in]  inp input string
+/// @param[in]  len length of the highlight string
 static void
-highlight(char* out, const char* inp)
+highlight(char* out, const char* inp, const size_t len)
 {
   char* pcent;
   char* delim;
   char* str;
   char cpy[NEMO_LOG_MAX_LENGTH];
   char hold;
+  size_t cur;
+  size_t max;
 
   // As the input string is likely to be a compiler literal, and therefore
   // is stored in a read-only memory, we have to make a copy of it.
-  memset(cpy, '\0', sizeof(cpy));
-  strcpy(cpy, inp);
+  (void)memset(cpy, '\0', sizeof(cpy));
+  (void)strncpy(cpy, inp, sizeof(cpy));
 
+  // Prepare state variables.
+  cur = 0;
   hold = '\0';
   str = cpy;
+  max = len - 5; // Leave space for "\x1b[0m\0".
+  (void)memset(out, '\0', len);
+
   while (str != NULL) {
     // Find the next substitution.
     pcent = strchr(str, '%');
     if (pcent != NULL) {
       // Copy the text leading to the start of the substitution.
       *pcent = '\0';
-      strcat(out, str);
+      cur = append(out, str, max, cur);
 
       // Append the ASCII escape code to start the highlighting.
-      strcat(out, "\x1b[1m");
+      cur = append(out, "\x1b[1m", max, cur);
 
       // Locate the substitution's end and copy the contents.
       *pcent = '%';
@@ -65,10 +103,10 @@ highlight(char* out, const char* inp)
         hold = *delim;
         *delim = '\0';
       }
-      strcat(out, pcent);
+      cur = append(out, pcent, max, cur);
 
       // Insert the ASCII escape code to end the highlighting.
-      strcat(out, "\x1b[0m");
+      cur = append(out, "\x1b[0m", max, cur);
 
       // Move back the space and continue.
       if (delim != NULL) {
@@ -80,10 +118,14 @@ highlight(char* out, const char* inp)
     } else {
       // Since there are no more substitutions in the input string, copy the
       // rest of it and finish.
-      strcat(out, str);
+      cur = append(out, str, max, cur);
       break;
     }
   }
+
+  // Ensure that the string ends with an escape code that negates all previous
+  // effects in case of string truncation.
+  (void)append(out, "\x1b[0m", max, cur);
 }
 
 /// Issue a log line to the selected back-end service.
@@ -125,7 +167,7 @@ log(const uint8_t lvl,
   // Prepare highlights for the message variables.
   (void)memset(hfmt, '\0', sizeof(hfmt));
   if (log_col == true)
-    highlight(hfmt, fmt);
+    highlight(hfmt, fmt, sizeof(hfmt));
   else
     (void)memcpy(hfmt, fmt, strlen(fmt));
 

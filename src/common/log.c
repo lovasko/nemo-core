@@ -186,7 +186,7 @@ log(const uint8_t lvl,
   if (log_col == true)
     (void)sprintf(lstr, "\x1b[%dm%s\x1b[0m", lcol[lvl], lname[lvl]);
   else
-    (void)memcpy(lstr, lname[lvl], strlen(lname[lvl]));
+    (void)strncpy(lstr, lname[lvl], sizeof(lstr) - 1);
 
   // Print the final log line.
   (void)fprintf(stderr, "[%s] %s - %s%s\n", tstr, lstr, msg, errmsg);

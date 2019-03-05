@@ -75,7 +75,7 @@ highlight(char* out, const char* inp, const size_t len)
   // As the input string is likely to be a compiler literal, and therefore
   // is stored in a read-only memory, we have to make a copy of it.
   (void)memset(cpy, '\0', sizeof(cpy));
-  (void)strncpy(cpy, inp, sizeof(cpy));
+  (void)strncpy(cpy, inp, sizeof(cpy) - 1); // Leave space for NUL.
 
   // Prepare state variables.
   cur = 0;

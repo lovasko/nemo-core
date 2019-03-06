@@ -90,10 +90,10 @@ highlight(char* out, const char* inp, const size_t len)
     if (pcent != NULL) {
       // Copy the text leading to the start of the substitution.
       *pcent = '\0';
-      cur = append(out, str, max, cur);
+      cur = append(out, str, cur, max);
 
       // Append the ASCII escape code to start the highlighting.
-      cur = append(out, "\x1b[1m", max, cur);
+      cur = append(out, "\x1b[1m", cur, max);
 
       // Locate the substitution's end and copy the contents.
       *pcent = '%';
@@ -103,10 +103,10 @@ highlight(char* out, const char* inp, const size_t len)
         hold = *delim;
         *delim = '\0';
       }
-      cur = append(out, pcent, max, cur);
+      cur = append(out, pcent, cur, max);
 
       // Insert the ASCII escape code to end the highlighting.
-      cur = append(out, "\x1b[0m", max, cur);
+      cur = append(out, "\x1b[0m", cur, max);
 
       // Move back the space and continue.
       if (delim != NULL) {
@@ -118,7 +118,7 @@ highlight(char* out, const char* inp, const size_t len)
     } else {
       // Since there are no more substitutions in the input string, copy the
       // rest of it and finish.
-      cur = append(out, str, max, cur);
+      cur = append(out, str, cur, max);
       break;
     }
   }

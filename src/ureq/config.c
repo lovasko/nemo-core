@@ -98,7 +98,7 @@ generate_key(uint64_t* key)
   int dr;
 
   // Prepare the source of random data.
-  dr = open("/dev/random", O_RDONLY);
+  dr = open("/dev/urandom", O_RDONLY);
   if (dr == -1) {
     log(LL_WARN, true, "unable to open file %s", "/dev/random");
     return false;

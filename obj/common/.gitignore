@@ -5,4 +5,5 @@ parse.o
 payload.o
 plugin.o
 signal.o
+stats.o
 ttl.o

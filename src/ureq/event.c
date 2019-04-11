@@ -94,12 +94,12 @@ handle_interrupt(const struct proto* p4,
   if (susr1 == true) {
     log_config(cf);
     if (cf->cf_ipv4 == true) {
-      log_counters(p4);
+      log_stats(p4->pr_name, &p4->pr_stat);
       log_socket_port(p4);
     }
 
     if (cf->cf_ipv6 == true) {
-      log_counters(p6);
+      log_stats(p6->pr_name, &p6->pr_stat);
       log_socket_port(p6);
     }
 

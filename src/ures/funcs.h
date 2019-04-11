@@ -21,10 +21,6 @@
 bool parse_config(struct config* cf, int argc, char* argv[]);
 void log_config(const struct config* cf);
 
-// Counters.
-void reset_counters(struct proto* pr);
-void log_counters(const struct proto* pr);
-
 // Event.
 bool handle_event(struct proto* pr,
                   const struct plugin* pi,

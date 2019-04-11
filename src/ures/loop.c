@@ -48,8 +48,8 @@ handle_interrupt(const struct proto* p4,
   // Print logging information and continue the process upon receiving SIGUSR1.
   if (susr1 == true) {
     log_config(cf);
-    if (cf->cf_ipv4 == true) log_counters(p4);
-    if (cf->cf_ipv6 == true) log_counters(p6);
+    if (cf->cf_ipv4 == true) log_stats(p4->pr_name, &p4->pr_stat);
+    if (cf->cf_ipv6 == true) log_stats(p6->pr_name, &p6->pr_stat);
 
     // Reset the signal indicator, so that following signal handling will avoid
     // the false positive.

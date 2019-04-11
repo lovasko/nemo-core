@@ -58,12 +58,12 @@ decode_payload(struct payload* pl)
 /// Verify the incoming payload for correctness.
 /// @return success/failure indication
 ///
-/// @param[out] pr protocol connection
+/// @param[out] st protocol event statistics 
 /// @param[in]  n  length of the received data
 /// @param[in]  pl payload
 /// @param[in]  et expected payload type
 bool
-verify_payload(struct proto* pr,
+verify_payload(struct stats* st,
                const ssize_t n,
                const struct payload* pl,
                const uint8_t et)
@@ -74,7 +74,7 @@ verify_payload(struct proto* pr,
   if ((size_t)n != sizeof(*pl)) {
     log(LL_DEBUG, false, "wrong datagram size, expected: %zd, actual: %zu",
         sizeof(*pl), n);
-    pr->pr_resz++;
+    st->st_resz++;
     return false;
   }
 
@@ -82,7 +82,7 @@ verify_payload(struct proto* pr,
   if (pl->pl_mgic != NEMO_PAYLOAD_MAGIC) {
     log(LL_DEBUG, false, "payload identifier unknown, expected: %"
         PRIx32 ", actual: %" PRIx32, NEMO_PAYLOAD_MAGIC, pl->pl_mgic);
-    pr->pr_remg++;
+    st->st_remg++;
     return false;
   }
 
@@ -90,7 +90,7 @@ verify_payload(struct proto* pr,
   if (pl->pl_fver != NEMO_PAYLOAD_VERSION) {
     log(LL_DEBUG, false, "unsupported payload version, expected: %"
         PRIu8 ", actual: %" PRIu8, NEMO_PAYLOAD_VERSION, pl->pl_fver);
-    pr->pr_repv++;
+    st->st_repv++;
     return false;
   }
 
@@ -98,7 +98,7 @@ verify_payload(struct proto* pr,
   if (pl->pl_type != et) {
     log(LL_DEBUG, false, "unexpected payload type, expected: %"
         PRIu8 ", actual: %" PRIu8, et, pl->pl_type);
-    pr->pr_rety++;
+    st->st_rety++;
     return false;
   }
 

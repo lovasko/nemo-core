@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "common/proto.h"
+#include "common/stats.h"
 
 
 /// Message types.
@@ -54,7 +54,7 @@ struct payload {
 
 void encode_payload(struct payload* pl);
 void decode_payload(struct payload* pl);
-bool verify_payload(struct proto* pr,
+bool verify_payload(struct stats* st,
                     const ssize_t n,
                     const struct payload* pl,
                     const uint8_t et);

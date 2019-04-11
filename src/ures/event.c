@@ -86,10 +86,11 @@ receive_datagram(struct proto* pr,
   msg->msg_flags   = 0;
 
   // Receive the message and handle potential errors.
+  pr->pr_stat.st_rall++;
   n = recvmsg(pr->pr_sock, msg, MSG_DONTWAIT | MSG_TRUNC);
   if (n < 0) {
     log(LL_WARN, true, "receiving has failed");
-    pr->pr_reni++;
+    pr->pr_stat.st_reni++;
 
     if (cf->cf_err == true)
       return false;
@@ -99,13 +100,11 @@ receive_datagram(struct proto* pr,
   decode_payload(pl);
 
   // Verify the payload correctness.
-  retb = verify_payload(pr, n, pl, NEMO_PAYLOAD_TYPE_REQUEST);
+  retb = verify_payload(&pr->pr_stat, n, pl, NEMO_PAYLOAD_TYPE_REQUEST);
   if (retb == false) {
     log(LL_WARN, false, "invalid payload content");
     return false;
   }
-
-  pr->pr_rall++;
 
   return true;
 }
@@ -146,10 +145,11 @@ send_datagram(struct proto* pr,
   encode_payload(pl);
 
   // Send the datagram.
+  pr->pr_stat.st_sall++;
   n = sendmsg(pr->pr_sock, &msg, MSG_DONTWAIT);
   if (n < 0) {
     log(LL_WARN, true, "unable to send datagram");
-    pr->pr_seni++;
+    pr->pr_stat.st_seni++;
 
     if (cf->cf_err == true)
       return false;
@@ -158,13 +158,11 @@ send_datagram(struct proto* pr,
   // Verify the size of the sent datagram.
   if ((size_t)n != sizeof(*pl)) {
     log(LL_WARN, false, "wrong sent payload size");
-    pr->pr_seni++;
+    pr->pr_stat.st_seni++;
 
     if (cf->cf_err == true)
       return false;
   }
-
-  pr->pr_sall++;
 
   return true;
 }

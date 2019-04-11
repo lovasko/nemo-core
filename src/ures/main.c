@@ -63,7 +63,7 @@ main(int argc, char* argv[])
 
   // Initialize the IPv4 connection.
   if (cf.cf_ipv4 == true) {
-    reset_counters(&p4);
+    reset_stats(&p4.pr_stat);
     p4.pr_name = "IPv4";
 
     retb = create_socket4(&p4, &cf);
@@ -75,7 +75,7 @@ main(int argc, char* argv[])
 
   // Initialize the IPv6 connection.
   if (cf.cf_ipv6 == true) {
-    reset_counters(&p6);
+    reset_stats(&p6.pr_stat);
     p6.pr_name = "IPv6";
 
     retb = create_socket6(&p6, &cf);
@@ -97,8 +97,8 @@ main(int argc, char* argv[])
   terminate_plugins(pins, npins);
 
   // Print final values of counters.
-  if (cf.cf_ipv4 == true) log_counters(&p4);
-  if (cf.cf_ipv6 == true) log_counters(&p6);
+  if (cf.cf_ipv4 == true) log_stats(p4.pr_name, &p4.pr_stat);
+  if (cf.cf_ipv6 == true) log_stats(p6.pr_name, &p6.pr_stat);
 
   // Flush the standard output and error streams.
   retb = flush_report_stream(&cf);

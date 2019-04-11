@@ -129,13 +129,14 @@ send_request(struct proto* pr,
   encode_payload(&pl);
 
   // Send the datagram.
+  pr->pr_stat.st_sall++;
   n = sendmsg(pr->pr_sock, &msg, MSG_DONTWAIT);
   if (n == -1) {
     // Increase the seriousness of the incident in case we are going to fail.
     lvl = cf->cf_err == true ? LL_WARN : LL_DEBUG;
     log(lvl, true, "unable to send datagram");
 
-    pr->pr_seni++;
+    pr->pr_stat.st_seni++;
 
     // Fail the procedure only if we have selected the exit-on-error attribute
     // to be true.
@@ -148,14 +149,12 @@ send_request(struct proto* pr,
     lvl = cf->cf_err == true ? LL_WARN : LL_DEBUG;
     log(lvl, true, "unable to send the whole payload");
 
-    pr->pr_seni++;
+    pr->pr_stat.st_seni++;
 
     // Fail the procedure only if we have selected the exit-on-error attribute
     // to be true.
     return !cf->cf_err;
   }
-
-  pr->pr_sall++;
 
   return true;
 }
@@ -188,10 +187,11 @@ receive_response(struct payload* pl, struct proto* pr, const struct config* cf)
   msg.msg_flags   = 0;
 
   // Receive the message and handle potential errors.
+  pr->pr_stat.st_rall++;
   n = recvmsg(pr->pr_sock, &msg, MSG_DONTWAIT | MSG_TRUNC);
   if (n < 0) {
     log(LL_WARN, true, "receiving has failed");
-    pr->pr_reni++;
+    pr->pr_stat.st_reni++;
 
     if (cf->cf_err == true)
       return false;
@@ -201,7 +201,7 @@ receive_response(struct payload* pl, struct proto* pr, const struct config* cf)
   decode_payload(pl);
 
   // Verify the payload correctness.
-  retb = verify_payload(pr, n, pl, NEMO_PAYLOAD_TYPE_RESPONSE);
+  retb = verify_payload(&pr->pr_stat, n, pl, NEMO_PAYLOAD_TYPE_RESPONSE);
   if (retb == false) {
     log(LL_WARN, false, "invalid payload content");
     return false;

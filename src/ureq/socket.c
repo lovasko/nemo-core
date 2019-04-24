@@ -207,6 +207,9 @@ get_assigned_port(uint16_t* pn, const struct proto* pr)
   return true;
 }
 
+/// Log the UDP port associated with the socket.
+///
+/// @param[in] pr protocol connection
 void
 log_socket_port(const struct proto* pr)
 {

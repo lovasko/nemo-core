@@ -189,6 +189,7 @@ delete_socket(const struct proto* pr)
   int reti;
 
   reti = close(pr->pr_sock);
-  if (reti == -1)
+  if (reti == -1) {
     log(LL_WARN, true, "unable to close the %s socket", pr->pr_name);
+  }
 }

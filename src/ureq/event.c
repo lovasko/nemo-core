@@ -43,8 +43,9 @@ handle_event(struct proto* p4, struct proto* p6, const fd_set* rfd, const struct
     reti = FD_ISSET(p4->pr_sock, rfd);
     if (reti > 0) {
       retb = receive_response(&pl, p4, cf);
-      if (retb == false)
+      if (retb == false) {
         return false;
+      }
     }
   }
 
@@ -53,8 +54,9 @@ handle_event(struct proto* p4, struct proto* p6, const fd_set* rfd, const struct
     reti = FD_ISSET(p6->pr_sock, rfd);
     if (reti > 0) {
       retb = receive_response(&pl, p6, cf);
-      if (retb == false)
+      if (retb == false) {
         return false;
+      }
     }
   }
 
@@ -188,8 +190,9 @@ wait_for_events(struct proto* p4,
       // Check for interrupt (possibly due to a signal).
       if (errno == EINTR) {
         retb = handle_interrupt(p4, p6, cf);
-        if (retb == true)
+        if (retb == true) {
           continue;
+        }
 
         return false;
       }
@@ -200,8 +203,9 @@ wait_for_events(struct proto* p4,
 
     // Handle the network events by receiving and reporting responses.
     retb = handle_event(p4, p6, &rfd, cf);
-    if (retb == false)
+    if (retb == false) {
       return false;
+    }
 
     // Update the current time.
     cur = mono_now();

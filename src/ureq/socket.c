@@ -215,6 +215,7 @@ log_socket_port(const struct proto* pr)
   uint16_t port;
 
   retb = get_assigned_port(&port, pr);
-  if (retb == true)
+  if (retb == true) {
     log(LL_DEBUG, false, "local %s UDP port: %" PRIu16, pr->pr_name, port);
+  }
 }

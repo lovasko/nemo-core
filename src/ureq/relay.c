@@ -193,8 +193,9 @@ receive_response(struct payload* pl, struct proto* pr, const struct config* cf)
     log(LL_WARN, true, "receiving has failed");
     pr->pr_stat.st_reni++;
 
-    if (cf->cf_err == true)
+    if (cf->cf_err == true) {
       return false;
+    }
   }
 
   // Convert the payload from its on-wire format.

@@ -33,8 +33,9 @@ ipv6_part(const uint8_t* ab)
   uint8_t i;
 
   res = 0;
-  for (i = 0; i < 8; i++)
+  for (i = 0; i < 8; i++) {
     res |= ((uint64_t)ab[i] << (i * 8));
+  }
 
   return res;
 }
@@ -104,8 +105,9 @@ resolve_name(struct target* tg,
       gai_strerror(reti));
     log(lvl, false, estr, name);
 
-    if (cf->cf_err == true)
+    if (cf->cf_err == true) {
       return false;
+    }
   }
 
   // Traverse the returned address information.
@@ -289,8 +291,9 @@ load_targets(struct target* tg,
   for (idx = 0; cf->cf_tg[idx] != NULL; idx++) {
     // Obtain a set of targets based on the target string.
     retb = parse_target_string(tg2, &tcnt1, 32, cf->cf_tg[idx], cf);
-    if (retb == false)
+    if (retb == false) {
       return false;
+    }
 
     // Remove duplicates and sort the targets.
     normalize_targets(tg2, &tcnt2, tcnt1);
@@ -299,10 +302,11 @@ load_targets(struct target* tg,
     if (tcnt2 + tall - 1 > cf->cf_ntg) {
       log(lvl, false, "unable to append more targets");
 
-      if (cf->cf_err == true)
+      if (cf->cf_err == true) {
         return false;
-      else
+      } else {
         break;
+      }
     }
 
     // Append the obtained targets to the overall list.
@@ -343,9 +347,10 @@ log_targets(const struct target tg[], const uint64_t cnt)
 
     // Print the target address. In case the target was resolved from a domain
     // name, append the information.
-    if (tg[i].tg_name == NULL)
+    if (tg[i].tg_name == NULL) {
       log(LL_DEBUG, false, "target address %s", str);
-    else
+    } else {
       log(LL_DEBUG, false, "target address %s resolved from %s", str, tg[i].tg_name);
+    }
   }
 }

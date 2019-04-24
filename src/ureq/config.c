@@ -391,10 +391,21 @@ option_v(struct config* cf, const char* in)
 {
   (void)in;
 
-  if (cf->cf_llvl == LL_DEBUG) cf->cf_llvl = LL_TRACE;
-  if (cf->cf_llvl == LL_INFO)  cf->cf_llvl = LL_DEBUG;
-  if (cf->cf_llvl == LL_WARN)  cf->cf_llvl = LL_INFO;
-  if (cf->cf_llvl == LL_ERROR) cf->cf_llvl = LL_WARN;
+  if (cf->cf_llvl == LL_DEBUG) {
+    cf->cf_llvl = LL_TRACE;
+  }
+
+  if (cf->cf_llvl == LL_INFO) {
+    cf->cf_llvl = LL_DEBUG;
+  }
+
+  if (cf->cf_llvl == LL_WARN) {
+    cf->cf_llvl = LL_INFO;
+  }
+
+  if (cf->cf_llvl == LL_ERROR) {
+    cf->cf_llvl = LL_WARN;
+  }
 
   return true;
 }
@@ -420,8 +431,10 @@ set_defaults(struct config* cf)
   intmax_t i;
   bool retb;
 
-  for (i = 0; i < PLUG_MAX; i++)
+  for (i = 0; i < PLUG_MAX; i++) {
     cf->cf_pi[i] = NULL;
+  }
+
   cf->cf_ntg  = DEF_TARGET_COUNT;
   cf->cf_cnt  = DEF_COUNT;
   cf->cf_int  = DEF_INTERVAL;
@@ -548,8 +561,9 @@ parse_config(struct config* cf, int argc, char* argv[])
   while (true) {
     // Parse the next option.
     opt = getopt(argc, argv, optdsl);
-    if (opt == -1)
+    if (opt == -1) {
       break;
+    }
 
     // Unknown option.
     if (opt == '?') {
@@ -592,12 +606,14 @@ parse_config(struct config* cf, int argc, char* argv[])
     return false;
   }
 
-  for (opt = optind; opt < argc; opt++)
+  for (opt = optind; opt < argc; opt++) {
     cf->cf_tg[opt - optind] = argv[opt];
+  }
 
   retb = organize_protocols(cf);
-  if (retb == false)
+  if (retb == false) {
     return false;
+  }
 
   // Assign the logging settings.
   log_lvl = cf->cf_llvl;

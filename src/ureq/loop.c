@@ -93,12 +93,14 @@ request_loop(struct proto* p4,
     // Select the appropriate type of issuing requests in the round.
     if (cf->cf_grp == true) {
       retb = grouped_round(p4, p6, tg, ntg, i, cf);
-      if (retb == false)
+      if (retb == false) {
         return false;
+      }
     } else {
       retb = dispersed_round(p4, p6, tg, ntg, i, cf);
-      if (retb == false)
+      if (retb == false) {
         return false;
+      }
     }
   }
 

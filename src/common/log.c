@@ -153,8 +153,9 @@ log(const uint8_t lvl,
   char lstr[32];
 
   // Ignore messages that fall below the global threshold.
-  if (lvl > log_lvl)
+  if (lvl > log_lvl) {
     return;
+  }
 
   // Save the errno with which the function was called.
   save = errno;
@@ -166,10 +167,11 @@ log(const uint8_t lvl,
 
   // Prepare highlights for the message variables.
   (void)memset(hfmt, '\0', sizeof(hfmt));
-  if (log_col == true)
+  if (log_col == true) {
     highlight(hfmt, fmt, sizeof(hfmt));
-  else
+  } else {
     (void)memcpy(hfmt, fmt, strlen(fmt));
+  }
 
   // Fill in the passed message.
   va_start(args, fmt);
@@ -178,15 +180,17 @@ log(const uint8_t lvl,
 
   // Obtain the errno message.
   (void)memset(errmsg, '\0', sizeof(errmsg));
-  if (perr == true)
+  if (perr == true) {
     (void)sprintf(errmsg, ": %s", strerror(save));
+  }
 
   // Format the level name.
   (void)memset(lstr, '\0', sizeof(lstr));
-  if (log_col == true)
+  if (log_col == true) {
     (void)sprintf(lstr, "\x1b[%dm%s\x1b[0m", lcol[lvl], lname[lvl]);
-  else
+  } else {
     (void)strncpy(lstr, lname[lvl], sizeof(lstr) - 1);
+  }
 
   // Print the final log line.
   (void)fprintf(stderr, "[%s] %s - %s%s\n", tstr, lstr, msg, errmsg);

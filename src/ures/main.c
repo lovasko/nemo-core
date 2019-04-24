@@ -87,18 +87,30 @@ main(int argc, char* argv[])
 
   // Start the main responding loop.
   retb = respond_loop(&p4, &p6, pins, npins, &cf);
-  if (retb == false)
+  if (retb == false) {
     log(LL_ERROR, false, "responding loop has been terminated");
+  }
 
-  if (cf.cf_ipv4 == true) delete_socket(&p4);
-  if (cf.cf_ipv6 == true) delete_socket(&p6);
+  // Delete sockets.
+  if (cf.cf_ipv4 == true) {
+    delete_socket(&p4);
+  }
+
+  if (cf.cf_ipv6 == true) {
+    delete_socket(&p6);
+  }
 
   // Terminate plugins.
   terminate_plugins(pins, npins);
 
   // Print final values of counters.
-  if (cf.cf_ipv4 == true) log_stats(p4.pr_name, &p4.pr_stat);
-  if (cf.cf_ipv6 == true) log_stats(p6.pr_name, &p6.pr_stat);
+  if (cf.cf_ipv4 == true) {
+    log_stats(p4.pr_name, &p4.pr_stat);
+  }
+
+  if (cf.cf_ipv6 == true) {
+    log_stats(p6.pr_name, &p6.pr_stat);
+  }
 
   // Flush the standard output and error streams.
   retb = flush_report_stream(&cf);

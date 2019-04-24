@@ -60,13 +60,33 @@ parse_uint64(uint64_t* out,
 void
 parse_time_unit(uint64_t* mult, const char* unit)
 {
-  if (strcmp(unit, "ns") == 0) *mult = 1LL;
-  if (strcmp(unit, "us") == 0) *mult = 1000LL;
-  if (strcmp(unit, "ms") == 0) *mult = 1000LL * 1000;
-  if (strcmp(unit, "s")  == 0) *mult = 1000LL * 1000 * 1000;
-  if (strcmp(unit, "m")  == 0) *mult = 1000LL * 1000 * 1000 * 60;
-  if (strcmp(unit, "h")  == 0) *mult = 1000LL * 1000 * 1000 * 60 * 60;
-  if (strcmp(unit, "d")  == 0) *mult = 1000LL * 1000 * 1000 * 60 * 60 * 24;
+  if (strcmp(unit, "ns") == 0) {
+    *mult = 1LL;
+  }
+
+  if (strcmp(unit, "us") == 0) {
+    *mult = 1000LL;
+  }
+
+  if (strcmp(unit, "ms") == 0) {
+    *mult = 1000LL * 1000;
+  }
+
+  if (strcmp(unit, "s")  == 0) {
+    *mult = 1000LL * 1000 * 1000;
+  }
+
+  if (strcmp(unit, "m")  == 0) {
+    *mult = 1000LL * 1000 * 1000 * 60;
+  }
+
+  if (strcmp(unit, "h")  == 0) {
+    *mult = 1000LL * 1000 * 1000 * 60 * 60;
+  }
+
+  if (strcmp(unit, "d")  == 0) {
+    *mult = 1000LL * 1000 * 1000 * 60 * 60 * 24;
+  }
 }
 
 /// Find the multiplier for the selected memory unit for conversion to bytes.
@@ -76,13 +96,33 @@ parse_time_unit(uint64_t* mult, const char* unit)
 void
 parse_memory_unit(uint64_t* mult, const char* unit)
 {
-  if (strcasecmp(unit, "b")  == 0) *mult = 1LL;
-  if (strcasecmp(unit, "k")  == 0) *mult = 1024LL;
-  if (strcasecmp(unit, "kb") == 0) *mult = 1024LL;
-  if (strcasecmp(unit, "m")  == 0) *mult = 1024LL * 1024;
-  if (strcasecmp(unit, "mb") == 0) *mult = 1024LL * 1024;
-  if (strcasecmp(unit, "g")  == 0) *mult = 1024LL * 1024 * 1024;
-  if (strcasecmp(unit, "gb") == 0) *mult = 1024LL * 1024 * 1024;
+  if (strcasecmp(unit, "b")  == 0) {
+    *mult = 1LL;
+  }
+
+  if (strcasecmp(unit, "k")  == 0) {
+    *mult = 1024LL;
+  }
+
+  if (strcasecmp(unit, "kb") == 0) {
+    *mult = 1024LL;
+  }
+
+  if (strcasecmp(unit, "m")  == 0) {
+    *mult = 1024LL * 1024;
+  }
+
+  if (strcasecmp(unit, "mb") == 0) {
+    *mult = 1024LL * 1024;
+  }
+
+  if (strcasecmp(unit, "g")  == 0) {
+    *mult = 1024LL * 1024 * 1024;
+  }
+
+  if (strcasecmp(unit, "gb") == 0) {
+    *mult = 1024LL * 1024 * 1024;
+  }
 }
 
 /// Parse a unit and a scalar from a string.

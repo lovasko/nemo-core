@@ -92,8 +92,9 @@ receive_datagram(struct proto* pr,
     log(LL_WARN, true, "receiving has failed");
     pr->pr_stat.st_reni++;
 
-    if (cf->cf_err == true)
+    if (cf->cf_err == true) {
       return false;
+    }
   }
 
   // Convert the payload from its on-wire format.
@@ -151,8 +152,9 @@ send_datagram(struct proto* pr,
     log(LL_WARN, true, "unable to send datagram");
     pr->pr_stat.st_seni++;
 
-    if (cf->cf_err == true)
+    if (cf->cf_err == true) {
       return false;
+    }
   }
 
   // Verify the size of the sent datagram.
@@ -160,8 +162,9 @@ send_datagram(struct proto* pr,
     log(LL_WARN, false, "wrong sent payload size");
     pr->pr_stat.st_seni++;
 
-    if (cf->cf_err == true)
+    if (cf->cf_err == true) {
       return false;
+    }
   }
 
   return true;
@@ -221,8 +224,9 @@ handle_event(struct proto* pr,
   report_event(&pl, cf);
 
   // Do not respond if the monologue mode is turned on.
-  if (cf->cf_mono == true)
+  if (cf->cf_mono == true) {
     return true;
+  }
 
   // Send a response back.
   retb = send_datagram(pr, &pl, &addr, cf);

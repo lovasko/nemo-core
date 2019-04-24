@@ -17,12 +17,14 @@ void
 report_header(const struct config* cf)
 {
   // No output to be performed if the silent mode was requested.
-  if (cf->cf_sil == true)
+  if (cf->cf_sil == true) {
     return;
+  }
 
   // Binary mode has no header.
-  if (cf->cf_bin == true)
+  if (cf->cf_bin == true) {
     return;
+  }
 
   // Print the CSV header of the standard output.
   (void)printf("Type,ReqKey,ResKey,SeqNum,SeqLen,IPVer,Addr,Port,DepTTL,"
@@ -39,8 +41,9 @@ flush_report_stream(const struct config* cf)
   int reti;
 
   // No output was performed if the silent mode was requested.
-  if (cf->cf_sil == true)
+  if (cf->cf_sil == true) {
     return true;
+  }
 
   log(LL_INFO, false, "flushing standard output stream");
 

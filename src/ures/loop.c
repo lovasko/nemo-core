@@ -48,8 +48,13 @@ handle_interrupt(const struct proto* p4,
   // Print logging information and continue the process upon receiving SIGUSR1.
   if (susr1 == true) {
     log_config(cf);
-    if (cf->cf_ipv4 == true) log_stats(p4->pr_name, &p4->pr_stat);
-    if (cf->cf_ipv6 == true) log_stats(p6->pr_name, &p6->pr_stat);
+    if (cf->cf_ipv4 == true) {
+      log_stats(p4->pr_name, &p4->pr_stat);
+    }
+
+    if (cf->cf_ipv6 == true) {
+      log_stats(p6->pr_name, &p6->pr_stat);
+    }
 
     // Reset the signal indicator, so that following signal handling will avoid
     // the false positive.
@@ -113,8 +118,9 @@ respond_loop(struct proto* p4,
       // Check for interrupt (possibly due to a signal).
       if (errno == EINTR) {
         retb = handle_interrupt(p4, p6, cf);
-        if (retb == true)
+        if (retb == true) {
           continue;
+        }
 
         return false;
       }
@@ -128,8 +134,9 @@ respond_loop(struct proto* p4,
       reti = FD_ISSET(p4->pr_sock, &rfd);
       if (reti > 0) {
         retb = handle_event(p4, pins, npins, cf);
-        if (retb == false)
+        if (retb == false) {
           return false;
+        }
       }
     }
 
@@ -138,8 +145,9 @@ respond_loop(struct proto* p4,
       reti = FD_ISSET(p6->pr_sock, &rfd);
       if (reti > 0) {
         retb = handle_event(p6, pins, npins, cf);
-        if (retb == false)
+        if (retb == false) {
           return false;
+        }
       }
     }
   }

@@ -87,8 +87,9 @@ dispersed_round(struct proto* p4,
   // Issue all requests.
   for (i = 0; i < ntg; i++) {
     retb = contact_target(p4, p6, snum, &tg[i], cf);
-    if (retb == false)
+    if (retb == false) {
       return false;
+    }
 
     // Await events for the appropriate fraction of the round.
     retb = wait_for_events(p4, p6, part, cf);
@@ -125,8 +126,9 @@ grouped_round(struct proto* p4,
   // Issue all requests.
   for (i = 0; i < ntg; i++) {
     retb = contact_target(p4, p6, snum, &tg[i], cf);
-    if (retb == false)
+    if (retb == false) {
       return false;
+    }
   }
 
   // Await events for the remainder of the interval.

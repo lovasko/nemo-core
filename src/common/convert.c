@@ -74,12 +74,14 @@ fipv6(uint64_t* lo, uint64_t* hi, const struct in6_addr addr)
   uint8_t i;
 
   *lo = 0;
-  for (i = 0; i < 8; i++)
+  for (i = 0; i < 8; i++) {
     *lo |= (uint64_t)addr.s6_addr[i]     << (i * 8);
+  }
 
   *hi = 0;
-  for (i = 0; i < 8; i++)
+  for (i = 0; i < 8; i++) {
     *hi |= (uint64_t)addr.s6_addr[i + 8] << (i * 8);
+  }
 }
 
 /// Convert two 64-bit unsigned integers into the standard IPv6 address
@@ -93,9 +95,11 @@ tipv6(struct in6_addr* addr, const uint64_t lo, const uint64_t hi)
 {
   uint8_t i;
 
-  for (i = 0; i < 8; i++)
+  for (i = 0; i < 8; i++) {
     addr->s6_addr[i]     = (uint8_t)(lo >> (8 * i)) & 0xff;
+  }
 
-  for (i = 0; i < 8; i++)
+  for (i = 0; i < 8; i++) {
     addr->s6_addr[i + 8] = (uint8_t)(hi >> (8 * i)) & 0xff;
+  }
 }

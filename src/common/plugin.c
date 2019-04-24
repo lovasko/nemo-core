@@ -28,9 +28,11 @@ count_plugins(const char* so[])
 {
   uint64_t i;
 
-  for (i = 0; i < PLUG_MAX; i++)
-    if (so[i] == NULL)
+  for (i = 0; i < PLUG_MAX; i++) {
+    if (so[i] == NULL) {
       break;
+    }
+  }
 
   return i;
 }
@@ -217,8 +219,9 @@ start_plugins(struct plugin* pi, const uint64_t npi)
 
     // Close the appropriate end of the pipe in each process.
     retb = close_pipe_end(&pi[i]);
-    if (retb == false)
+    if (retb == false) {
       return false;
+    }
 
     // In case this code is executed in the child process start the main event
     // loop.
@@ -260,13 +263,14 @@ notify_plugins(const struct plugin* pi,
     retss = write(pi[i].pi_pipe[0], pl, sizeof(*pl));
 
     // Check for error.
-    if (retss == -1)
+    if (retss == -1) {
       log(LL_WARN, true, "unable to send payload to plugin %s", pi[i].pi_name);
+    }
 
     // Check whether all expected data was written to the pipe.
-    if (retss != (ssize_t)sizeof(*pl))
-      log(LL_WARN, false, "unable to send full payload to plugin %s",
-        pi[i].pi_name);
+    if (retss != (ssize_t)sizeof(*pl)) {
+      log(LL_WARN, false, "unable to send full payload to plugin %s", pi[i].pi_name);
+    }
   }
 }
 
@@ -309,8 +313,9 @@ terminate_plugins(const struct plugin* pi, const uint64_t npi)
   // a chance to perform an orderly clean-up.
   for (i = 0; i < npi; i++) {
     reti = close(pi[i].pi_pipe[1]);
-    if (reti == -1)
+    if (reti == -1) {
       log(LL_WARN, true, "unable to close a pipe");
+    }
   }
 
   // Once the pipe was closed, the main loop of the plugin process should come

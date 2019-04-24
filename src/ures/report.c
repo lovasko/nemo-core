@@ -24,12 +24,14 @@ void
 report_header(const struct config* cf)
 {
   // No output to be performed if the silent mode was requested.
-  if (cf->cf_sil == true)
+  if (cf->cf_sil == true) {
     return;
+  }
 
   // Binary mode has no header.
-  if (cf->cf_bin == true)
+  if (cf->cf_bin == true) {
     return;
+  }
 
   // Print the CSV header of the standard output.
   (void)printf("ReqKey,ResKey,SeqNum,SeqLen,IPVer,Addr,Port,DepTTL,ArrTTL,"
@@ -51,8 +53,9 @@ report_event(const struct payload* pl, const struct config* cf)
   struct payload plout;
 
   // No output to be performed if the silent mode was requested.
-  if (cf->cf_sil == true)
+  if (cf->cf_sil == true) {
     return;
+  }
 
   // Binary mode expects the payload in a on-wire encoding.
   if (cf->cf_bin == true) {
@@ -76,10 +79,11 @@ report_event(const struct payload* pl, const struct config* cf)
   }
 
   // If no TTL was received, report is as not available.
-  if (pl->pl_ttl2 == 0)
+  if (pl->pl_ttl2 == 0) {
     (void)strncpy(ttlstr, "N/A", 3);
-  else
+  } else {
     (void)snprintf(ttlstr, 4, "%" PRIu8, pl->pl_ttl2);
+  }
 
   (void)printf("%" PRIu64 ","   // ReqKey
                "%" PRIu64 ","   // ResKey
@@ -112,8 +116,9 @@ flush_report_stream(const struct config* cf)
   int reti;
 
   // No output was performed if the silent mode was requested.
-  if (cf->cf_sil == true)
+  if (cf->cf_sil == true) {
     return true;
+  }
 
   log(LL_INFO, false, "flushing standard output stream");
 

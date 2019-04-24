@@ -34,7 +34,7 @@
 static void
 print_usage(void)
 {
-  printf(
+  (void)printf(
     "About:\n"
     "  Unicast network responder.\n"
     "  Program version: %d.%d.%d\n"

@@ -115,8 +115,7 @@ resolve_name(struct target* tg,
   for (ai = ais; ai != NULL; ai = ai->ai_next) {
     // Verify that we are not exceeding the maximal number of targets.
     if (*tcnt == tmax) {
-      log(lvl, false, "reached maximum number of targets per name: %"
-        PRIu64, tmax);
+      log(lvl, false, "reached maximum number of targets per name: %" PRIu64, tmax);
 
       if (cf->cf_err == true) {
         freeaddrinfo(ais);
@@ -173,8 +172,7 @@ parse_target_string(struct target* tg,
   if (reti == 1) {
     // Verify that we accept IPv4 protocol addresses.
     if (cf->cf_ipv4 == false) {
-      log(LL_WARN, false, "target %s is a %s address, which is not selected",
-        tstr, "IPv4");
+      log(LL_WARN, false, "target %s is a %s address, which is not selected", tstr, "IPv4");
       return false;
     }
 
@@ -191,8 +189,7 @@ parse_target_string(struct target* tg,
   if (reti == 1) {
     // Verify that we accept IPv6 protocol addresses.
     if (cf->cf_ipv6 == false) {
-      log(LL_WARN, false, "target %s is a %s address, which is not selected",
-        tstr, "IPv6");
+      log(LL_WARN, false, "target %s is a %s address, which is not selected", tstr, "IPv6");
       return false;
     }
 

@@ -288,8 +288,7 @@ log_exit_details(const int ws)
 
   // Check whether it was killed by a signal.
   if (WIFSIGNALED(ws)) {
-    log(LL_DEBUG, false, "plugin killed by signal: %s",
-      strsignal(WTERMSIG(ws)));
+    log(LL_DEBUG, false, "plugin killed by signal: %s", strsignal(WTERMSIG(ws)));
     return;
   }
 }

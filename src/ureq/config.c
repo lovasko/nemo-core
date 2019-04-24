@@ -635,8 +635,6 @@ log_config(const struct config* cf)
   log(LL_DEBUG, false, "Time-To-Live: %" PRIu64, cf->cf_ttl);
   log(LL_DEBUG, false, "receive buffer size: %" PRIu64 " bytes", cf->cf_rbuf);
   log(LL_DEBUG, false, "send buffer size: %" PRIu64 " bytes", cf->cf_sbuf);
-  log(LL_DEBUG, false, "monologue mode: %s",
-    cf->cf_mono == true ? "yes" : "no");
-  log(LL_DEBUG, false, "binary report: %s",
-    cf->cf_bin == true ? "yes" : "no");
+  log(LL_DEBUG, false, "monologue mode: %s", cf->cf_mono == true ? "yes" : "no");
+  log(LL_DEBUG, false, "binary report: %s", cf->cf_bin == true ? "yes" : "no");
 }

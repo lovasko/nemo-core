@@ -151,8 +151,7 @@ create_socket6(struct proto* pr, const struct config* cf)
 
   // Set the outgoing Time-To-Live value.
   val = (int)cf->cf_ttl;
-  reti = setsockopt(pr->pr_sock, IPPROTO_IPV6, IPV6_UNICAST_HOPS, &val,
-    sizeof(val));
+  reti = setsockopt(pr->pr_sock, IPPROTO_IPV6, IPV6_UNICAST_HOPS, &val, sizeof(val));
   if (reti == -1) {
     log(LL_WARN, true, "unable to set time-to-live to %d", val);
     return false;
@@ -181,8 +180,7 @@ get_assigned_port(uint16_t* pn, const struct proto* pr)
   // Request the socket details.
   reti = getsockname(pr->pr_sock, (struct sockaddr*)&ss, &len);
   if (reti == -1) {
-    log(LL_WARN, true, "unable to obtain address of the %s socket",
-      pr->pr_name);
+    log(LL_WARN, true, "unable to obtain address of the %s socket", pr->pr_name);
     return false;
   }
   

@@ -86,7 +86,7 @@ respond_loop(struct proto* p4,
              const struct config* cf)
 {
   int reti;
-  int ndfs;
+  int nfds;
   bool retb;
   fd_set rfd;
   sigset_t mask;
@@ -99,11 +99,17 @@ respond_loop(struct proto* p4,
 
   // Add sockets to the event list.
   FD_ZERO(&rfd);
-  if (cf->cf_ipv4 == true) FD_SET(p4->pr_sock, &rfd);
-  if (cf->cf_ipv6 == true) FD_SET(p6->pr_sock, &rfd);
+  nfds = 3; //< Standard input, output, and error streams; plus one.
 
-  // Compute the file descriptor count.
-  ndfs = (cf->cf_ipv4 == true && cf->cf_ipv6 == true) ? 5 : 4;
+  if (cf->cf_ipv4 == true) {
+    FD_SET(p4->pr_sock, &rfd);
+    nfds++;
+  }
+
+  if (cf->cf_ipv6 == true) {
+    FD_SET(p6->pr_sock, &rfd);
+    nfds++;
+  }
 
   // Create the signal mask used for enabling signals during the pselect(2)
   // waiting.
@@ -113,7 +119,7 @@ respond_loop(struct proto* p4,
     log(LL_TRACE, false, "waiting for incoming datagrams");
 
     // Wait for incoming datagram events.
-    reti = pselect(ndfs, &rfd, NULL, NULL, NULL, &mask);
+    reti = pselect(nfds, &rfd, NULL, NULL, NULL, &mask);
     if (reti == -1) {
       // Check for interrupt (possibly due to a signal).
       if (errno == EINTR) {

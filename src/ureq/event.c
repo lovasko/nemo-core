@@ -129,15 +129,18 @@ prepare_file_set(fd_set* rfd,
                  const struct proto* p6,
                  const struct config* cf)
 {
-  // Add sockets to the event list.
   FD_ZERO(rfd);
-  if (cf->cf_ipv4 == true)
-    FD_SET(p4->pr_sock, rfd);
-  if (cf->cf_ipv6 == true)
-    FD_SET(p6->pr_sock, rfd);
+  *nfds = 3;
 
-  // Compute the file descriptor count.
-  *nfds = (cf->cf_ipv4 == true && cf->cf_ipv6 == true) ? 5 : 4;
+  if (cf->cf_ipv4 == true) {
+    FD_SET(p4->pr_sock, rfd);
+    (*nfds)++;
+  }
+
+  if (cf->cf_ipv6 == true) {
+    FD_SET(p6->pr_sock, rfd);
+    (*nfds)++;
+  }
 }
 
 /// Await and handle responses on both IPv4 and IPv6 sockets for a selected

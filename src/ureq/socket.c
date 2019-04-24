@@ -192,6 +192,7 @@ get_assigned_port(uint16_t* pn, const struct proto* pr)
     s4 = (struct sockaddr_in*)&ss;
     *pn = s4->sin_port;
   } 
+
   if (ss.ss_family == PF_INET6) {
     s6 = (struct sockaddr_in6*)&ss;
     *pn = s6->sin6_port;

@@ -92,15 +92,19 @@ print_usage(void)
 static bool 
 generate_key(uint64_t* key)
 {
+  char* path;
   uint64_t data;
   ssize_t retss;
   int reti;
   int dr;
 
+  // Use a non-blocking source.
+  path = "/dev/urandom";
+
   // Prepare the source of random data.
-  dr = open("/dev/urandom", O_RDONLY);
+  dr = open(path, O_RDONLY);
   if (dr == -1) {
-    log(LL_WARN, true, "unable to open file %s", "/dev/random");
+    log(LL_WARN, true, "unable to open file %s", path);
     return false;
   }
 
@@ -112,7 +116,7 @@ generate_key(uint64_t* key)
     // Close the random source.
     reti = close(dr);
     if (reti == -1) {
-      log(LL_WARN, true, "unable to close file %s", "/dev/random");
+      log(LL_WARN, true, "unable to close file %s", path);
     }
 
     return false;
@@ -121,7 +125,7 @@ generate_key(uint64_t* key)
   // Close the random source.
   reti = close(dr);
   if (reti == -1) {
-    log(LL_WARN, true, "unable to close file %s", "/dev/random");
+    log(LL_WARN, true, "unable to close file %s", path);
     return false;
   }
 

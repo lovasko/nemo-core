@@ -50,7 +50,7 @@ report_event(const struct payload* pl, const struct config* cf)
   struct in_addr a4;
   struct in6_addr a6;
   char ttlstr[8];
-  struct payload plout;
+  struct payload enc;
 
   // No output to be performed if the silent mode was requested.
   if (cf->cf_sil == true) {
@@ -59,10 +59,8 @@ report_event(const struct payload* pl, const struct config* cf)
 
   // Binary mode expects the payload in a on-wire encoding.
   if (cf->cf_bin == true) {
-    (void)memcpy(&plout, pl, sizeof(plout));
-    encode_payload(&plout);
-    (void)fwrite(&plout, sizeof(plout), 1, stdout);
-
+    encode_payload(&enc, pl);
+    (void)fwrite(&enc, sizeof(enc), 1, stdout);
     return;
   }
 

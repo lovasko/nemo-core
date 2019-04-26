@@ -68,6 +68,7 @@ receive_datagram(struct proto* pr,
                  struct msghdr* msg,
                  const struct config* cf)
 {
+  struct payload rec;
   struct iovec data;
   ssize_t n;
   bool retb;
@@ -75,8 +76,8 @@ receive_datagram(struct proto* pr,
   log(LL_TRACE, false, "receiving datagram");
 
   // Prepare payload data.
-  data.iov_base = pl;
-  data.iov_len  = sizeof(*pl);
+  data.iov_base = &rec;
+  data.iov_len  = sizeof(rec);
 
   // Prepare the message.
   msg->msg_name    = addr;
@@ -98,7 +99,7 @@ receive_datagram(struct proto* pr,
   }
 
   // Convert the payload from its on-wire format.
-  decode_payload(pl);
+  decode_payload(pl, &rec);
 
   // Verify the payload correctness.
   retb = verify_payload(&pr->pr_stat, n, pl, NEMO_PAYLOAD_TYPE_REQUEST);
@@ -126,12 +127,14 @@ send_datagram(struct proto* pr,
   ssize_t n;
   struct msghdr msg;
   struct iovec data;
+  struct payload enc;
 
   log(LL_TRACE, false, "sending datagram");
 
   // Prepare payload data.
-  data.iov_base = pl;
-  data.iov_len  = sizeof(*pl);
+  encode_payload(&enc, pl);
+  data.iov_base = &enc;
+  data.iov_len  = sizeof(enc);
 
   // Prepare the message.
   msg.msg_name       = addr;
@@ -141,9 +144,6 @@ send_datagram(struct proto* pr,
   msg.msg_control    = NULL;
   msg.msg_controllen = 0;
   msg.msg_flags      = 0;
-
-  // Convert the payload to its on-wire format.
-  encode_payload(pl);
 
   // Send the datagram.
   pr->pr_stat.st_sall++;
@@ -158,7 +158,7 @@ send_datagram(struct proto* pr,
   }
 
   // Verify the size of the sent datagram.
-  if ((size_t)n != sizeof(*pl)) {
+  if ((size_t)n != sizeof(enc)) {
     log(LL_WARN, false, "wrong sent payload size");
     pr->pr_stat.st_seni++;
 

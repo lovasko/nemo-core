@@ -52,8 +52,8 @@ struct payload {
   uint64_t pl_rtm2;   ///< System time of response.
 };
 
-void encode_payload(struct payload* pl);
-void decode_payload(struct payload* pl);
+void encode_payload(struct payload* dst, const struct payload* src);
+void decode_payload(struct payload* dst, const struct payload* src);
 bool verify_payload(struct stats* st,
                     const ssize_t n,
                     const struct payload* pl,

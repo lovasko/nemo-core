@@ -102,6 +102,7 @@ send_request(struct proto* pr,
              const struct config* cf)
 {
   struct payload pl;
+  struct payload enc;
   struct msghdr msg;
   struct iovec data;
   struct sockaddr_storage ss;
@@ -111,8 +112,10 @@ send_request(struct proto* pr,
   log(LL_TRACE, false, "sending a request");
 
   // Prepare payload data.
-  data.iov_base = &pl;
-  data.iov_len  = sizeof(pl);
+  fill_payload(&pl, tg, snum, pr, cf);
+  encode_payload(&enc, &pl);
+  data.iov_base = &enc;
+  data.iov_len  = sizeof(enc);
 
   // Prepare the message.
   set_address(&ss, tg, cf);
@@ -123,10 +126,6 @@ send_request(struct proto* pr,
   msg.msg_control    = NULL;
   msg.msg_controllen = 0;
   msg.msg_flags      = 0;
-
-  // Prepare the payload content.
-  fill_payload(&pl, tg, snum, pr, cf);
-  encode_payload(&pl);
 
   // Send the datagram.
   pr->pr_stat.st_sall++;
@@ -168,6 +167,7 @@ send_request(struct proto* pr,
 bool
 receive_response(struct payload* pl, struct proto* pr, const struct config* cf)
 {
+  struct payload inp;
   struct msghdr msg;
   ssize_t n;
   bool retb;
@@ -175,8 +175,8 @@ receive_response(struct payload* pl, struct proto* pr, const struct config* cf)
   struct sockaddr_storage addr;
 
   // Prepare payload data.
-  data.iov_base = pl;
-  data.iov_len  = sizeof(*pl);
+  data.iov_base = &inp;
+  data.iov_len  = sizeof(inp);
 
   // Prepare the message.
   (void)memset(&msg, 0, sizeof(msg));
@@ -199,7 +199,7 @@ receive_response(struct payload* pl, struct proto* pr, const struct config* cf)
   }
 
   // Convert the payload from its on-wire format.
-  decode_payload(pl);
+  decode_payload(pl, &inp);
 
   // Verify the payload correctness.
   retb = verify_payload(&pr->pr_stat, n, pl, NEMO_PAYLOAD_TYPE_RESPONSE);

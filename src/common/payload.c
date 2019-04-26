@@ -15,44 +15,46 @@
 /// multi-byte fields, as all single-byte fields are correctly interpreted on
 /// all endian encodings.
 ///
-/// @param[out] pl payload
+/// @param[in] dst encoded payload
+/// @param[in] src original payload
 void
-encode_payload(struct payload* pl)
+encode_payload(struct payload* dst, const struct payload* src)
 {
-  pl->pl_mgic  = htonl(pl->pl_mgic);
-  pl->pl_port  = htons(pl->pl_port);
-  pl->pl_snum  = htonll(pl->pl_snum);
-  pl->pl_slen  = htonll(pl->pl_slen);
-  pl->pl_laddr = htonll(pl->pl_laddr);
-  pl->pl_haddr = htonll(pl->pl_haddr);
-  pl->pl_reqk  = htonll(pl->pl_reqk);
-  pl->pl_resk  = htonll(pl->pl_resk);
-  pl->pl_mtm1  = htonll(pl->pl_mtm1);
-  pl->pl_rtm1  = htonll(pl->pl_rtm1);
-  pl->pl_mtm2  = htonll(pl->pl_mtm2);
-  pl->pl_rtm2  = htonll(pl->pl_rtm2);
+  dst->pl_mgic  = htonl(src->pl_mgic);
+  dst->pl_port  = htons(src->pl_port);
+  dst->pl_snum  = htonll(src->pl_snum);
+  dst->pl_slen  = htonll(src->pl_slen);
+  dst->pl_laddr = htonll(src->pl_laddr);
+  dst->pl_haddr = htonll(src->pl_haddr);
+  dst->pl_reqk  = htonll(src->pl_reqk);
+  dst->pl_resk  = htonll(src->pl_resk);
+  dst->pl_mtm1  = htonll(src->pl_mtm1);
+  dst->pl_rtm1  = htonll(src->pl_rtm1);
+  dst->pl_mtm2  = htonll(src->pl_mtm2);
+  dst->pl_rtm2  = htonll(src->pl_rtm2);
 }
 
 /// Decode the on-wire format of the payload. This function only deals with the
 /// multi-byte fields, as all single-byte fields are correctly interpreted on
 /// all endian encodings.
 ///
-/// @param[out] pl payload
+/// @param[in] dst decoded payload
+/// @param[in] src original payload
 void
-decode_payload(struct payload* pl)
+decode_payload(struct payload* dst, const struct payload* src)
 {
-  pl->pl_mgic  = ntohl(pl->pl_mgic);
-  pl->pl_port  = ntohs(pl->pl_port);
-  pl->pl_snum  = ntohll(pl->pl_snum);
-  pl->pl_slen  = ntohll(pl->pl_slen);
-  pl->pl_laddr = ntohll(pl->pl_laddr);
-  pl->pl_haddr = ntohll(pl->pl_haddr);
-  pl->pl_reqk  = ntohll(pl->pl_reqk);
-  pl->pl_resk  = ntohll(pl->pl_resk);
-  pl->pl_mtm1  = ntohll(pl->pl_mtm1);
-  pl->pl_rtm1  = ntohll(pl->pl_rtm1);
-  pl->pl_mtm2  = ntohll(pl->pl_mtm2);
-  pl->pl_rtm2  = ntohll(pl->pl_rtm2);
+  dst->pl_mgic  = ntohl(src->pl_mgic);
+  dst->pl_port  = ntohs(src->pl_port);
+  dst->pl_snum  = ntohll(src->pl_snum);
+  dst->pl_slen  = ntohll(src->pl_slen);
+  dst->pl_laddr = ntohll(src->pl_laddr);
+  dst->pl_haddr = ntohll(src->pl_haddr);
+  dst->pl_reqk  = ntohll(src->pl_reqk);
+  dst->pl_resk  = ntohll(src->pl_resk);
+  dst->pl_mtm1  = ntohll(src->pl_mtm1);
+  dst->pl_rtm1  = ntohll(src->pl_rtm1);
+  dst->pl_mtm2  = ntohll(src->pl_mtm2);
+  dst->pl_rtm2  = ntohll(src->pl_rtm2);
 }
 
 /// Verify the incoming payload for correctness.

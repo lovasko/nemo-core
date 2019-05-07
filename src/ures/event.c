@@ -9,7 +9,7 @@
 #include "common/convert.h"
 #include "common/log.h"
 #include "common/now.h"
-#include "common/ttl.h"
+#include "common/packet.h"
 #include "common/payload.h"
 #include "ures/funcs.h"
 #include "ures/types.h"
@@ -18,15 +18,12 @@
 /// Update payload with local diagnostic information.
 /// @return success/failure indication
 ///
-/// @param[out] pl  payload
-/// @param[in]  msg message header
-/// @param[in]  cf  configuration
-static bool
-update_payload(struct payload* pl, struct msghdr* msg, const struct config* cf)
+/// @param[in] pl  payload
+/// @param[in] ttl Time-To-Live value
+/// @param[in] cf  configuration
+static void 
+update_payload(struct payload* pl, const uint8_t ttl, const struct config* cf)
 {
-  int ttl;
-  bool retb;
-
   log(LL_TRACE, false, "updating payload");
 
   // Change the message type.
@@ -41,134 +38,10 @@ update_payload(struct payload* pl, struct msghdr* msg, const struct config* cf)
   // Obtain the current real-time clock value.
   pl->pl_rtm2 = real_now();
 
-  // Retrieve the received Time-To-Live value.
-  retb = retrieve_ttl(&ttl, msg);
-  if (retb == false) {
-    log(LL_WARN, false, "unable to extract IP Time-To-Live value");
-    pl->pl_ttl2 = 0;
-  } else {
-    pl->pl_ttl2 = (uint8_t)ttl;
-  }
-
-  return true;
+  // Provide the TTL upon receipt.
+  pl->pl_ttl2 = ttl;
 }
 
-/// Receive datagrams on both IPv4 and IPv6.
-/// @return success/failure indication
-///
-/// @param[out] pr   protocol connection
-/// @param[out] addr IPv4/IPv6 address
-/// @param[out] pl   payload
-/// @param[in]  msg  message headers
-/// @param[in]  cf   configuration
-static bool
-receive_datagram(struct proto* pr,
-                 struct sockaddr_storage* addr,
-                 struct payload* pl,
-                 struct msghdr* msg,
-                 const struct config* cf)
-{
-  struct payload rec;
-  struct iovec data;
-  ssize_t n;
-  bool retb;
-
-  log(LL_TRACE, false, "receiving datagram");
-
-  // Prepare payload data.
-  data.iov_base = &rec;
-  data.iov_len  = sizeof(rec);
-
-  // Prepare the message.
-  msg->msg_name    = addr;
-  msg->msg_namelen = sizeof(*addr);
-  msg->msg_iov     = &data;
-  msg->msg_iovlen  = 1;
-  msg->msg_flags   = 0;
-
-  // Receive the message and handle potential errors.
-  pr->pr_stat.st_rall++;
-  n = recvmsg(pr->pr_sock, msg, MSG_DONTWAIT | MSG_TRUNC);
-  if (n < 0) {
-    log(LL_WARN, true, "receiving has failed");
-    pr->pr_stat.st_reni++;
-
-    if (cf->cf_err == true) {
-      return false;
-    }
-  }
-
-  // Convert the payload from its on-wire format.
-  decode_payload(pl, &rec);
-
-  // Verify the payload correctness.
-  retb = verify_payload(&pr->pr_stat, n, pl, NEMO_PAYLOAD_TYPE_REQUEST);
-  if (retb == false) {
-    log(LL_WARN, false, "invalid payload content");
-    return false;
-  }
-
-  return true;
-}
-
-/// Send a payload to the defined address.
-/// @return success/failure indication
-///
-/// @param[out] pr   protocol connection
-/// @param[in]  pl   payload
-/// @param[in]  addr IPv4/IPv6 address
-/// @param[in]  cf   configuration
-static bool
-send_datagram(struct proto* pr,
-              struct payload* pl,
-              struct sockaddr_storage* addr,
-              const struct config* cf)
-{
-  ssize_t n;
-  struct msghdr msg;
-  struct iovec data;
-  struct payload enc;
-
-  log(LL_TRACE, false, "sending datagram");
-
-  // Prepare payload data.
-  encode_payload(&enc, pl);
-  data.iov_base = &enc;
-  data.iov_len  = sizeof(enc);
-
-  // Prepare the message.
-  msg.msg_name       = addr;
-  msg.msg_namelen    = sizeof(*addr);
-  msg.msg_iov        = &data;
-  msg.msg_iovlen     = 1;
-  msg.msg_control    = NULL;
-  msg.msg_controllen = 0;
-  msg.msg_flags      = 0;
-
-  // Send the datagram.
-  pr->pr_stat.st_sall++;
-  n = sendmsg(pr->pr_sock, &msg, MSG_DONTWAIT);
-  if (n < 0) {
-    log(LL_WARN, true, "unable to send datagram");
-    pr->pr_stat.st_seni++;
-
-    if (cf->cf_err == true) {
-      return false;
-    }
-  }
-
-  // Verify the size of the sent datagram.
-  if ((size_t)n != sizeof(enc)) {
-    log(LL_WARN, false, "wrong sent payload size");
-    pr->pr_stat.st_seni++;
-
-    if (cf->cf_err == true) {
-      return false;
-    }
-  }
-
-  return true;
-}
 
 /// Handle the event of an incoming datagram.
 /// @return success/failure indication
@@ -185,43 +58,33 @@ handle_event(struct proto* pr,
 {
   bool retb;
   struct sockaddr_storage addr;
-  struct payload pl;
-  struct msghdr msg;
-  uint8_t cdata[512];
+  struct payload hpl;
+  struct payload npl;
+  uint8_t ttl;
 
   log(LL_TRACE, false, "handling event on the %s socket", pr->pr_name);
 
-  // Assign a buffer for storing the control messages received as part of the
-  // datagram. This data is later passed to other functions for reporting the
-  // relevant data.
-  msg.msg_control    = cdata;
-  msg.msg_controllen = sizeof(cdata);
-
   // Receive a request.
-  retb = receive_datagram(pr, &addr, &pl, &msg, cf);
+  retb = receive_packet(pr, &addr, &hpl, &npl, &ttl, cf->cf_err);
   if (retb == false) {
     log(LL_WARN, false, "unable to receive datagram on the socket");
 
     // We do not continue with the response, given the receiving of the
-    // request has failed. If the op_err option was selected, all network
+    // request has failed. If the cf_err option was selected, all network
     // transmission errors should be treated as fatal. In order to propagate
-    // error, we need to return 'false', if op_err was 'true'. The same applies
+    // error, we need to return 'false', if cf_err was 'true'. The same applies
     // in the opposite case.
     return !cf->cf_err;
   }
 
   // Update payload.
-  retb = update_payload(&pl, &msg, cf);
-  if (retb == false) {
-    log(LL_WARN, false, "unable to update the payload");
-    return false;
-  }
+  update_payload(&hpl, ttl, cf);
 
   // Notify all attached plugins about the payload.
-  notify_plugins(pins, npins, &pl);
+  notify_plugins(pins, npins, &hpl);
 
   // Report the event as a entry in the CSV output.
-  report_event(&pl, cf);
+  report_event(&hpl, &npl, cf->cf_sil, cf->cf_bin);
 
   // Do not respond if the monologue mode is turned on.
   if (cf->cf_mono == true) {
@@ -229,7 +92,7 @@ handle_event(struct proto* pr,
   }
 
   // Send a response back.
-  retb = send_datagram(pr, &pl, &addr, cf);
+  retb = send_packet(pr, &hpl, addr, cf->cf_err);
   if (retb == false) {
     log(LL_WARN, false, "unable to send datagram on the socket");
 

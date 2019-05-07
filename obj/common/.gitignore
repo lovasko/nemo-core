@@ -2,7 +2,7 @@ convert.o
 log.o
 now.o
 parse.o
-payload.o
+packet.o
 plugin.o
 signal.o
 stats.o

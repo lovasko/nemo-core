@@ -33,15 +33,6 @@ void report_header(const struct config* cf);
 void report_event(const struct payload* pl, const struct config* cf);
 bool flush_report_stream(const struct config* cf);
 
-// Relay.
-bool send_request(struct proto* pr,
-                  const uint64_t snum,
-                  const struct target* tg,
-                  const struct config* cf);
-bool receive_response(struct payload* pl,
-                      struct proto* pr,
-                      const struct config* cf);
-
 // Round.
 bool dispersed_round(struct proto* p4,
                      struct proto* p6,

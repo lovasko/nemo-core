@@ -7,18 +7,14 @@
 #ifndef NEMO_COMMON_PAYLOAD_H
 #define NEMO_COMMON_PAYLOAD_H
 
-#include <stdbool.h>
 #include <stdint.h>
-#include <stddef.h>
-
-#include "common/stats.h"
 
 
-/// Message types.
+// Message types.
 #define NEMO_PAYLOAD_TYPE_RESPONSE 1
 #define NEMO_PAYLOAD_TYPE_REQUEST  2
 
-/// Constants.
+// Constants.
 #define NEMO_PAYLOAD_MAGIC 0x6e656d6f
 #define NEMO_PAYLOAD_VERSION        2
 
@@ -29,7 +25,7 @@
 #define NEMO_IP_VERSION_4 4
 #define NEMO_IP_VERSION_6 6
 
-// Diagnostic payload.
+// Payload.
 struct payload {
   uint32_t pl_mgic;   ///< Magic identifier.
   uint8_t  pl_fver;   ///< Format version.
@@ -51,12 +47,5 @@ struct payload {
   uint64_t pl_mtm2;   ///< Steady time of response.
   uint64_t pl_rtm2;   ///< System time of response.
 };
-
-void encode_payload(struct payload* dst, const struct payload* src);
-void decode_payload(struct payload* dst, const struct payload* src);
-bool verify_payload(struct stats* st,
-                    const ssize_t n,
-                    const struct payload* pl,
-                    const uint8_t et);
 
 #endif

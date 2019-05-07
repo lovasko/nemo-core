@@ -20,6 +20,7 @@
 #include "common/convert.h"
 #include "common/now.h"
 #include "common/signal.h"
+#include "common/packet.h"
 #include "ureq/funcs.h"
 #include "ureq/types.h"
 
@@ -36,13 +37,16 @@ handle_event(struct proto* p4, struct proto* p6, const fd_set* rfd, const struct
 {
   int reti;
   bool retb;
-  struct payload pl;
+  struct payload hpl;
+  struct payload npl;
+  struct sockaddr_storage addr;
+  uint8_t ttl;
 
   // Handle incoming response on the IPv4 socket.
   if (cf->cf_ipv4 == true) {
     reti = FD_ISSET(p4->pr_sock, rfd);
     if (reti > 0) {
-      retb = receive_response(&pl, p4, cf);
+      retb = receive_packet(p4, &addr, &hpl, &npl, &ttl, cf->cf_err);
       if (retb == false) {
         return false;
       }
@@ -53,7 +57,7 @@ handle_event(struct proto* p4, struct proto* p6, const fd_set* rfd, const struct
   if (cf->cf_ipv6 == true) {
     reti = FD_ISSET(p6->pr_sock, rfd);
     if (reti > 0) {
-      retb = receive_response(&pl, p6, cf);
+      retb = receive_packet(p6, &addr, &hpl, &npl, &ttl, cf->cf_err);
       if (retb == false) {
         return false;
       }

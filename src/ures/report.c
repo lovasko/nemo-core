@@ -41,26 +41,29 @@ report_header(const struct config* cf)
 /// Report the event of the incoming datagram by printing a CSV-formatted line
 /// to the standard output stream.
 ///
-/// @param[in] pl payload
-/// @param[in] cf configuration
+/// @param[in] hpl payload in host byte order
+/// @param[in] npl payload in network byte order
+/// @param[in] sil silent mode
+/// @param[in] bin binary mode
 void
-report_event(const struct payload* pl, const struct config* cf)
+report_event(const struct payload* hpl,
+             const struct payload* npl,
+             const bool sil,
+             const bool bin)
 {
   char addrstr[128];
   struct in_addr a4;
   struct in6_addr a6;
   char ttlstr[8];
-  struct payload enc;
 
   // No output to be performed if the silent mode was requested.
-  if (cf->cf_sil == true) {
+  if (sil == true) {
     return;
   }
 
   // Binary mode expects the payload in a on-wire encoding.
-  if (cf->cf_bin == true) {
-    encode_payload(&enc, pl);
-    (void)fwrite(&enc, sizeof(enc), 1, stdout);
+  if (bin == true) {
+    (void)fwrite(npl, sizeof(*npl), 1, stdout);
     return;
   }
 
@@ -68,19 +71,19 @@ report_event(const struct payload* pl, const struct config* cf)
   (void)memset(ttlstr,  '\0', sizeof(ttlstr));
 
   // Convert the IP address into a string.
-  if (pl->pl_pver == NEMO_IP_VERSION_4) {
-    a4.s_addr = (uint32_t)pl->pl_laddr;
+  if (hpl->pl_pver == NEMO_IP_VERSION_4) {
+    a4.s_addr = (uint32_t)hpl->pl_laddr;
     inet_ntop(AF_INET, &a4, addrstr, sizeof(addrstr));
   } else {
-    tipv6(&a6, pl->pl_laddr, pl->pl_haddr);
+    tipv6(&a6, hpl->pl_laddr, hpl->pl_haddr);
     inet_ntop(AF_INET6, &a6, addrstr, sizeof(addrstr));
   }
 
   // If no TTL was received, report is as not available.
-  if (pl->pl_ttl2 == 0) {
+  if (hpl->pl_ttl2 == 0) {
     (void)strncpy(ttlstr, "N/A", 3);
   } else {
-    (void)snprintf(ttlstr, 4, "%" PRIu8, pl->pl_ttl2);
+    (void)snprintf(ttlstr, 4, "%" PRIu8, hpl->pl_ttl2);
   }
 
   (void)printf("%" PRIu64 ","   // ReqKey
@@ -96,12 +99,12 @@ report_event(const struct payload* pl, const struct config* cf)
                "%" PRIu64 ","   // DepMonoTime
                "%" PRIu64 ","   // ArrRealTime
                "%" PRIu64 "\n", // ArrMonoTime
-               pl->pl_reqk, pl->pl_resk,
-               pl->pl_snum, pl->pl_slen,
-               pl->pl_pver, addrstr, pl->pl_port,
-               pl->pl_ttl1, ttlstr,
-               pl->pl_rtm1, pl->pl_mtm1,
-               pl->pl_rtm2, pl->pl_mtm2);
+               hpl->pl_reqk, hpl->pl_resk,
+               hpl->pl_snum, hpl->pl_slen,
+               hpl->pl_pver, addrstr, hpl->pl_port,
+               hpl->pl_ttl1, ttlstr,
+               hpl->pl_rtm1, hpl->pl_mtm1,
+               hpl->pl_rtm2, hpl->pl_mtm2);
 }
 
 /// Flush all data written to the standard output to their respective device.

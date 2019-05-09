@@ -223,7 +223,7 @@ option_e(struct config* cf, const char* in)
   return true;
 }
 
-/// Group
+/// Group issued requests each round.
 /// @return success/failure indication
 ///
 /// @param[out] cf configuration
@@ -254,7 +254,7 @@ option_h(struct config* cf, const char* in)
   return true;
 }
 
-/// Interval between rounds of issued payloads.
+/// Interval between rounds of issued requests.
 /// @return success/failure indication
 ///
 /// @param[out] cf configuration

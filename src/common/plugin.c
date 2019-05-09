@@ -171,6 +171,42 @@ close_pipe_end(const struct plugin* pin)
   return true;
 }
 
+/// Create a pipe for plugin communication.
+/// @return success/failure indication
+///
+/// @param[in] pi plugin
+static bool
+create_pipe(struct plugin* pi)
+{
+  int reti;
+  int fl;
+
+  // Create a pipe through which the processes will communicate.
+  reti = pipe(pi->pi_pipe);
+  if (reti == -1) {
+    log(LL_WARN, true, "unable to create a pipe");
+    return false;
+  }
+
+  // Obtain the file status flags of the writing end of the pipe.
+  fl = fcntl(pi->pi_pipe[0], F_GETFL);
+  if (fl == -1) {
+    log(LL_WARN, true, "unable to obtain file status flags for pipe");
+    return false;
+  }
+
+  // Set the writing end of the pipe to be non-blocking, so that a slow
+  // plugin does not block the main program (and other plugins).
+  fl |= O_NONBLOCK;
+  reti = fcntl(pi->pi_pipe[1], F_SETFL, fl);
+  if (reti == -1) {
+    log(LL_WARN, true, "unable to set the pipe to be non-blocking");
+    return false;
+  }
+
+  return false;
+}
+
 /// Start all plugins.
 /// @return success/failure indication
 ///
@@ -180,31 +216,13 @@ bool
 start_plugins(struct plugin* pi, const uint64_t npi)
 {
   uint64_t i;
-  int reti;
   bool retb;
-  int fl;
 
   for (i = 0; i < npi; i++) {
-    // Create a pipe through which the processes will communicate.
-    reti = pipe(pi[i].pi_pipe);
-    if (reti == -1) {
-      log(LL_WARN, true, "unable to create a pipe");
-      return false;
-    }
-
-    // Obtain the file status flags of the writing end of the pipe.
-    fl = fcntl(pi[i].pi_pipe[0], F_GETFL);
-    if (fl == -1) {
-      log(LL_WARN, true, "unable to obtain file status flags for pipe");
-      return false;
-    }
-
-    // Set the writing end of the pipe to be non-blocking, so that a slow
-    // plugin does not block the main program (and other plugins).
-    fl |= O_NONBLOCK;
-    reti = fcntl(pi[i].pi_pipe[0], F_SETFL, fl);
-    if (reti == -1) {
-      log(LL_WARN, true, "unable to set the pipe to be non-blocking");
+    // Create a communication channel.
+    retb = create_pipe(&pi[i]);
+    if (retb == false) {
+      log(LL_WARN, false, "unable to create a plugin channel");
       return false;
     }
 

@@ -34,7 +34,7 @@ report_header(const struct config* cf)
   }
 
   // Print the CSV header of the standard output.
-  (void)printf("ReqKey,ResKey,SeqNum,SeqLen,IPVer,Addr,Port,DepTTL,ArrTTL,"
+  (void)printf("Key,SeqNum,SeqLen,IPVer,Addr,Port,DepTTL,ArrTTL,"
                "DepRealTime,DepMonoTime,ArrRealTime,ArrMonoTime\n");
 }
 
@@ -86,8 +86,7 @@ report_event(const struct payload* hpl,
     (void)snprintf(ttlstr, 4, "%" PRIu8, hpl->pl_ttl2);
   }
 
-  (void)printf("%" PRIu64 ","   // ReqKey
-               "%" PRIu64 ","   // ResKey
+  (void)printf("%" PRIu64 ","   // Key
                "%" PRIu64 ","   // SeqNum
                "%" PRIu64 ","   // SeqLen
                "%" PRIu8  ","   // IPVer
@@ -99,8 +98,7 @@ report_event(const struct payload* hpl,
                "%" PRIu64 ","   // DepMonoTime
                "%" PRIu64 ","   // ArrRealTime
                "%" PRIu64 "\n", // ArrMonoTime
-               hpl->pl_reqk, hpl->pl_resk,
-               hpl->pl_snum, hpl->pl_slen,
+               hpl->pl_key, hpl->pl_snum, hpl->pl_slen,
                hpl->pl_pver, addrstr, hpl->pl_port,
                hpl->pl_ttl1, ttlstr,
                hpl->pl_rtm1, hpl->pl_mtm1,

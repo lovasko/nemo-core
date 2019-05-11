@@ -39,6 +39,7 @@
 #define DEF_SILENT         false      ///< Do not suppress reporting.
 #define DEF_BINARY         false      ///< CSV reporting by default.
 #define DEF_GROUP          false      ///< Do not group requests.
+#define DEF_KEY            0          ///< Issue promiscuous requests.
 
 /// Print the usage information to the standard output stream.
 static void
@@ -65,7 +66,7 @@ print_usage(void)
     "  -h      Print this help message.\n"
     "  -i DUR  Interval duration between published datagram rounds. (def=1s)\n"
     "  -j CNT  Upper limit on network target count. (def=%d)\n"
-    "  -k KEY  Key for the current run. (def=random)\n"
+    "  -k KEY  Key for the current run. (def=%d)\n"
     "  -m      Do not react to responses (monologue mode).\n"
     "  -n      Turn off colors in logging messages.\n"
     "  -r RBS  Receive memory buffer size.\n"
@@ -81,56 +82,9 @@ print_usage(void)
     NEMO_PAYLOAD_VERSION,
     DEF_TARGET_COUNT,
     DEF_COUNT,
+    DEF_KEY,
     DEF_UDP_PORT,
     DEF_TIME_TO_LIVE);
-}
-
-/// Generate a random key.
-/// @return success/failure indication
-///
-/// @param[out] key random 64-bit unsigned integer
-static bool 
-generate_key(uint64_t* key)
-{
-  char* path;
-  uint64_t data;
-  ssize_t retss;
-  int reti;
-  int dr;
-
-  // Use a non-blocking source.
-  path = "/dev/urandom";
-
-  // Prepare the source of random data.
-  dr = open(path, O_RDONLY);
-  if (dr == -1) {
-    log(LL_WARN, true, "unable to open file %s", path);
-    return false;
-  }
-
-  // Obtain a random key.
-  retss = read(dr, &data, sizeof(data));
-  if (retss != (ssize_t)sizeof(data)) {
-    log(LL_WARN, true, "unable to obtain random bytes");
-     
-    // Close the random source.
-    reti = close(dr);
-    if (reti == -1) {
-      log(LL_WARN, true, "unable to close file %s", path);
-    }
-
-    return false;
-  }
-
-  // Close the random source.
-  reti = close(dr);
-  if (reti == -1) {
-    log(LL_WARN, true, "unable to close file %s", path);
-    return false;
-  }
-
-  *key = data;
-  return true;
 }
 
 /// Select IPv4 protocol only.
@@ -433,7 +387,6 @@ static bool
 set_defaults(struct config* cf)
 {
   intmax_t i;
-  bool retb;
 
   for (i = 0; i < PLUG_MAX; i++) {
     cf->cf_pi[i] = NULL;
@@ -453,16 +406,11 @@ set_defaults(struct config* cf)
   cf->cf_sil  = DEF_SILENT;
   cf->cf_bin  = DEF_BINARY;
   cf->cf_grp  = DEF_GROUP;
+  cf->cf_key  = DEF_KEY;
   cf->cf_llvl = (log_lvl = DEF_LOG_LEVEL);
   cf->cf_lcol = (log_col = DEF_LOG_COLOR);
   cf->cf_ipv4 = false;
   cf->cf_ipv6 = false;
-
-  retb = generate_key(&cf->cf_key);
-  if (retb == false) {
-    log(LL_WARN, false, "unable to generate a random key");
-    return false;
-  }
 
   return true;
 }

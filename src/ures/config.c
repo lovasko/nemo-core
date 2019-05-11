@@ -29,6 +29,7 @@
 #define DEF_MONOLOGUE           false
 #define DEF_SILENT              false
 #define DEF_BINARY              false
+#define DEF_KEY                 0
 
 /// Print the usage information to the standard output stream.
 static void
@@ -50,7 +51,7 @@ print_usage(void)
     "  -b      Reporting data to be in binary format.\n"
     "  -e      Stop the process on first transmission error.\n"
     "  -h      Print this help message.\n"
-    "  -k KEY  Key for the current run. (def=random)\n"
+    "  -k KEY  Key for the current run. (def=%d)\n"
     "  -m      Disable responding (monologue mode).\n"
     "  -n      Turn off coloring in the logging output.\n"
     "  -p NUM  UDP port to use for all endpoints. (def=%d)\n"
@@ -63,6 +64,7 @@ print_usage(void)
     NEMO_RES_VERSION_MINOR,
     NEMO_RES_VERSION_PATCH,
     NEMO_PAYLOAD_VERSION,
+    DEF_KEY,
     DEF_UDP_PORT,
     DEF_TIME_TO_LIVE);
 }
@@ -289,54 +291,6 @@ option_v(struct config* cf, const char* in)
   return true;
 }
 
-/// Generate a random key.
-/// @return success/failure indication
-///
-/// @param[out] key random 64-bit unsigned integer
-static bool 
-generate_key(uint64_t* key)
-{
-  char* path;
-  uint64_t data;
-  ssize_t retss;
-  int reti;
-  int dr;
-
-  // Use non-blocking random source.
-  path = "/dev/urandom";
-
-  // Prepare the source of random data.
-  dr = open(path, O_RDONLY);
-  if (dr == -1) {
-    log(LL_WARN, true, "unable to open file %s", path);
-    return false;
-  }
-
-  // Obtain a random key.
-  retss = read(dr, &data, sizeof(data));
-  if (retss != (ssize_t)sizeof(data)) {
-    log(LL_WARN, true, "unable to obtain random bytes");
-     
-    // Close the random source.
-    reti = close(dr);
-    if (reti == -1) {
-      log(LL_WARN, true, "unable to close file %s", path);
-    }
-
-    return false;
-  }
-
-  // Close the random source.
-  reti = close(dr);
-  if (reti == -1) {
-    log(LL_WARN, true, "unable to close file %s", path);
-    return false;
-  }
-
-  *key = data;
-  return true;
-}
-
 /// Assign default values to all options.
 /// @return success/failure indication
 ///
@@ -345,7 +299,6 @@ static bool
 set_defaults(struct config* cf)
 {
   intmax_t i;
-  bool retb;
 
   for (i = 0; i < PLUG_MAX; i++) {
     cf->cf_plgs[i] = NULL;
@@ -363,12 +316,7 @@ set_defaults(struct config* cf)
   cf->cf_lcol = (log_col = DEF_LOG_COLOR);
   cf->cf_ipv4 = false;
   cf->cf_ipv6 = false;
-
-  retb = generate_key(&cf->cf_key);
-  if (retb == false) {
-    log(LL_WARN, false, "unable to generate a random key");
-    return false;
-  }
+  cf->cf_key  = DEF_KEY;
 
   return true;
 }

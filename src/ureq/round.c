@@ -36,7 +36,7 @@ fill_payload(struct payload *hpl,
   hpl->pl_ttl1  = (uint8_t)cf->cf_ttl;
   hpl->pl_snum  = snum;
   hpl->pl_slen  = cf->cf_cnt;
-  hpl->pl_reqk  = cf->cf_key;
+  hpl->pl_key   = cf->cf_key;
   hpl->pl_laddr = tg->tg_laddr;
   hpl->pl_haddr = tg->tg_haddr;
   hpl->pl_rtm1  = real_now();

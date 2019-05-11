@@ -132,7 +132,7 @@ read_loop(const struct plugin* pi)
     }
 
     // Execute the plugin event action based on the payload content.
-    pi->pi_evnt(pl.pl_reqk, pl.pl_reqk, pl.pl_reqk, pl.pl_reqk);
+    pi->pi_evnt(pl.pl_key, pl.pl_key, pl.pl_key, pl.pl_key);
   }
 }
 

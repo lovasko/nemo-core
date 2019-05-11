@@ -30,7 +30,7 @@ update_payload(struct payload* pl, const uint8_t ttl, const struct config* cf)
   pl->pl_type = NEMO_PAYLOAD_TYPE_RESPONSE;
 
   // Sign the payload.
-  pl->pl_resk = cf->cf_key;
+  pl->pl_key = cf->cf_key;
 
   // Obtain the current monotonic clock value.
   pl->pl_mtm2 = mono_now();
@@ -41,7 +41,6 @@ update_payload(struct payload* pl, const uint8_t ttl, const struct config* cf)
   // Provide the TTL upon receipt.
   pl->pl_ttl2 = ttl;
 }
-
 
 /// Handle the event of an incoming datagram.
 /// @return success/failure indication
@@ -77,9 +76,6 @@ handle_event(struct proto* pr,
     return !cf->cf_err;
   }
 
-  // Update payload.
-  update_payload(&hpl, ttl, cf);
-
   // Notify all attached plugins about the payload.
   notify_plugins(pins, npins, &hpl);
 
@@ -90,6 +86,15 @@ handle_event(struct proto* pr,
   if (cf->cf_mono == true) {
     return true;
   }
+
+  // Do not respond if a particular key is selected, and the requesters key
+  // does not match.
+  if (cf->cf_key != 0 && (hpl.pl_key != cf->cf_key)) {
+    return true;
+  }
+
+  // Update payload.
+  update_payload(&hpl, ttl, cf);
 
   // Send a response back.
   retb = send_packet(pr, &hpl, addr, cf->cf_err);

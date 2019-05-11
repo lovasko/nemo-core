@@ -16,14 +16,14 @@
 
 // Constants.
 #define NEMO_PAYLOAD_MAGIC 0x6e656d6f
-#define NEMO_PAYLOAD_VERSION        2
-
-// Memory size.
-#define NEMO_PAYLOAD_SIZE 96
+#define NEMO_PAYLOAD_VERSION        3
 
 // Internet protocol versions.
 #define NEMO_IP_VERSION_4 4
 #define NEMO_IP_VERSION_6 6
+
+// Memory size.
+#define NEMO_PAYLOAD_SIZE 88
 
 // Payload.
 struct payload {
@@ -40,8 +40,7 @@ struct payload {
   uint64_t pl_slen;   ///< Sequence length.
   uint64_t pl_laddr;  ///< IP address - low-bits.
   uint64_t pl_haddr;  ///< IP address - high-bits.
-  uint64_t pl_reqk;   ///< Requester unique key.
-  uint64_t pl_resk;   ///< Responder unique key.
+  uint64_t pl_key;    ///< Responder/requester key.
   uint64_t pl_mtm1;   ///< Steady time of request.
   uint64_t pl_rtm1;   ///< System time of request.
   uint64_t pl_mtm2;   ///< Steady time of response.

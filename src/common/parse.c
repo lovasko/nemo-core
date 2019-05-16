@@ -170,7 +170,7 @@ parse_scalar(uint64_t* out,
   int adv;
   char unit[3];
 
-  memset(unit, '\0', sizeof(unit));
+  (void)memset(unit, '\0', sizeof(unit));
 
   // Separate the scalar and the unit of the input string.
   n = sscanf(inp, "%" SCNu64 "%2s%n", &num, unit, &adv);

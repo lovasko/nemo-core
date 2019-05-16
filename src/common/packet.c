@@ -124,14 +124,14 @@ retrieve_ttl(uint8_t* ttl, struct msghdr* msg)
   for (cmsg = CMSG_FIRSTHDR(msg); cmsg != NULL; cmsg = CMSG_NXTHDR(msg, cmsg)) {
     // Check the IPv4 label.
     if (cmsg->cmsg_level == IPPROTO_IP && cmsg->cmsg_type == type4) {
-      memcpy(&val, CMSG_DATA(cmsg), sizeof(val));
+      (void)memcpy(&val, CMSG_DATA(cmsg), sizeof(val));
       *ttl = (uint8_t)val;
       return;
     }
 
     // Check the IPv6 label.
     if (cmsg->cmsg_level == IPPROTO_IPV6 && cmsg->cmsg_type == type6) {
-      memcpy(&val, CMSG_DATA(cmsg), sizeof(val));
+      (void)memcpy(&val, CMSG_DATA(cmsg), sizeof(val));
       *ttl = (uint8_t)val;
       return;
     }

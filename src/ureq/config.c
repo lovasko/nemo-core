@@ -234,7 +234,7 @@ option_j(struct config* cf, const char* in)
       / sizeof(struct target)) - 1);
 }
 
-/// Set a unique key to identify the flow.
+/// Set a unique key to identify the communication.
 /// @return success/failure indication
 ///
 /// @param[out] cf configuration

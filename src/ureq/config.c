@@ -65,7 +65,7 @@ print_usage(void)
     "  -e      Stop the process on first network error.\n"
     "  -g      Group requests at the start of each round.\n"
     "  -h      Print this help message.\n"
-    "  -i DUR  Interval duration between published datagram rounds. (def=1s)\n"
+    "  -i DUR  Minimal duration of a request round. (def=1s)\n"
     "  -j CNT  Upper limit on network target count. (def=%d)\n"
     "  -k KEY  Key for the current run. (def=%d)\n"
     "  -l LEN  Extended length of the payload. (def=%d)\n"

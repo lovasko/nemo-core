@@ -60,35 +60,35 @@ parse_uint64(uint64_t* out,
 void
 parse_time_unit(uint64_t* mult, const char* unit)
 {
-  if (strcmp(unit, "ns") == 0) {
+  if (strcasecmp(unit, "ns") == 0) {
     *mult = 1LL;
   }
 
-  if (strcmp(unit, "us") == 0) {
+  if (strcasecmp(unit, "us") == 0) {
     *mult = 1000LL;
   }
 
-  if (strcmp(unit, "ms") == 0) {
+  if (strcasecmp(unit, "ms") == 0) {
     *mult = 1000LL * 1000;
   }
 
-  if (strcmp(unit, "s")  == 0) {
+  if (strcasecmp(unit, "s")  == 0) {
     *mult = 1000LL * 1000 * 1000;
   }
 
-  if (strcmp(unit, "m")  == 0) {
+  if (strcasecmp(unit, "m")  == 0) {
     *mult = 1000LL * 1000 * 1000 * 60;
   }
 
-  if (strcmp(unit, "h")  == 0) {
+  if (strcasecmp(unit, "h")  == 0) {
     *mult = 1000LL * 1000 * 1000 * 60 * 60;
   }
 
-  if (strcmp(unit, "d")  == 0) {
+  if (strcasecmp(unit, "d")  == 0) {
     *mult = 1000LL * 1000 * 1000 * 60 * 60 * 24;
   }
 
-  if (strcmp(unit, "w")  == 0) {
+  if (strcasecmp(unit, "w")  == 0) {
     *mult = 1000LL * 1000 * 1000 * 60 * 60 * 24 * 7;
   }
 }

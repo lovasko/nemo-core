@@ -40,6 +40,7 @@
 #define DEF_BINARY         false      ///< CSV reporting by default.
 #define DEF_GROUP          false      ///< Do not group requests.
 #define DEF_KEY            0          ///< Issue promiscuous requests.
+#define DEF_LENGTH         NEMO_PAYLOAD_SIZE
 
 /// Print the usage information to the standard output stream.
 static void
@@ -67,6 +68,7 @@ print_usage(void)
     "  -i DUR  Interval duration between published datagram rounds. (def=1s)\n"
     "  -j CNT  Upper limit on network target count. (def=%d)\n"
     "  -k KEY  Key for the current run. (def=%d)\n"
+    "  -l LEN  Extended length of the payload. (def=%d)\n"
     "  -m      Do not react to responses (monologue mode).\n"
     "  -n      Turn off colors in logging messages.\n"
     "  -r RBS  Receive memory buffer size.\n"
@@ -83,6 +85,7 @@ print_usage(void)
     DEF_TARGET_COUNT,
     DEF_COUNT,
     DEF_KEY,
+    DEF_LENGTH,
     DEF_UDP_PORT,
     DEF_TIME_TO_LIVE);
 }
@@ -240,6 +243,33 @@ static bool
 option_k(struct config* cf, const char* in)
 {
   return parse_uint64(&cf->cf_key, in, 1, UINT64_MAX);
+}
+
+/// Overall length of the payload (includes mandatory and optional parts).
+/// @return success/failure indication
+///
+/// @param[in] cf configuration
+/// @param[in] in argument input
+static bool
+option_l(struct config* cf, const char* in)
+{
+  uint64_t len;
+  bool retb;
+
+  // Try to parse the length in bytes.
+  retb = parse_scalar(&len, in, "b", parse_memory_unit);
+  if (retb == false) {
+    return false;
+  }
+
+  // Ensure that the value falls within the accepted interval.
+  if (len < NEMO_PAYLOAD_SIZE || len > 65536) {
+    log(LL_WARN, false, "length must be between %d and %d", NEMO_PAYLOAD_SIZE, 64436);
+    return false;
+  }
+
+  cf->cf_len = len;
+  return true;
 }
 
 /// Enable monologue mode where no responses are being issued.
@@ -477,7 +507,7 @@ parse_config(struct config* cf, int argc, char* argv[])
   bool retb;
   uint64_t i;
   char optdsl[128];
-  struct option opts[21] = {
+  struct option opts[22] = {
     { '4',  false, option_4 },
     { '6',  false, option_6 },
     { 'a',  true , option_a },
@@ -489,6 +519,7 @@ parse_config(struct config* cf, int argc, char* argv[])
     { 'i',  true , option_i },
     { 'j',  true , option_j },
     { 'k',  true , option_k },
+    { 'l',  true , option_l },
     { 'm',  false, option_m },
     { 'n',  false, option_n },
     { 'p',  true , option_p },
@@ -504,7 +535,7 @@ parse_config(struct config* cf, int argc, char* argv[])
   log(LL_INFO, false, "parsing command-line options");
 
   (void)memset(optdsl, '\0', sizeof(optdsl));
-  generate_getopt_string(optdsl, opts, 21);
+  generate_getopt_string(optdsl, opts, 22);
 
   // Set optional arguments to sensible defaults.
   set_defaults(cf);
@@ -526,7 +557,7 @@ parse_config(struct config* cf, int argc, char* argv[])
     }
 
     // Find the relevant option.
-    for (i = 0; i < 21; i++) {
+    for (i = 0; i < 22; i++) {
       if (opts[i].op_name == (char)opt) {
         retb = opts[i].op_act(cf, optarg);
         if (retb == false) {

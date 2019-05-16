@@ -28,6 +28,7 @@ struct config {
   uint64_t    cf_key;          ///< Key of the current process.
   uint64_t    cf_port;         ///< UDP port for all endpoints.
   uint64_t    cf_rld;          ///< Name resolution refresh period.
+  uint64_t    cf_len;          ///< Overall payload length.
   uint8_t     cf_llvl;         ///< Notification verbosity level.
   bool        cf_lcol;         ///< Notification coloring policy.
   bool        cf_err;          ///< Process exit policy on publishing error.

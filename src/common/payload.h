@@ -16,7 +16,7 @@
 
 // Constants.
 #define NEMO_PAYLOAD_MAGIC 0x6e656d6f
-#define NEMO_PAYLOAD_VERSION        3
+#define NEMO_PAYLOAD_VERSION        4
 
 // Internet protocol versions.
 #define NEMO_IP_VERSION_4 4
@@ -35,7 +35,8 @@ struct payload {
   uint8_t  pl_ttl2;   ///< Time-To-Live when received by responder.
   uint8_t  pl_ttl3;   ///< Time-To-Live when sent from responder.
   uint8_t  pl_pver;   ///< IP protocol version.
-  uint8_t  pl_pad[4]; ///< Padding (unused).
+  uint16_t pl_len;    ///< Artificial payload length in bytes.
+  uint8_t  pl_pad[2]; ///< Padding (unused).
   uint64_t pl_snum;   ///< Sequence iteration number.
   uint64_t pl_slen;   ///< Sequence length.
   uint64_t pl_laddr;  ///< IP address - low-bits.

@@ -14,6 +14,10 @@
 #include "common/log.h"
 
 
+// This memory block is used to send and receive packets that are larger than
+// diagnostic payload.
+static uint8_t wrapper[65536];
+
 /// Encode the payload to the on-wire format. This function only deals with the
 /// multi-byte fields, as all single-byte fields are correctly interpreted on
 /// all endian encodings.
@@ -131,6 +135,8 @@ retrieve_ttl(uint8_t* ttl, struct msghdr* msg)
 /// Send a payload to a network address.
 /// @return success/failure indication
 ///
+/// @global wrapper
+///
 /// @param[in] pr   protocol connection
 /// @param[in] hpl  payload in host byte order
 /// @param[in] addr IPv4/IPv6 address
@@ -149,11 +155,15 @@ send_packet(struct proto* pr,
 
   log(LL_TRACE, false, "sending a packet");
 
-  // Prepare payload data.
+  // Prepare payload data for transport. First step is to encode the payload
+  // to ensure correct handling of endianness of the multi-byte integers.
+  // Second step consists of placing the encoded payload at start of the
+  // wrapper buffer to allow for artificially extending the payload.
   encode_payload(&npl, hpl);
+  (void)memcpy(wrapper, &npl, sizeof(npl));
   (void)memset(&iov, 0, sizeof(iov));
-  iov.iov_base = &npl;
-  iov.iov_len  = sizeof(npl);
+  iov.iov_base = wrapper;
+  iov.iov_len  = hpl->pl_len;
 
   // Prepare the message.
   (void)memset(&msg, 0, sizeof(msg));
@@ -177,7 +187,7 @@ send_packet(struct proto* pr,
   len = sendmsg(pr->pr_sock, &msg, MSG_DONTWAIT);
 
   // Verify if sending has completed successfully.
-  if (len == -1 || len != (ssize_t)sizeof(npl)) {
+  if (len == -1 || len != (ssize_t)hpl->pl_len) {
     log(lvl, true, "unable to send a payload");
     pr->pr_stat.st_seni++;
     return false;
@@ -188,6 +198,8 @@ send_packet(struct proto* pr,
 
 /// Receive datagrams on both IPv4 and IPv6.
 /// @return success/failure indication
+///
+/// @global wrapper
 ///
 /// @param[in]  pr   protocol connection
 /// @param[in]  addr IPv4/IPv6 address of the sender
@@ -210,12 +222,13 @@ receive_packet(struct proto* pr,
 	uint8_t cmsg[256];
   struct msghdr msg;
   struct iovec iov;
+  bool ctl;
 
   log(LL_TRACE, false, "receiving a packet");
 
   // Prepare payload data.
   (void)memset(&iov, 0, sizeof(iov));
-  iov.iov_base = npl;
+  iov.iov_base = wrapper;
   iov.iov_len  = sizeof(*npl);
 
   // Prepare the message.
@@ -246,23 +259,47 @@ receive_packet(struct proto* pr,
     return false;
   }
 
+  // Ensure that at least the base payload has arrived.
+  if (len < (ssize_t)sizeof(*npl)) {
+    log(lvl, false, "insufficient payload length");
+    pr->pr_stat.st_resz++;
+    return false;
+  }
+
 	// Check for received packet payload size.
-	if (len != (ssize_t)sizeof(*npl) || msg.msg_flags & MSG_TRUNC) {
+	if (len < (ssize_t)sizeof(*npl) || msg.msg_flags & MSG_TRUNC) {
 	  log(lvl, false, "wrong payload size, expected %zd, actual %zu", len, sizeof(*npl));
     pr->pr_stat.st_resz++;
     return false;
 	}
 
-	// Check for received packet control payload size.
+	// Check for received packet control payload size. Inability to receive the
+  // control data is not considered to be critical to the main purpose of the
+  // application.
+  ctl = true;
 	if (msg.msg_flags & MSG_CTRUNC) {
-	  log(LL_DEBUG, false, "control message truncated");
+	  log(LL_DEBUG, false, "control data was truncated");
+    ctl = false;
 	}
 
-  // Convert the payload from its on-wire format.
+  // Unpack the payload from the wrapper and convert the payload from its
+  // on-wire format.
+  (void)memcpy(&npl, wrapper, sizeof(npl));
   decode_payload(hpl, npl);
 
-	// Obtain the TTL/hops value.
-	retrieve_ttl(ttl, &msg);
+  // Now that the base part of the payload is decoded, we can examine whether
+  // the actual length of the datagram matches the expected length.
+  if (len != (ssize_t)hpl->pl_len) {
+	  log(lvl, false, "wrong payload size, expected %zd, actual %" PRIu64, len, hpl->pl_len);
+  }
+
+	// Obtain the TTL/hops value, if the control data was successfully received.
+  // If not, an invalid TTL/hops value of 0 is used.
+  if (ctl == true) {
+    retrieve_ttl(ttl, &msg);
+  } else {
+    *ttl = 0;   
+  }
 
   // Verify the payload correctness.
   retb = verify_payload(&pr->pr_stat, hpl);

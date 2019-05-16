@@ -51,7 +51,7 @@ print_usage(void)
     "  -b      Reporting data to be in binary format.\n"
     "  -e      Stop the process on first transmission error.\n"
     "  -h      Print this help message.\n"
-    "  -k KEY  Key for the current run. (def=%d)\n"
+    "  -k KEY  Unique key for identification of payloads.\n"
     "  -m      Disable responding (monologue mode).\n"
     "  -n      Turn off coloring in the logging output.\n"
     "  -p NUM  UDP port to use for all endpoints. (def=%d)\n"
@@ -64,7 +64,6 @@ print_usage(void)
     NEMO_RES_VERSION_MINOR,
     NEMO_RES_VERSION_PATCH,
     NEMO_PAYLOAD_VERSION,
-    DEF_KEY,
     DEF_UDP_PORT,
     DEF_TIME_TO_LIVE);
 }

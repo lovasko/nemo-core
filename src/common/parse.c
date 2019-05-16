@@ -87,6 +87,10 @@ parse_time_unit(uint64_t* mult, const char* unit)
   if (strcmp(unit, "d")  == 0) {
     *mult = 1000LL * 1000 * 1000 * 60 * 60 * 24;
   }
+
+  if (strcmp(unit, "w")  == 0) {
+    *mult = 1000LL * 1000 * 1000 * 60 * 60 * 24 * 7;
+  }
 }
 
 /// Find the multiplier for the selected memory unit for conversion to bytes.

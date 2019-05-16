@@ -19,9 +19,9 @@ bool parse_uint64(uint64_t* out,
 bool parse_scalar(uint64_t* out,
                   const char* inp,
                   const char* sun,
-                  void (*upf) (uint64_t*, const char*));
+                  bool (*upf) (uint64_t*, const char*));
 
-void parse_memory_unit(uint64_t* mult, const char* unit);
-void parse_time_unit(uint64_t* mult, const char* unit);
+bool parse_memory_unit(uint64_t* mult, const char* unit);
+bool parse_time_unit(uint64_t* mult, const char* unit);
 
 #endif

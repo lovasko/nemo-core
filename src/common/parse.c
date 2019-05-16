@@ -60,35 +60,53 @@ parse_uint64(uint64_t* out,
 void
 parse_time_unit(uint64_t* mult, const char* unit)
 {
-  if (strcasecmp(unit, "ns") == 0) {
+  int reti;
+
+  // Nanoseconds.
+  reti = strcasecmp(unit, "ns");
+  if (reti == 0) {
     *mult = 1LL;
   }
 
-  if (strcasecmp(unit, "us") == 0) {
+  // Microseconds.
+  reti = strcasecmp(unit, "us");
+  if (reti == 0) {
     *mult = 1000LL;
   }
 
-  if (strcasecmp(unit, "ms") == 0) {
+  // Milliseconds.
+  reti = strcasecmp(unit, "ms");
+  if (reti == 0) {
     *mult = 1000LL * 1000;
   }
 
-  if (strcasecmp(unit, "s")  == 0) {
+  // Seconds.
+  reti = strcasecmp(unit, "s");
+  if (reti == 0) {
     *mult = 1000LL * 1000 * 1000;
   }
 
-  if (strcasecmp(unit, "m")  == 0) {
+  // Minutes.
+  reti = strcasecmp(unit, "m");
+  if (reti == 0) {
     *mult = 1000LL * 1000 * 1000 * 60;
   }
 
-  if (strcasecmp(unit, "h")  == 0) {
+  // Hours.
+  reti = strcasecmp(unit, "h");
+  if (reti == 0) {
     *mult = 1000LL * 1000 * 1000 * 60 * 60;
   }
 
-  if (strcasecmp(unit, "d")  == 0) {
+  // Days.
+  reti = strcasecmp(unit, "d");
+  if (reti == 0) {
     *mult = 1000LL * 1000 * 1000 * 60 * 60 * 24;
   }
 
-  if (strcasecmp(unit, "w")  == 0) {
+  // Weeks.
+  reti = strcasecmp(unit, "w");
+  if (reti == 0) {
     *mult = 1000LL * 1000 * 1000 * 60 * 60 * 24 * 7;
   }
 }
@@ -100,31 +118,33 @@ parse_time_unit(uint64_t* mult, const char* unit)
 void
 parse_memory_unit(uint64_t* mult, const char* unit)
 {
-  if (strcasecmp(unit, "b")  == 0) {
+  int reti1;
+  int reti2;
+
+  // Bytes.
+  reti1 = strcasecmp(unit, "b");
+  if (reti1 == 0) {
     *mult = 1LL;
   }
 
-  if (strcasecmp(unit, "k")  == 0) {
+  // Kilobytes.
+  reti1 = strcasecmp(unit, "k");
+  reti2 = strcasecmp(unit, "kb");
+  if (reti1 == 0 || reti2 == 0) {
     *mult = 1024LL;
   }
 
-  if (strcasecmp(unit, "kb") == 0) {
-    *mult = 1024LL;
-  }
-
-  if (strcasecmp(unit, "m")  == 0) {
+  // Megabytes.
+  reti1 = strcasecmp(unit, "m");
+  reti2 = strcasecmp(unit, "mb");
+  if (reti1 == 0 || reti2 == 0) {
     *mult = 1024LL * 1024;
   }
 
-  if (strcasecmp(unit, "mb") == 0) {
-    *mult = 1024LL * 1024;
-  }
-
-  if (strcasecmp(unit, "g")  == 0) {
-    *mult = 1024LL * 1024 * 1024;
-  }
-
-  if (strcasecmp(unit, "gb") == 0) {
+  // Gigabytes.
+  reti1 = strcasecmp(unit, "g");
+  reti2 = strcasecmp(unit, "gb");
+  if (reti1 == 0 || reti2 == 0) {
     *mult = 1024LL * 1024 * 1024;
   }
 }
@@ -142,6 +162,7 @@ parse_scalar(uint64_t* out,
              const char* sun,
              void (*upf) (uint64_t*, const char*))
 {
+  size_t len;
   uint64_t num;
   uint64_t mult;
   uint64_t x;
@@ -164,7 +185,8 @@ parse_scalar(uint64_t* out,
   }
 
   // Verify that the full input string was parsed.
-  if (adv != (int)strlen(inp)) {
+  len = strlen(inp);
+  if (adv != (int)len) {
     log(LL_ERROR, false, "scalar string '%s' contains excess characters", inp);
     return false;
   }

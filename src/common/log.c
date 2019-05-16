@@ -47,7 +47,7 @@ append(char* out, const char* inp, const size_t cur, const size_t max)
   // Compute string lengths.
   rem = max - cur;
   len = strlen(inp);
-  act = len > rem ? len : rem;
+  act = len > rem ? rem : len;
 
   // Copy the input string.
   (void)strncpy(out + cur, inp, act);
@@ -125,7 +125,7 @@ highlight(char* out, const char* inp, const size_t len)
 
   // Ensure that the string ends with an escape code that negates all previous
   // effects in case of string truncation.
-  (void)append(out, "\x1b[0m", max, cur);
+  (void)append(out, "\x1b[0m", cur, max);
 }
 
 /// Issue a log line to the selected back-end service.

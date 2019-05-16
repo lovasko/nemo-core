@@ -18,17 +18,21 @@
 // diagnostic payload.
 static uint8_t wrapper[65536];
 
-/// Encode the payload to the on-wire format. This function only deals with the
-/// multi-byte fields, as all single-byte fields are correctly interpreted on
-/// all endian encodings.
+/// Encode the payload to the on-wire format.
 ///
 /// @param[in] dst encoded payload
 /// @param[in] src original payload
 static void
 encode_payload(struct payload* dst, const struct payload* src)
 {
+  // Copy the whole payload. This ensures that all single-byte fields are
+  // copied correctly, future-proofing the code for future field additions.
+  (void)memcpy(dst, src, sizeof(*src));
+
+  // Handle all multi-byte conversions into the network byte order.
   dst->pl_mgic  = htonl(src->pl_mgic);
   dst->pl_port  = htons(src->pl_port);
+  dst->pl_len   = htons(src->pl_len);
   dst->pl_snum  = htonll(src->pl_snum);
   dst->pl_slen  = htonll(src->pl_slen);
   dst->pl_laddr = htonll(src->pl_laddr);
@@ -40,17 +44,21 @@ encode_payload(struct payload* dst, const struct payload* src)
   dst->pl_rtm2  = htonll(src->pl_rtm2);
 }
 
-/// Decode the on-wire format of the payload. This function only deals with the
-/// multi-byte fields, as all single-byte fields are correctly interpreted on
-/// all endian encodings.
+/// Decode the on-wire format of the payload.
 ///
 /// @param[in] dst decoded payload
 /// @param[in] src original payload
 static void
 decode_payload(struct payload* dst, const struct payload* src)
 {
+  // Copy the whole payload. This ensures that all single-byte fields are
+  // copied correctly, future-proofing the code for future field additions.
+  (void)memcpy(dst, src, sizeof(*src));
+  
+  // Handle all multi-byte conversions into the host byte order.
   dst->pl_mgic  = ntohl(src->pl_mgic);
   dst->pl_port  = ntohs(src->pl_port);
+  dst->pl_len   = ntohs(src->pl_len);
   dst->pl_snum  = ntohll(src->pl_snum);
   dst->pl_slen  = ntohll(src->pl_slen);
   dst->pl_laddr = ntohll(src->pl_laddr);

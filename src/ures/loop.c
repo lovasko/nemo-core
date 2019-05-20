@@ -10,7 +10,9 @@
 #include <errno.h>
 #include <signal.h>
 
+#include "common/convert.h"
 #include "common/log.h"
+#include "common/now.h"
 #include "common/signal.h"
 #include "ures/funcs.h"
 #include "ures/types.h"
@@ -90,6 +92,10 @@ respond_loop(struct proto* p4,
   bool retb;
   fd_set rfd;
   sigset_t mask;
+  struct timespec tout;
+  struct timespec* ptout;
+  uint64_t lim;
+  uint64_t cur;
 
   log(LL_INFO, false, "starting the response loop");
   log_config(cf);
@@ -115,11 +121,30 @@ respond_loop(struct proto* p4,
   // waiting.
   create_signal_mask(&mask);
 
+  // Create the initial timeout.
+  lim = mono_now() + cf->cf_ito;
+
   while (true) {
+    // Compute the remaining time to wait for events.
+    cur = mono_now();
+
+    // Check whether the time is up.
+    if (cf->cf_ito != 0 && cur >= lim) {
+      break;
+    }
+
+    // Compute the timeout.
+    if (cf->cf_ito == 0) {
+      ptout = NULL;
+    } else {
+      fnanos(&tout, lim - cur);
+      ptout = &tout;
+    }
+
     log(LL_TRACE, false, "waiting for incoming datagrams");
 
     // Wait for incoming datagram events.
-    reti = pselect(nfds, &rfd, NULL, NULL, NULL, &mask);
+    reti = pselect(nfds, &rfd, NULL, NULL, ptout, &mask);
     if (reti == -1) {
       // Check for interrupt (possibly due to a signal).
       if (errno == EINTR) {
@@ -135,6 +160,12 @@ respond_loop(struct proto* p4,
       return false;
     }
 
+    // Stop the loop if the timeout was reached due to no incoming requests.
+    if (reti == 0) {
+      log(LL_WARN, false, "no incoming requests within time limit");
+      return true;
+    }
+
     // Handle incoming IPv4 datagrams.
     if (cf->cf_ipv4 == true) {
       reti = FD_ISSET(p4->pr_sock, &rfd);
@@ -143,6 +174,9 @@ respond_loop(struct proto* p4,
         if (retb == false) {
           return false;
         }
+
+        // Replenish the inactivity timeout.
+        lim = mono_now() + cf->cf_ito;
       }
     }
 

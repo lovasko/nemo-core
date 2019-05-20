@@ -30,6 +30,7 @@
 #define DEF_SILENT              false
 #define DEF_BINARY              false
 #define DEF_KEY                 0
+#define DEF_TIMEOUT             0
 
 /// Print the usage information to the standard output stream.
 static void
@@ -49,6 +50,7 @@ print_usage(void)
     "  -6      Use only the IPv6 protocol.\n"
     "  -a OBJ  Attach a plugin from a shared object file.\n"
     "  -b      Reporting data to be in binary format.\n"
+    "  -d DUR  Time-out for lack of incoming requests.\n"
     "  -e      Stop the process on first transmission error.\n"
     "  -h      Print this help message.\n"
     "  -k KEY  Unique key for identification of payloads.\n"
@@ -131,6 +133,17 @@ option_b(struct config* cf, const char* in)
   cf->cf_bin = true;
 
   return true;
+}
+
+/// Time-out of inactivity (no requests received).
+/// @return success/failure indication
+///
+/// @param[in] cf configuration
+/// @param[in] in argument input
+static bool
+option_d(struct config* cf, const char* in)
+{
+  return parse_scalar(&cf->cf_ito, in, "ns", parse_time_unit);
 }
 
 /// Terminate the process on first network-related error.
@@ -316,6 +329,7 @@ set_defaults(struct config* cf)
   cf->cf_ipv4 = false;
   cf->cf_ipv6 = false;
   cf->cf_key  = DEF_KEY;
+  cf->cf_ito  = DEF_TIMEOUT;
 
   return true;
 }
@@ -382,11 +396,12 @@ parse_config(struct config* cf, int argc, char* argv[])
   bool retb;
   uint64_t i;
   char optdsl[128];
-  struct option opts[15] = {
+  struct option opts[16] = {
     { '4',  false, option_4 },
     { '6',  false, option_6 },
     { 'a',  true , option_a },
     { 'b',  false, option_b },
+    { 'd',  true,  option_d },
     { 'e',  false, option_e },
     { 'h',  false, option_h },
     { 'k',  true , option_k },
@@ -403,7 +418,7 @@ parse_config(struct config* cf, int argc, char* argv[])
   log(LL_INFO, false, "parsing command-line options");
 
   (void)memset(optdsl, '\0', sizeof(optdsl));
-  generate_getopt_string(optdsl, opts, 15);
+  generate_getopt_string(optdsl, opts, 16);
 
   // Set optional arguments to sensible defaults.
   retb = set_defaults(cf);
@@ -429,7 +444,7 @@ parse_config(struct config* cf, int argc, char* argv[])
     }
 
     // Find the relevant option.
-    for (i = 0; i < 15; i++) {
+    for (i = 0; i < 16; i++) {
       if (opts[i].op_name == (char)opt) {
         retb = opts[i].op_act(cf, optarg);
         if (retb == false) {

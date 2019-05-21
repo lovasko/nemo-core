@@ -221,13 +221,13 @@ receive_packet(struct proto* pr,
                struct sockaddr_storage* addr,
                struct payload* hpl,
                struct payload* npl,
-							 uint8_t* ttl,
+               uint8_t* ttl,
                const bool err)
 {
   ssize_t len;
   bool retb;
   uint8_t lvl;
-	uint8_t cmsg[256];
+  uint8_t cmsg[256];
   struct msghdr msg;
   struct iovec iov;
   bool ctl;
@@ -245,9 +245,9 @@ receive_packet(struct proto* pr,
   msg.msg_namelen    = sizeof(*addr);
   msg.msg_iov        = &iov;
   msg.msg_iovlen     = 1;
-	msg.msg_control    = cmsg;
-	msg.msg_controllen = sizeof(cmsg);
-	msg.msg_flags      = 0;
+  msg.msg_control    = cmsg;
+  msg.msg_controllen = sizeof(cmsg);
+  msg.msg_flags      = 0;
 
   // Increase the seriousness of the incident in case we are going to fail.
   if (err == true) {
@@ -260,7 +260,7 @@ receive_packet(struct proto* pr,
   pr->pr_stat.st_rall++;
   len = recvmsg(pr->pr_sock, &msg, MSG_DONTWAIT | MSG_TRUNC);
 
-	// Check for errors during the receipt.
+  // Check for errors during the receipt.
   if (len < 0) {
     log(lvl, true, "receiving has failed");
     pr->pr_stat.st_reni++;
@@ -274,21 +274,21 @@ receive_packet(struct proto* pr,
     return false;
   }
 
-	// Check for received packet payload size.
-	if (len < (ssize_t)sizeof(*npl) || msg.msg_flags & MSG_TRUNC) {
-	  log(lvl, false, "wrong payload size, expected %zd, actual %zu", len, sizeof(*npl));
+  // Check for received packet payload size.
+  if (len < (ssize_t)sizeof(*npl) || msg.msg_flags & MSG_TRUNC) {
+    log(lvl, false, "wrong payload size, expected %zd, actual %zu", len, sizeof(*npl));
     pr->pr_stat.st_resz++;
     return false;
-	}
+  }
 
-	// Check for received packet control payload size. Inability to receive the
+  // Check for received packet control payload size. Inability to receive the
   // control data is not considered to be critical to the main purpose of the
   // application.
   ctl = true;
-	if (msg.msg_flags & MSG_CTRUNC) {
-	  log(LL_DEBUG, false, "control data was truncated");
+  if (msg.msg_flags & MSG_CTRUNC) {
+    log(LL_DEBUG, false, "control data was truncated");
     ctl = false;
-	}
+  }
 
   // Unpack the payload from the wrapper and convert the payload from its
   // on-wire format.
@@ -298,10 +298,10 @@ receive_packet(struct proto* pr,
   // Now that the base part of the payload is decoded, we can examine whether
   // the actual length of the datagram matches the expected length.
   if (len != (ssize_t)hpl->pl_len) {
-	  log(lvl, false, "wrong payload size, expected %zd, actual %" PRIu64, len, hpl->pl_len);
+    log(lvl, false, "wrong payload size, expected %zd, actual %" PRIu64, len, hpl->pl_len);
   }
 
-	// Obtain the TTL/hops value, if the control data was successfully received.
+  // Obtain the TTL/hops value, if the control data was successfully received.
   // If not, an invalid TTL/hops value of 0 is used.
   if (ctl == true) {
     retrieve_ttl(ttl, &msg);

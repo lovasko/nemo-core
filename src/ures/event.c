@@ -93,6 +93,12 @@ handle_event(struct proto* pr,
     return true;
   }
 
+  // Do not respond if the overall length of the packet does not match the
+  // expected length.
+  if (cf->cf_len != 0 && (hpl.pl_len != cf->cf_len)) {
+    return true;
+  }
+
   // Update payload.
   update_payload(&hpl, ttl, cf);
 

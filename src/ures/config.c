@@ -31,6 +31,7 @@
 #define DEF_BINARY              false
 #define DEF_KEY                 0
 #define DEF_TIMEOUT             0
+#define DEF_LENGTH              0
 
 /// Print the usage information to the standard output stream.
 static void
@@ -54,6 +55,7 @@ print_usage(void)
     "  -e      Stop the process on first transmission error.\n"
     "  -h      Print this help message.\n"
     "  -k KEY  Unique key for identification of payloads.\n"
+    "  -l LEN  Overall accepted payload length.\n"
     "  -m      Disable responding (monologue mode).\n"
     "  -n      Turn off coloring in the logging output.\n"
     "  -p NUM  UDP port to use for all endpoints. (def=%d)\n"
@@ -186,6 +188,33 @@ static bool
 option_k(struct config* cf, const char* in)
 {
   return parse_uint64(&cf->cf_key, in, 1, UINT64_MAX);
+}
+
+/// Overall length of the payload (includes mandatory and optional parts).
+/// @return success/failure indication
+///
+/// @param[in] cf configuration
+/// @param[in] in argument input
+static bool
+option_l(struct config* cf, const char* in)
+{
+  uint64_t len;
+  bool retb;
+
+  // Try to parse the length in bytes.
+  retb = parse_scalar(&len, in, "b", parse_memory_unit);
+  if (retb == false) {
+    return false;
+  }
+
+  // Ensure that the value falls within the accepted interval.
+  if (len < NEMO_PAYLOAD_SIZE || len > 65536) {
+    log(LL_WARN, false, "length must be between %d and %d", NEMO_PAYLOAD_SIZE, 64436);
+    return false;
+  }
+
+  cf->cf_len = len;
+  return true;
 }
 
 /// Enable monologue mode where no responses are being issued.
@@ -330,6 +359,7 @@ set_defaults(struct config* cf)
   cf->cf_ipv6 = false;
   cf->cf_key  = DEF_KEY;
   cf->cf_ito  = DEF_TIMEOUT;
+  cf->cf_len  = DEF_LENGTH;
 
   return true;
 }
@@ -396,7 +426,7 @@ parse_config(struct config* cf, int argc, char* argv[])
   bool retb;
   uint64_t i;
   char optdsl[128];
-  struct option opts[16] = {
+  struct option opts[17] = {
     { '4',  false, option_4 },
     { '6',  false, option_6 },
     { 'a',  true , option_a },
@@ -405,6 +435,7 @@ parse_config(struct config* cf, int argc, char* argv[])
     { 'e',  false, option_e },
     { 'h',  false, option_h },
     { 'k',  true , option_k },
+    { 'l',  true , option_l },
     { 'm',  false, option_m },
     { 'n',  false, option_n },
     { 'p',  true , option_p },
@@ -418,7 +449,7 @@ parse_config(struct config* cf, int argc, char* argv[])
   log(LL_INFO, false, "parsing command-line options");
 
   (void)memset(optdsl, '\0', sizeof(optdsl));
-  generate_getopt_string(optdsl, opts, 16);
+  generate_getopt_string(optdsl, opts, 17);
 
   // Set optional arguments to sensible defaults.
   retb = set_defaults(cf);
@@ -444,7 +475,7 @@ parse_config(struct config* cf, int argc, char* argv[])
     }
 
     // Find the relevant option.
-    for (i = 0; i < 16; i++) {
+    for (i = 0; i < 17; i++) {
       if (opts[i].op_name == (char)opt) {
         retb = opts[i].op_act(cf, optarg);
         if (retb == false) {
@@ -500,6 +531,7 @@ log_config(const struct config* cf)
   log(LL_DEBUG, false, "UDP port: %" PRIu64, cf->cf_port);
   log(LL_DEBUG, false, "unique key: %" PRIu64, cf->cf_key);
   log(LL_DEBUG, false, "Time-To-Live: %" PRIu64, cf->cf_ttl);
+  log(LL_DEBUG, false, "payload length: %" PRIu64 " bytes", cf->cf_len);
   log(LL_DEBUG, false, "receive buffer size: %" PRIu64 " bytes", cf->cf_rbuf);
   log(LL_DEBUG, false, "send buffer size: %" PRIu64 " bytes", cf->cf_sbuf);
   log(LL_DEBUG, false, "monologue mode: %s", mono);

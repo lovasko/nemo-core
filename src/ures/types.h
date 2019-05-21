@@ -22,6 +22,7 @@ struct config {
   uint64_t    cf_key;            ///< Unique key.
   uint64_t    cf_ttl;            ///< Time-To-Live for outgoing IP packets.
   uint64_t    cf_ito;            ///< Inactivity timeout.
+  uint64_t    cf_len;            ///< Overall packet length.
   bool        cf_err;            ///< Early exit on first network error.
   bool        cf_ipv4;           ///< IPv4-only traffic.
   bool        cf_ipv6;           ///< IPv6-only traffic.

@@ -87,7 +87,11 @@ resolve_name(struct target* tg,
   uint8_t lvl;
 
   // Prepare the logging level for network-related errors.
-  lvl = cf->cf_err == true ? LL_WARN : LL_DEBUG;
+  if (cf->cf_err == true) {
+    lvl = LL_WARN;
+  } else {
+    lvl = LL_DEBUG;
+  }
 
   // Prepare the look-up settings.
   (void)memset(&hint, 0, sizeof(hint));
@@ -281,7 +285,11 @@ load_targets(struct target* tg,
   uint64_t tall;
 
   // Prepare the logging level for network-related errors.
-  lvl = cf->cf_err == true ? LL_WARN : LL_DEBUG;
+  if (cf->cf_err == true) {
+    lvl = LL_WARN;
+  } else {
+    lvl = LL_DEBUG;
+  }
 
   // Traverse all targets listed in the configuration.
   tall = 0;

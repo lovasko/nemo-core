@@ -47,7 +47,11 @@ append(char* out, const char* inp, const size_t cur, const size_t max)
   // Compute string lengths.
   rem = max - cur;
   len = strlen(inp);
-  act = len > rem ? rem : len;
+  if (len > rem) {
+    act = rem;
+  } else {
+    act = len;
+  }
 
   // Copy the input string.
   (void)strncpy(out + cur, inp, act);

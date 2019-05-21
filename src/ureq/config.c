@@ -613,11 +613,26 @@ parse_config(struct config* cf, int argc, char* argv[])
 void
 log_config(const struct config* cf)
 {
+  const char* bin;
+  const char* mono;
+
+  if (cf->cf_mono == true) {
+    mono = "yes";
+  } else {
+    mono = "no";
+  }
+
+  if (cf->cf_bin == true) {
+    bin = "yes";
+  } else {
+    bin = "no";
+  }
+
   log(LL_DEBUG, false, "responder UDP port: %" PRIu64, cf->cf_port);
   log(LL_DEBUG, false, "unique key: %" PRIu64, cf->cf_key);
   log(LL_DEBUG, false, "Time-To-Live: %" PRIu64, cf->cf_ttl);
   log(LL_DEBUG, false, "receive buffer size: %" PRIu64 " bytes", cf->cf_rbuf);
   log(LL_DEBUG, false, "send buffer size: %" PRIu64 " bytes", cf->cf_sbuf);
-  log(LL_DEBUG, false, "monologue mode: %s", cf->cf_mono == true ? "yes" : "no");
-  log(LL_DEBUG, false, "binary report: %s", cf->cf_bin == true ? "yes" : "no");
+  log(LL_DEBUG, false, "monologue mode: %s", mono);
+  log(LL_DEBUG, false, "binary report: %s", bin);
 }

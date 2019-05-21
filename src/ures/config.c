@@ -145,7 +145,7 @@ option_b(struct config* cf, const char* in)
 static bool
 option_d(struct config* cf, const char* in)
 {
-  return parse_scalar(&cf->cf_ito, in, "ns", parse_time_unit);
+  return parse_scalar(&cf->cf_ito, in, "ns", 1, UINT64_MAX, parse_time_unit);
 }
 
 /// Terminate the process on first network-related error.
@@ -198,23 +198,7 @@ option_k(struct config* cf, const char* in)
 static bool
 option_l(struct config* cf, const char* in)
 {
-  uint64_t len;
-  bool retb;
-
-  // Try to parse the length in bytes.
-  retb = parse_scalar(&len, in, "b", parse_memory_unit);
-  if (retb == false) {
-    return false;
-  }
-
-  // Ensure that the value falls within the accepted interval.
-  if (len < NEMO_PAYLOAD_SIZE || len > 65536) {
-    log(LL_WARN, false, "length must be between %d and %d", NEMO_PAYLOAD_SIZE, 64436);
-    return false;
-  }
-
-  cf->cf_len = len;
-  return true;
+  return parse_scalar(&cf->cf_len, in, "b", NEMO_PAYLOAD_SIZE, 64436, parse_memory_unit);
 }
 
 /// Enable monologue mode where no responses are being issued.
@@ -278,7 +262,7 @@ option_q(struct config* cf, const char* in)
 static bool
 option_r(struct config* cf, const char* in)
 {
-  return parse_scalar(&cf->cf_rbuf, in, "b", parse_memory_unit);
+  return parse_scalar(&cf->cf_rbuf, in, "b", NEMO_PAYLOAD_SIZE, SIZE_MAX, parse_memory_unit);
 }
 
 /// Set the socket send buffer size.
@@ -289,7 +273,7 @@ option_r(struct config* cf, const char* in)
 static bool
 option_s(struct config* cf, const char* in)
 {
-  return parse_scalar(&cf->cf_sbuf, in, "b", parse_memory_unit);
+  return parse_scalar(&cf->cf_sbuf, in, "b", NEMO_PAYLOAD_SIZE, SIZE_MAX, parse_memory_unit);
 }
 
 /// Set the IP Time-To-Live value.

@@ -19,13 +19,35 @@
 #include "common/parse.h"
 
 
+/// Verify that the value belongs to the specified range.
+/// @return interval membership
+///
+/// @param[in] val value to check
+/// @param[in] min lower inclusive bound
+/// @param[in] max upper inclusive bound
+static bool
+check_bounds(const uint64_t val, const uint64_t min, const uint64_t max)
+{
+  if (val < min) {
+    log(LL_WARN, false, "value %" PRIu64 " is below lower inclusive bound of %" PRIu64, val, min);
+    return false;
+  }
+
+  if (val > max) {
+    log(LL_WARN, false, "value %" PRIu64 " is above upper inclusive bound of %" PRIu64, val, max);
+    return false;
+  }
+
+  return true;
+}
+
 /// Convert a string into an unsigned 64-bit integer.
 /// @return status code
 ///
 /// @param[out] out resulting integer
 /// @param[in]  str string
-/// @param[in]  min minimal allowed value (inclusive)
-/// @param[in]  max maximal allowed value (inclusive)
+/// @param[in]  min lower inclusive bound
+/// @param[in]  max upper inclusive bound
 bool
 parse_uint64(uint64_t* out,
              const char* str,
@@ -33,6 +55,7 @@ parse_uint64(uint64_t* out,
              const uint64_t max)
 {
   uintmax_t x;
+  bool retb;
 
   // Convert the input string into a number.
   errno = 0;
@@ -43,8 +66,8 @@ parse_uint64(uint64_t* out,
   }
 
   // Verify that the number belongs to the specified range.
-  if (x < (uintmax_t)min || x > (uintmax_t)max) {
-    log(LL_ERROR, false, "number %ju out of range " "(%" PRIu64 "..%" PRIu64 ")", x, min, max);
+  retb = check_bounds((uint64_t)x, min, max);
+  if (retb == false) {
     return false;
   }
 
@@ -168,15 +191,19 @@ parse_memory_unit(uint64_t* mult, const char* unit)
 /// Parse a unit and a scalar from a string.
 /// @return status code
 ///
-/// @param[out] out scalar in the smallest unit
-/// @param[in]  inp input string
-/// @param[in]  sun smallest unit name
-/// @param[in]  upf unit parser function
+/// @param[out] out  scalar in the smallest unit
+/// @param[in]  inp  input string
+/// @param[in]  name smallest unit name
+/// @param[in]  min lower inclusive bound
+/// @param[in]  max upper inclusive bound
+/// @param[in]  func unit parser function
 bool
 parse_scalar(uint64_t* out,
              const char* inp,
-             const char* sun,
-             bool (*upf) (uint64_t*, const char*))
+             const char* name,
+             const uint64_t min,
+             const uint64_t max,
+             bool (*func) (uint64_t*, const char*))
 {
   size_t len;
   uint64_t num;
@@ -209,7 +236,7 @@ parse_scalar(uint64_t* out,
   }
 
   // Parse the unit of the input string.
-  retb = upf(&mult, unit);
+  retb = func(&mult, unit);
   if (retb == false) {
     log(LL_ERROR, false, "unknown unit '%2s'", unit);
     return false;
@@ -218,7 +245,13 @@ parse_scalar(uint64_t* out,
   // Check for overflow of the value in the smallest unit.
   x = num * mult;
   if (x / mult != num) {
-    log(LL_ERROR, false, "quantity would overflow, maximum is %" PRIu64 "%s", UINT64_MAX, sun);
+    log(LL_ERROR, false, "quantity would overflow", name);
+    return false;
+  }
+
+  // Verify that the value falls within the selected bounds.
+  retb = check_bounds(x, min, max);
+  if (retb == false) {
     return false;
   }
 

@@ -219,7 +219,7 @@ option_h(struct config* cf, const char* in)
 static bool
 option_i(struct config* cf, const char* in)
 {
-  return parse_scalar(&cf->cf_int, in, "ns", parse_time_unit);
+  return parse_scalar(&cf->cf_int, in, "ns", 1, UINT64_MAX, parse_time_unit);
 }
 
 static bool
@@ -253,23 +253,7 @@ option_k(struct config* cf, const char* in)
 static bool
 option_l(struct config* cf, const char* in)
 {
-  uint64_t len;
-  bool retb;
-
-  // Try to parse the length in bytes.
-  retb = parse_scalar(&len, in, "b", parse_memory_unit);
-  if (retb == false) {
-    return false;
-  }
-
-  // Ensure that the value falls within the accepted interval.
-  if (len < NEMO_PAYLOAD_SIZE || len > 65536) {
-    log(LL_WARN, false, "length must be between %d and %d", NEMO_PAYLOAD_SIZE, 64436);
-    return false;
-  }
-
-  cf->cf_len = len;
-  return true;
+  return parse_scalar(&cf->cf_len, in, "b", NEMO_PAYLOAD_SIZE, 64436, parse_memory_unit);
 }
 
 /// Enable monologue mode where no responses are being issued.
@@ -333,7 +317,7 @@ option_q(struct config* cf, const char* in)
 static bool
 option_r(struct config* cf, const char* in)
 {
-  return parse_scalar(&cf->cf_rbuf, in, "b", parse_memory_unit);
+  return parse_scalar(&cf->cf_rbuf, in, "b", NEMO_PAYLOAD_SIZE, SIZE_MAX, parse_memory_unit);
 }
 
 /// Set the socket send buffer size.
@@ -344,7 +328,7 @@ option_r(struct config* cf, const char* in)
 static bool
 option_s(struct config* cf, const char* in)
 {
-  return parse_scalar(&cf->cf_sbuf, in, "b", parse_memory_unit);
+  return parse_scalar(&cf->cf_sbuf, in, "b", NEMO_PAYLOAD_SIZE, SIZE_MAX, parse_memory_unit);
 }
 
 /// Set the IP Time-To-Live value.
@@ -366,7 +350,7 @@ option_t(struct config* cf, const char* in)
 static bool
 option_u(struct config* cf, const char* in)
 {
-  return parse_scalar(&cf->cf_rld, in, "ns", parse_time_unit);
+  return parse_scalar(&cf->cf_rld, in, "ns", 1, UINT64_MAX, parse_time_unit);
 }
 
 /// Increase the logging verbosity.
@@ -406,7 +390,7 @@ option_v(struct config* cf, const char* in)
 static bool
 option_w(struct config* cf, const char* in)
 {
-  return parse_scalar(&cf->cf_wait, in, "ns", parse_time_unit);
+  return parse_scalar(&cf->cf_wait, in, "ns", 1, UINT64_MAX, parse_time_unit);
 }
 
 /// Assign default values to all options.

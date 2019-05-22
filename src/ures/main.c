@@ -23,8 +23,7 @@ main(int argc, char* argv[])
   struct config cf;
   struct plugin pins[PLUG_MAX];
   uint64_t npins;
-  struct proto p4;
-  struct proto p6;
+  struct proto pr;
 
   // Parse configuration from command-line options.
   retb = parse_config(&cf, argc, argv);
@@ -61,56 +60,41 @@ main(int argc, char* argv[])
     return EXIT_FAILURE;
   }
 
-  // Initialize the IPv4 connection.
+  // Initialize the IPv4 or IPv6 connection.
   if (cf.cf_ipv4 == true) {
-    reset_stats(&p4.pr_stat);
-    p4.pr_name = "IPv4";
+    reset_stats(&pr.pr_stat);
+    pr.pr_name = "IPv4";
 
-    retb = create_socket4(&p4, &cf);
+    retb = create_socket4(&pr, &cf);
     if (retb == false) {
-      log(LL_ERROR, false, "unable to create %s socket", p4.pr_name);
+      log(LL_ERROR, false, "unable to create %s socket", pr.pr_name);
       return EXIT_FAILURE;
     }
-  }
+  } else {
+    reset_stats(&pr.pr_stat);
+    pr.pr_name = "IPv6";
 
-  // Initialize the IPv6 connection.
-  if (cf.cf_ipv6 == true) {
-    reset_stats(&p6.pr_stat);
-    p6.pr_name = "IPv6";
-
-    retb = create_socket6(&p6, &cf);
+    retb = create_socket6(&pr, &cf);
     if (retb == false) {
-      log(LL_ERROR, false, "unable to create %s socket", p6.pr_name);
+      log(LL_ERROR, false, "unable to create %s socket", pr.pr_name);
       return EXIT_FAILURE;
     }
   }
 
   // Start the main responding loop.
-  retb = respond_loop(&p4, &p6, pins, npins, &cf);
+  retb = respond_loop(&pr, pins, npins, &cf);
   if (retb == false) {
     log(LL_ERROR, false, "responding loop has been terminated");
   }
 
-  // Delete sockets.
-  if (cf.cf_ipv4 == true) {
-    delete_socket(&p4);
-  }
-
-  if (cf.cf_ipv6 == true) {
-    delete_socket(&p6);
-  }
+  // Delete the socket.
+  delete_socket(&pr);
 
   // Terminate plugins.
   terminate_plugins(pins, npins);
 
   // Print final values of counters.
-  if (cf.cf_ipv4 == true) {
-    log_stats(p4.pr_name, &p4.pr_stat);
-  }
-
-  if (cf.cf_ipv6 == true) {
-    log_stats(p6.pr_name, &p6.pr_stat);
-  }
+  log_stats(pr.pr_name, &pr.pr_stat);
 
   // Flush the standard output and error streams.
   retb = flush_report_stream(&cf);

@@ -24,14 +24,13 @@ struct config {
   uint64_t    cf_ito;            ///< Inactivity timeout.
   uint64_t    cf_len;            ///< Overall packet length.
   bool        cf_err;            ///< Early exit on first network error.
-  bool        cf_ipv4;           ///< IPv4-only traffic.
-  bool        cf_ipv6;           ///< IPv6-only traffic.
+  bool        cf_ipv4;           ///< Usage of Internet Protocol version 4.
   uint8_t     cf_llvl;           ///< Minimal log level.
   bool        cf_lcol;           ///< Log coloring policy.
   bool        cf_mono;           ///< Monologue mode (no responses).
   bool        cf_sil;            ///< Standard output presence.
   bool        cf_bin;            ///< Binary reporting mode.
-  uint8_t     cf_pad[7];         ///< Padding (unused).
+  uint8_t     cf_pad;            ///< Padding (unused).
 };
 
 /// Command-line option.

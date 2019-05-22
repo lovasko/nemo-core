@@ -25,12 +25,10 @@
 /// @global sterm
 /// @global susr1
 ///
-/// @param[in] p4 IPv4 protocol
-/// @param[in] p6 IPv6 protocol
+/// @param[in] pr protocol
 /// @param[in] cf configuration
 static bool
-handle_interrupt(const struct proto* p4,
-                 const struct proto* p6,
+handle_interrupt(const struct proto* pr,
                  const struct config* cf)
 {
   log(LL_TRACE, false, "handling interrupt");
@@ -50,16 +48,10 @@ handle_interrupt(const struct proto* p4,
   // Print logging information and continue the process upon receiving SIGUSR1.
   if (susr1 == true) {
     log_config(cf);
-    if (cf->cf_ipv4 == true) {
-      log_stats(p4->pr_name, &p4->pr_stat);
-    }
+    log_stats(pr->pr_name, &pr->pr_stat);
 
-    if (cf->cf_ipv6 == true) {
-      log_stats(p6->pr_name, &p6->pr_stat);
-    }
-
-    // Reset the signal indicator, so that following signal handling will avoid
-    // the false positive.
+    // Reset the signal indicator, so that following signal handling will
+    // avoid the false positive.
     susr1 = false;
     return true;
   }
@@ -75,14 +67,12 @@ handle_interrupt(const struct proto* p4,
 /// @global sterm
 /// @global susr1
 ///
-/// @param[out] p4    IPv4 protocol
-/// @param[out] p6    IPv6 protocol
+/// @param[out] pr    protocol
 /// @param[in]  pins  array of plugins
 /// @param[in]  npins number of plugins
 /// @param[in]  cf    configuration
 bool
-respond_loop(struct proto* p4,
-             struct proto* p6,
+respond_loop(struct proto* pr,
              const struct plugin* pins,
              const uint64_t npins,
              const struct config* cf)
@@ -103,19 +93,12 @@ respond_loop(struct proto* p4,
   // Print the CSV header of the standard output.
   report_header(cf);
 
-  // Add sockets to the event list.
+  // Add sockets to the event list. The number of file descriptors include the
+  // standard input, output, and error streams; accompanied by the protocol
+  // socket, plus one.
+  nfds = 4;
   FD_ZERO(&rfd);
-  nfds = 3; //< Standard input, output, and error streams; plus one.
-
-  if (cf->cf_ipv4 == true) {
-    FD_SET(p4->pr_sock, &rfd);
-    nfds++;
-  }
-
-  if (cf->cf_ipv6 == true) {
-    FD_SET(p6->pr_sock, &rfd);
-    nfds++;
-  }
+  FD_SET(pr->pr_sock, &rfd);
 
   // Create the signal mask used for enabling signals during the pselect(2)
   // waiting.
@@ -148,7 +131,7 @@ respond_loop(struct proto* p4,
     if (reti == -1) {
       // Check for interrupt (possibly due to a signal).
       if (errno == EINTR) {
-        retb = handle_interrupt(p4, p6, cf);
+        retb = handle_interrupt(pr, cf);
         if (retb == true) {
           continue;
         }
@@ -167,28 +150,15 @@ respond_loop(struct proto* p4,
     }
 
     // Handle incoming IPv4 datagrams.
-    if (cf->cf_ipv4 == true) {
-      reti = FD_ISSET(p4->pr_sock, &rfd);
-      if (reti > 0) {
-        retb = handle_event(p4, pins, npins, cf);
-        if (retb == false) {
-          return false;
-        }
-
-        // Replenish the inactivity timeout.
-        lim = mono_now() + cf->cf_ito;
+    reti = FD_ISSET(pr->pr_sock, &rfd);
+    if (reti > 0) {
+      retb = handle_event(pr, pins, npins, cf);
+      if (retb == false) {
+        return false;
       }
-    }
 
-    // Handle incoming IPv6 datagrams.
-    if (cf->cf_ipv6 == true) {
-      reti = FD_ISSET(p6->pr_sock, &rfd);
-      if (reti > 0) {
-        retb = handle_event(p6, pins, npins, cf);
-        if (retb == false) {
-          return false;
-        }
-      }
+      // Replenish the inactivity timeout.
+      lim = mono_now() + cf->cf_ito;
     }
   }
 

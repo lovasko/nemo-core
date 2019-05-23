@@ -74,10 +74,10 @@ report_event(const struct payload* hpl,
   // Convert the IP address into a string.
   if (ipv4 == true) {
     a4.s_addr = (uint32_t)hpl->pl_laddr;
-    inet_ntop(AF_INET, &a4, addrstr, sizeof(addrstr));
+    (void)inet_ntop(AF_INET, &a4, addrstr, sizeof(addrstr));
   } else {
     tipv6(&a6, hpl->pl_laddr, hpl->pl_haddr);
-    inet_ntop(AF_INET6, &a6, addrstr, sizeof(addrstr));
+    (void)inet_ntop(AF_INET6, &a6, addrstr, sizeof(addrstr));
   }
 
   // If no TTL was received, report is as not available.

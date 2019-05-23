@@ -18,10 +18,6 @@
 #define NEMO_PAYLOAD_MAGIC 0x6e656d6f
 #define NEMO_PAYLOAD_VERSION        4
 
-// Internet protocol versions.
-#define NEMO_IP_VERSION_4 4
-#define NEMO_IP_VERSION_6 6
-
 // Memory size.
 #define NEMO_PAYLOAD_SIZE 88
 

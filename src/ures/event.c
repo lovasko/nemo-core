@@ -80,7 +80,7 @@ handle_event(struct proto* pr,
   notify_plugins(pins, npins, &hpl);
 
   // Report the event as a entry in the CSV output.
-  report_event(&hpl, &npl, cf->cf_sil, cf->cf_bin);
+  report_event(&hpl, &npl, cf->cf_sil, cf->cf_bin, cf->cf_ipv4);
 
   // Do not respond if the monologue mode is turned on.
   if (cf->cf_mono == true) {

@@ -49,7 +49,8 @@ void
 report_event(const struct payload* hpl,
              const struct payload* npl,
              const bool sil,
-             const bool bin)
+             const bool bin,
+             const bool ipv4)
 {
   char addrstr[128];
   struct in_addr a4;
@@ -71,7 +72,7 @@ report_event(const struct payload* hpl,
   (void)memset(ttlstr,  '\0', sizeof(ttlstr));
 
   // Convert the IP address into a string.
-  if (hpl->pl_pver == NEMO_IP_VERSION_4) {
+  if (ipv4 == true) {
     a4.s_addr = (uint32_t)hpl->pl_laddr;
     inet_ntop(AF_INET, &a4, addrstr, sizeof(addrstr));
   } else {

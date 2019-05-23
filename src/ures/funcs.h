@@ -38,7 +38,8 @@ void report_header(const struct config* cf);
 void report_event(const struct payload* hpl,
                   const struct payload* npl,
                   const bool sil,
-                  const bool bin);
+                  const bool bin,
+                  const bool ipv4);
 bool flush_report_stream(const struct config* cf);
 
 // Socket.

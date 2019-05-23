@@ -15,7 +15,6 @@ struct proto {
   struct stats pr_stat; ///< Event counter statistics.
   const char*  pr_name; ///< Human-readable name.
   int          pr_sock; ///< Network socket.
-  int          pr_ipv;  ///< Protocol version (4 or 6).
 };
 
 #endif

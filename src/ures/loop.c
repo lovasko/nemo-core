@@ -78,7 +78,6 @@ respond_loop(struct proto* pr,
              const struct config* cf)
 {
   int reti;
-  int nfds;
   bool retb;
   fd_set rfd;
   sigset_t mask;
@@ -93,10 +92,7 @@ respond_loop(struct proto* pr,
   // Print the CSV header of the standard output.
   report_header(cf);
 
-  // Add sockets to the event list. The number of file descriptors include the
-  // standard input, output, and error streams; accompanied by the protocol
-  // socket, plus one.
-  nfds = 4;
+  // Add the protocol socket to the read event list.
   FD_ZERO(&rfd);
   FD_SET(pr->pr_sock, &rfd);
 
@@ -126,8 +122,9 @@ respond_loop(struct proto* pr,
 
     log(LL_TRACE, false, "waiting for incoming datagrams");
 
-    // Wait for incoming datagram events.
-    reti = pselect(nfds, &rfd, NULL, NULL, ptout, &mask);
+    // Wait for incoming datagram events. The number of file descriptors is based on the fact
+    // that a standard process has three standard streams open, plus the socket, plus one.
+    reti = pselect(4, &rfd, NULL, NULL, ptout, &mask);
     if (reti == -1) {
       // Check for interrupt (possibly due to a signal).
       if (errno == EINTR) {

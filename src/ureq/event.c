@@ -116,12 +116,10 @@ wait_for_events(struct proto* pr, const uint64_t dur, const struct config* cf)
   uint64_t goal;
   struct timespec todo;
   fd_set rfd;
-  int nfds;
   sigset_t mask;
   bool retb;
 
   // Ensure that all relevant events are registered.
-  nfds = 4;
   FD_ZERO(&rfd);
   FD_SET(pr->pr_sock, &rfd);
 
@@ -139,8 +137,9 @@ wait_for_events(struct proto* pr, const uint64_t dur, const struct config* cf)
     // Compute the time left to wait for the responses.
     fnanos(&todo, goal - cur);
 
-    // Start waiting on events.
-    reti = pselect(nfds, &rfd, NULL, NULL, &todo, &mask);
+    // Start waiting on events. The number of file descriptors is based on the fact
+    // that the process is expected to have three standard streams open, plus socket, plus one.
+    reti = pselect(4, &rfd, NULL, NULL, &todo, &mask);
     if (reti == -1) {
       // Check for interrupt (possibly due to a signal).
       if (errno == EINTR) {

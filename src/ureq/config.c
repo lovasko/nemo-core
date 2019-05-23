@@ -41,6 +41,7 @@
 #define DEF_GROUP          false      ///< Do not group requests.
 #define DEF_KEY            0          ///< Issue promiscuous requests.
 #define DEF_LENGTH         NEMO_PAYLOAD_SIZE
+#define DEF_PROTO_VERSION_4 true
 
 /// Print the usage information to the standard output stream.
 static void
@@ -59,8 +60,7 @@ print_usage(void)
     "  target  IPv4/IPv6 address or hostname\n\n"
 
     "Options:\n"
-    "  -4      Use only the IPv4 protocol.\n"
-    "  -6      Use only the IPv6 protocol.\n"
+    "  -6      Use the IPv6 protocol.\n"
     "  -c CNT  Number of requests to issue. (def=%d)\n"
     "  -e      Stop the process on first network error.\n"
     "  -g      Group requests at the start of each round.\n"
@@ -90,20 +90,6 @@ print_usage(void)
     DEF_TIME_TO_LIVE);
 }
 
-/// Select IPv4 protocol only.
-/// @return success/failure indication
-///
-/// @param[out] cf configuration
-/// @param[in]  in argument input (unused)
-static bool
-option_4(struct config* cf, const char* in)
-{
-  (void)in;
-  cf->cf_ipv4 = true;
-
-  return true;
-}
-
 /// Select IPv6 protocol only.
 /// @return success/failure indication
 ///
@@ -113,7 +99,7 @@ static bool
 option_6(struct config* cf, const char* in)
 {
   (void)in;
-  cf->cf_ipv6 = true;
+  cf->cf_ipv4 = false;
 
   return true;
 }
@@ -423,30 +409,7 @@ set_defaults(struct config* cf)
   cf->cf_key  = DEF_KEY;
   cf->cf_llvl = (log_lvl = DEF_LOG_LEVEL);
   cf->cf_lcol = (log_col = DEF_LOG_COLOR);
-  cf->cf_ipv4 = false;
-  cf->cf_ipv6 = false;
-
-  return true;
-}
-
-/// Sanitize the IPv4/IPv6 options.
-/// @return success/failure indication
-///
-/// @param[out] cf configuration
-static bool
-organize_protocols(struct config* cf)
-{
-  // Check whether two exclusive modes were selected.
-  if (cf->cf_ipv4 == true && cf->cf_ipv6 == true) {
-    log(LL_WARN, false, "options -4 and -6 are mutually exclusive");
-    return false;
-  }
-
-  // If no restrictions on the IP version were set, enable both versions.
-  if (cf->cf_ipv4 == false && cf->cf_ipv6 == false) {
-    cf->cf_ipv4 = true;
-    cf->cf_ipv6 = true;
-  }
+  cf->cf_ipv4 = DEF_PROTO_VERSION_4;
 
   return true;
 }
@@ -491,8 +454,7 @@ parse_config(struct config* cf, int argc, char* argv[])
   bool retb;
   uint64_t i;
   char optdsl[128];
-  struct option opts[22] = {
-    { '4',  false, option_4 },
+  struct option opts[21] = {
     { '6',  false, option_6 },
     { 'a',  true , option_a },
     { 'b',  false, option_b },
@@ -519,7 +481,7 @@ parse_config(struct config* cf, int argc, char* argv[])
   log(LL_INFO, false, "parsing command-line options");
 
   (void)memset(optdsl, '\0', sizeof(optdsl));
-  generate_getopt_string(optdsl, opts, 22);
+  generate_getopt_string(optdsl, opts, 21);
 
   // Set optional arguments to sensible defaults.
   set_defaults(cf);
@@ -541,7 +503,7 @@ parse_config(struct config* cf, int argc, char* argv[])
     }
 
     // Find the relevant option.
-    for (i = 0; i < 22; i++) {
+    for (i = 0; i < 21; i++) {
       if (opts[i].op_name == (char)opt) {
         retb = opts[i].op_act(cf, optarg);
         if (retb == false) {
@@ -575,11 +537,6 @@ parse_config(struct config* cf, int argc, char* argv[])
 
   for (opt = optind; opt < argc; opt++) {
     cf->cf_tg[opt - optind] = argv[opt];
-  }
-
-  retb = organize_protocols(cf);
-  if (retb == false) {
-    return false;
   }
 
   // Assign the logging settings.

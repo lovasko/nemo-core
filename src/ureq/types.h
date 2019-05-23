@@ -36,8 +36,7 @@ struct config {
   bool        cf_sil;          ///< Suppress reporting output.
   bool        cf_bin;          ///< Binary reporting mode.
   bool        cf_grp;          ///< Group requests at the beginning of a round.
-  bool        cf_ipv4;         ///< IPv4-only mode.
-  bool        cf_ipv6;         ///< IPv6-only mode.
+  bool        cf_ipv4;         ///< Usage of Internet Protocol version 4.
 };
 
 /// Command-line option.
@@ -53,8 +52,6 @@ struct target {
   const char* tg_name;   ///< Domain name.
   uint64_t    tg_laddr;  ///< Low address bits.
   uint64_t    tg_haddr;  ///< High address bits.
-  uint8_t     tg_ipv;    ///< IP address version.
-  uint8_t     tg_pad[7]; ///< Padding (unused).
 };
 
 #endif

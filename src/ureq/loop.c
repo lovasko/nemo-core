@@ -33,14 +33,10 @@
 ///
 /// @global shup
 ///
-/// @param[in] p4 IPv4 protocol connection
-/// @param[in] p6 IPv6 protocol connection
+/// @param[in] pr protocol
 /// @param[in] cf configuration
 bool
-request_loop(struct proto* p4,
-             struct proto* p6,
-             struct target* tg,
-             const struct config* cf)
+request_loop(struct proto* pr, struct target* tg, const struct config* cf)
 {
   uint64_t i;
   uint64_t ntg;
@@ -92,12 +88,12 @@ request_loop(struct proto* p4,
 
     // Select the appropriate type of issuing requests in the round.
     if (cf->cf_grp == true) {
-      retb = grouped_round(p4, p6, tg, ntg, i, cf);
+      retb = grouped_round(pr, tg, ntg, i, cf);
       if (retb == false) {
         return false;
       }
     } else {
-      retb = dispersed_round(p4, p6, tg, ntg, i, cf);
+      retb = dispersed_round(pr, tg, ntg, i, cf);
       if (retb == false) {
         return false;
       }
@@ -107,7 +103,7 @@ request_loop(struct proto* p4,
   // Await events after issuing all requests. The intention is to wait for
   // potential responses to the last few requests.
   log(LL_TRACE, false, "waiting for final events");
-  retb = wait_for_events(p4, p6, cf->cf_wait, cf);
+  retb = wait_for_events(pr, cf->cf_wait, cf);
   if (retb == false) {
     log(LL_WARN, false, "unable to wait for final events");
     return false;

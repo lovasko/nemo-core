@@ -19,8 +19,7 @@ main(int argc, char* argv[])
 {
   struct target* tg;
   struct config cf;
-  struct proto p4;
-  struct proto p6;
+  struct proto pr;
   bool retb;
 
   // Parse command-line options.
@@ -44,31 +43,23 @@ main(int argc, char* argv[])
     return EXIT_FAILURE;
   }
 
-  // Initialize the IPv4 connection.
+  // Initialize the IPv4 or IPv6 protocols.
   if (cf.cf_ipv4 == true) {
-    reset_stats(&p4.pr_stat);
-    p4.pr_name = "IPv4";
-    p4.pr_ipv  = 4;
-
-    retb = create_socket4(&p4, &cf);
+    pr.pr_name = "IPv4";
+    retb = create_socket4(&pr, &cf);
     if (retb == false) {
-      log(LL_ERROR, false, "unable to create %s socket", p4.pr_name);
+      log(LL_ERROR, false, "unable to create %s socket", pr.pr_name);
+      return EXIT_FAILURE;
+    }
+  } else {
+    pr.pr_name = "IPv6";
+    retb = create_socket6(&pr, &cf);
+    if (retb == false) {
+      log(LL_ERROR, false, "unable to create %s socket", pr.pr_name);
       return EXIT_FAILURE;
     }
   }
-
-  // Initialize the IPv6 connection.
-  if (cf.cf_ipv6 == true) {
-    reset_stats(&p6.pr_stat);
-    p6.pr_name = "IPv6";
-    p6.pr_ipv  = 6;
-
-    retb = create_socket6(&p6, &cf);
-    if (retb == false) {
-      log(LL_ERROR, false, "unable to create %s socket", p6.pr_name);
-      return EXIT_FAILURE;
-    }
-  }
+  reset_stats(&pr.pr_stat);
 
   // Allocate the targets.
   tg = calloc((size_t)cf.cf_ntg, sizeof(*tg));
@@ -78,9 +69,9 @@ main(int argc, char* argv[])
   }
 
   // Start issuing requests and waiting for responses.
-  retb = request_loop(&p4, &p6, tg, &cf);
+  retb = request_loop(&pr, tg, &cf);
   if (retb == false) {
-    log(LL_ERROR, false, "the request loop has ended unexpectedly");
+    log(LL_ERROR, false, "the request loop has terminated");
     return EXIT_FAILURE;
   }
 

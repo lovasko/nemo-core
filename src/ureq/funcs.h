@@ -17,16 +17,10 @@ bool parse_config(struct config* cf, int argc, char* argv[]);
 void log_config(const struct config* cf);
 
 // Event.
-bool wait_for_events(struct proto* p4,
-                     struct proto* p6,
-                     const uint64_t dur,
-                     const struct config* cf);
+bool wait_for_events(struct proto* pr, const uint64_t dur, const struct config* cf);
 
 // Loop.
-bool request_loop(struct proto* p4,
-                  struct proto* p6,
-                  struct target* tg,
-                  const struct config* cf);
+bool request_loop(struct proto* pr, struct target* tg, const struct config* cf);
 
 // Report.
 void report_header(const struct config* cf);
@@ -34,14 +28,12 @@ void report_event(const struct payload* pl, const struct config* cf);
 bool flush_report_stream(const struct config* cf);
 
 // Round.
-bool dispersed_round(struct proto* p4,
-                     struct proto* p6,
+bool dispersed_round(struct proto* pr,
                      const struct target* tg,
                      const uint64_t ntg,
                      const uint64_t snum,
                      const struct config* cf);
-bool grouped_round(struct proto* p4,
-                   struct proto* p6,
+bool grouped_round(struct proto* pr,
                    const struct target* tg,
                    const uint64_t ntg,
                    const uint64_t snum,
@@ -54,7 +46,5 @@ bool get_assigned_port(uint16_t* pn, const struct proto* pr);
 void log_socket_port(const struct proto* pr);
 
 // Target.
-void log_targets(const struct target tg[], const uint64_t cnt);
-bool load_targets(struct target* tg,
-                  uint64_t* cnt,
-                  const struct config* cf);
+void log_targets(const struct target tg[], const uint64_t cnt, const struct config* cf);
+bool load_targets(struct target* tg, uint64_t* cnt, const struct config* cf);

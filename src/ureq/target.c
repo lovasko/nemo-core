@@ -47,7 +47,6 @@ ipv6_part(const uint8_t* ab)
 static void
 read_target4(struct target* tg, const struct in_addr* a4)
 {
-  tg->tg_ipv   = NEMO_IP_VERSION_4;
   tg->tg_laddr = (uint64_t)a4->s_addr;
   tg->tg_haddr = (uint64_t)0;
 }
@@ -59,7 +58,6 @@ read_target4(struct target* tg, const struct in_addr* a4)
 static void
 read_target6(struct target* tg, const struct in6_addr* a6)
 {
-  tg->tg_ipv   = NEMO_IP_VERSION_6;
   tg->tg_laddr = ipv6_part(&a6->s6_addr[0]);
   tg->tg_haddr = ipv6_part(&a6->s6_addr[7]);
 }
@@ -97,16 +95,21 @@ resolve_name(struct target* tg,
   (void)memset(&hint, 0, sizeof(hint));
   hint.ai_flags    = 0;
   hint.ai_socktype = SOCK_DGRAM;
-  hint.ai_family   = AF_UNSPEC;
   hint.ai_protocol = 0;
+
+  // Select address family type.
+  if (cf->cf_ipv4 == true) {
+    hint.ai_family = AF_INET;
+  } else {
+    hint.ai_family = AF_INET6;
+  }
 
   // Resolve the domain name to a list of address information.
   reti = getaddrinfo(name, NULL, &hint, &ais);
   if (reti != 0) {
     // Due to the getaddrinfo(3) function not using errno, we have to replicate
     // the expected error format this way.
-    (void)snprintf(estr, sizeof(estr), "unable to resolve name '%%s': %s",
-      gai_strerror(reti));
+    (void)snprintf(estr, sizeof(estr), "unable to resolve name '%%s': %s", gai_strerror(reti));
     log(lvl, false, estr, name);
 
     if (cf->cf_err == true) {
@@ -129,18 +132,15 @@ resolve_name(struct target* tg,
       }
     }
 
-    // Convert the address to a IPv4 target.
-    if (cf->cf_ipv4 == true && ai->ai_family == AF_INET) {
+    // Convert the IP address into a target.
+    if (cf->cf_ipv4 == true) {
       read_target4(&tg[*tcnt], &((struct sockaddr_in*)ai->ai_addr)->sin_addr);
-      tg[*tcnt].tg_name = name;
-      (*tcnt)++;
+    } else {
+      read_target6(&tg[*tcnt], &((struct sockaddr_in6*)ai->ai_addr)->sin6_addr);
     }
 
-    // Convert the address to a IPv6 target.
-    if (cf->cf_ipv6 == true && ai->ai_family == AF_INET6) {
-      read_target6(&tg[*tcnt], &((struct sockaddr_in6*)ai->ai_addr)->sin6_addr);
-      (*tcnt)++;
-    }
+    tg[*tcnt].tg_name = name;
+    (*tcnt)++;
   }
 
   freeaddrinfo(ais);
@@ -192,7 +192,7 @@ parse_target_string(struct target* tg,
   reti = inet_pton(AF_INET6, tstr, &a6);
   if (reti == 1) {
     // Verify that we accept IPv6 protocol addresses.
-    if (cf->cf_ipv6 == false) {
+    if (cf->cf_ipv4 == true) {
       log(LL_WARN, false, "target %s is a %s address, which is not selected", tstr, "IPv6");
       return false;
     }
@@ -329,8 +329,9 @@ load_targets(struct target* tg,
 ///
 /// @param[in] tg  array of targets
 /// @param[in] cnt number of targets
+/// @param[in] cf  configuration
 void
-log_targets(const struct target tg[], const uint64_t cnt)
+log_targets(const struct target tg[], const uint64_t cnt, const struct config* cf)
 {
   uint64_t i;
   struct in_addr a4;
@@ -338,14 +339,11 @@ log_targets(const struct target tg[], const uint64_t cnt)
   char str[INET6_ADDRSTRLEN];
 
   for (i = 0; i < cnt; i++) {
-    // Handle the IPv4 case.
-    if (tg[i].tg_ipv == NEMO_IP_VERSION_4) {
+    // Convert the address into a string.
+    if (cf->cf_ipv4 == true) {
       a4.s_addr = (uint32_t)tg[i].tg_laddr;
       (void)inet_ntop(AF_INET, &a4, str, sizeof(str));
-    }
-
-    // Handle the IPv6 case.
-    if (tg[i].tg_ipv == NEMO_IP_VERSION_6) {
+    } else {
       tipv6(&a6, tg[i].tg_laddr, tg[i].tg_haddr);
       (void)inet_ntop(AF_INET6, &a6, str, sizeof(str));
     }

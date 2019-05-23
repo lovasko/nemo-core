@@ -28,12 +28,11 @@
 /// Handle a network event by attempting to receive responses on all available sockets.
 /// @return success/failure indication
 ///
-/// @param[out] p4  IPv4 connection
-/// @param[out] p6  IPv6 connection
+/// @param[out] pr  protocol
 /// @param[in]  rfd read file descriptors
 /// @param[in]  cf  configuration
 static bool
-handle_event(struct proto* p4, struct proto* p6, const fd_set* rfd, const struct config* cf)
+handle_event(struct proto* pr, const fd_set* rfd, const struct config* cf)
 {
   int reti;
   bool retb;
@@ -42,27 +41,16 @@ handle_event(struct proto* p4, struct proto* p6, const fd_set* rfd, const struct
   struct sockaddr_storage addr;
   uint8_t ttl;
 
-  // Handle incoming response on the IPv4 socket.
-  if (cf->cf_ipv4 == true) {
-    reti = FD_ISSET(p4->pr_sock, rfd);
-    if (reti > 0) {
-      retb = receive_packet(p4, &addr, &hpl, &npl, &ttl, cf->cf_err);
-      if (retb == false) {
-        return false;
-      }
+  reti = FD_ISSET(pr->pr_sock, rfd);
+  if (reti > 0) {
+    retb = receive_packet(pr, &addr, &hpl, &npl, &ttl, cf->cf_err);
+    if (retb == false) {
+      return false;
     }
   }
 
-  // Handle incoming response on the IPv6 socket.
-  if (cf->cf_ipv6 == true) {
-    reti = FD_ISSET(p6->pr_sock, rfd);
-    if (reti > 0) {
-      retb = receive_packet(p6, &addr, &hpl, &npl, &ttl, cf->cf_err);
-      if (retb == false) {
-        return false;
-      }
-    }
-  }
+  // TODO report
+  // TODO notify plugins
 
   return true;
 }
@@ -74,13 +62,10 @@ handle_event(struct proto* p4, struct proto* p6, const fd_set* rfd, const struct
 /// @global sterm
 /// @global susr1
 ///
-/// @param[in] p4 IPv4 protocol
-/// @param[in] p6 IPv6 protocol
+/// @param[in] pr protocol
 /// @param[in] cf configuration
 static bool
-handle_interrupt(const struct proto* p4,
-                 const struct proto* p6,
-                 const struct config* cf)
+handle_interrupt(const struct proto* pr, const struct config* cf)
 {
   log(LL_TRACE, false, "handling interrupt");
 
@@ -99,15 +84,8 @@ handle_interrupt(const struct proto* p4,
   // Print logging information and continue the process upon receiving SIGUSR1.
   if (susr1 == true) {
     log_config(cf);
-    if (cf->cf_ipv4 == true) {
-      log_stats(p4->pr_name, &p4->pr_stat);
-      log_socket_port(p4);
-    }
-
-    if (cf->cf_ipv6 == true) {
-      log_stats(p6->pr_name, &p6->pr_stat);
-      log_socket_port(p6);
-    }
+    log_stats(pr->pr_name, &pr->pr_stat);
+    log_socket_port(pr);
 
     // Reset the signal indicator, so that following signal handling will avoid
     // the false positive.
@@ -119,34 +97,6 @@ handle_interrupt(const struct proto* p4,
   return false;
 }
 
-/// Prepare file set used in the pselect(2) function.
-///
-/// @param[out] rfd  read file descriptors
-/// @param[out] nfds number of file descriptors
-/// @param[in]  p4   IPv4 protocol connection
-/// @param[in]  p6   IPv6 protocol connection
-/// @param[in]  cf   configuration
-static void
-prepare_file_set(fd_set* rfd,
-                 int* nfds,
-                 const struct proto* p4,
-                 const struct proto* p6,
-                 const struct config* cf)
-{
-  FD_ZERO(rfd);
-  *nfds = 3;
-
-  if (cf->cf_ipv4 == true) {
-    FD_SET(p4->pr_sock, rfd);
-    (*nfds)++;
-  }
-
-  if (cf->cf_ipv6 == true) {
-    FD_SET(p6->pr_sock, rfd);
-    (*nfds)++;
-  }
-}
-
 /// Await and handle responses on both IPv4 and IPv6 sockets for a selected
 /// duration of time.
 /// @return success/failure indication
@@ -155,15 +105,11 @@ prepare_file_set(fd_set* rfd,
 /// @global sterm
 /// @global susr1
 ///
-/// @param[out] p4  IPv4 protocol connection
-/// @param[out] p6  IPv6 protocol connection
+/// @param[out] pr  protocol
 /// @param[in]  dur duration to wait for responses
 /// @param[in]  cf  configuration
 bool
-wait_for_events(struct proto* p4,
-                struct proto* p6,
-                const uint64_t dur,
-                const struct config* cf)
+wait_for_events(struct proto* pr, const uint64_t dur, const struct config* cf)
 {
   int reti;
   uint64_t cur;
@@ -175,7 +121,9 @@ wait_for_events(struct proto* p4,
   bool retb;
 
   // Ensure that all relevant events are registered.
-  prepare_file_set(&rfd, &nfds, p4, p6, cf);
+  nfds = 4;
+  FD_ZERO(&rfd);
+  FD_SET(pr->pr_sock, &rfd);
 
   // Create the signal mask used for enabling signals during the pselect(2) waiting.
   create_signal_mask(&mask);
@@ -196,7 +144,7 @@ wait_for_events(struct proto* p4,
     if (reti == -1) {
       // Check for interrupt (possibly due to a signal).
       if (errno == EINTR) {
-        retb = handle_interrupt(p4, p6, cf);
+        retb = handle_interrupt(pr, cf);
         if (retb == true) {
           continue;
         }
@@ -209,7 +157,7 @@ wait_for_events(struct proto* p4,
     }
 
     // Handle the network events by receiving and reporting responses.
-    retb = handle_event(p4, p6, &rfd, cf);
+    retb = handle_event(pr, &rfd, cf);
     if (retb == false) {
       return false;
     }

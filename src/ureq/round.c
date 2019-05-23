@@ -56,42 +56,32 @@ set_address(struct sockaddr_storage* ss,
   struct sockaddr_in sin;
   struct sockaddr_in6 sin6;
 
-  if (tg->tg_ipv == NEMO_IP_VERSION_4) {
+  if (cf->cf_ipv4 == true) {
     (void)memset(&sin, 0, sizeof(sin));
     sin.sin_family      = AF_INET;
     sin.sin_port        = htons((uint16_t)cf->cf_port);
     sin.sin_addr.s_addr = (uint32_t)tg->tg_laddr;
 
     (void)memcpy(ss, &sin, sizeof(sin));
-    return;
-  }
-
-  if (tg->tg_ipv == NEMO_IP_VERSION_6) {
+  } else {
     (void)memset(&sin6, 0, sizeof(sin6));
     sin6.sin6_family = AF_INET6;
     sin6.sin6_port   = htons((uint16_t)cf->cf_port);
     tipv6(&sin6.sin6_addr, tg->tg_laddr, tg->tg_haddr);
 
     (void)memcpy(ss, &sin6, sizeof(sin6));
-    return;
   }
-
-  // This is to silence a warning about unused memory, which could happen if
-  // the `tg_ipv` was incorrect for one of the targets.
-  (void)memset(ss, 0, sizeof(*ss));
 }
 
 /// Issue a request against a target.
 /// @return success/failure indication
 ///
-/// @param[out] p4   IPv4 protocol connection
-/// @param[out] p6   IPv6 protocol connection
+/// @param[out] pr   protocol
 /// @param[in]  snum sequence number
 /// @param[in]  tg   network target
 /// @param[in]  cf   configuration
 static bool
-issue_request(struct proto* p4,
-              struct proto* p6,
+issue_request(struct proto* pr,
               const uint64_t snum,
               const struct target* tg,
               const struct config* cf)
@@ -105,21 +95,10 @@ issue_request(struct proto* p4,
   set_address(&addr, tg, cf);
 
   // Handle the IPv4 case.
-  if (cf->cf_ipv4 == true && tg->tg_ipv == NEMO_IP_VERSION_4) { 
-    retb = send_packet(p4, &hpl, addr, cf->cf_err);
-    if (retb == false) {
-      log(LL_WARN, false, "unable to send a request");
-      return false;
-    }
-  }
-
-  // Handle the IPv6 case.
-  if (cf->cf_ipv6 == true && tg->tg_ipv == NEMO_IP_VERSION_6) { 
-    retb = send_packet(p6, &hpl, addr, cf->cf_err);
-    if (retb == false) {
-      log(LL_WARN, false, "unable to send a request");
-      return false;
-    }
+  retb = send_packet(pr, &hpl, addr, cf->cf_err);
+  if (retb == false) {
+    log(LL_WARN, false, "unable to send a request");
+    return false;
   }
 
   return true;
@@ -128,15 +107,13 @@ issue_request(struct proto* p4,
 /// Single round of issued requests with small pauses after each request.
 /// @return success/failure indication
 ///
-/// @param[out] p4  IPv4 protocol connection
-/// @param[out] p6  IPv6 protocol connection
+/// @param[out] pr  protoco
 /// @param[in]  tg  array of network targets
 /// @param[in]  ntg number of network targets
 /// @param[in]  sn  sequence number
 /// @param[in]  cf  configuration
 bool
-dispersed_round(struct proto* p4,
-                struct proto* p6,
+dispersed_round(struct proto* pr,
                 const struct target* tg,
                 const uint64_t ntg,
                 const uint64_t snum,
@@ -148,7 +125,7 @@ dispersed_round(struct proto* p4,
 
   // In case there are no targets, just sleep throughout the whole round.
   if (ntg == 0) {
-    retb = wait_for_events(p4, p6, cf->cf_int, cf);
+    retb = wait_for_events(pr, cf->cf_int, cf);
     if (retb == false) {
       log(LL_WARN, false, "unable to wait for events");
       return false;
@@ -164,13 +141,13 @@ dispersed_round(struct proto* p4,
 
   // Issue all requests.
   for (i = 0; i < ntg; i++) {
-    retb = issue_request(p4, p6, snum, &tg[i], cf);
+    retb = issue_request(pr, snum, &tg[i], cf);
     if (retb == false) {
       return false;
     }
 
     // Await events for the appropriate fraction of the round.
-    retb = wait_for_events(p4, p6, part, cf);
+    retb = wait_for_events(pr, part, cf);
     if (retb == false) {
       log(LL_WARN, false, "unable to wait for events");
       return false;
@@ -184,15 +161,13 @@ dispersed_round(struct proto* p4,
 /// by a single full pause.
 /// @return success/failure indication
 ///
-/// @param[out] p4  IPv4 protocol connection
-/// @param[out] p6  IPv6 protocol connection
+/// @param[out] pr  protocol
 /// @param[in]  tg  array of network targets
 /// @param[in]  ntg number of network targets
 /// @param[in]  sn  sequence number
 /// @param[in]  cf  configuration
 bool
-grouped_round(struct proto* p4,
-              struct proto* p6,
+grouped_round(struct proto* pr,
               const struct target* tg,
               const uint64_t ntg,
               const uint64_t snum,
@@ -203,14 +178,14 @@ grouped_round(struct proto* p4,
 
   // Issue all requests.
   for (i = 0; i < ntg; i++) {
-    retb = issue_request(p4, p6, snum, &tg[i], cf);
+    retb = issue_request(pr, snum, &tg[i], cf);
     if (retb == false) {
       return false;
     }
   }
 
   // Await events for the remainder of the interval.
-  retb = wait_for_events(p4, p6, cf->cf_int, cf);
+  retb = wait_for_events(pr, cf->cf_int, cf);
   if (retb == false) {
     log(LL_WARN, false, "unable to wait for events");
     return false;

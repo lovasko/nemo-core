@@ -32,7 +32,6 @@ fill_payload(struct payload *hpl,
   hpl->pl_mgic  = NEMO_PAYLOAD_MAGIC;
   hpl->pl_fver  = NEMO_PAYLOAD_VERSION;
   hpl->pl_type  = NEMO_PAYLOAD_TYPE_REQUEST;
-  hpl->pl_port  = (uint16_t)cf->cf_port;
   hpl->pl_ttl1  = (uint8_t)cf->cf_ttl;
   hpl->pl_len   = (uint16_t)cf->cf_len;
   hpl->pl_snum  = snum;

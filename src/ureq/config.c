@@ -556,24 +556,89 @@ log_config(const struct config* cf)
 {
   const char* bin;
   const char* mono;
+  const char* err;
+  const char* grp;
+  const char* ipv;
+  char key[32];
+  char len[32];
+  char wait[32];
+  char rld[32];
 
+  // Monologue mode.
   if (cf->cf_mono == true) {
     mono = "yes";
   } else {
     mono = "no";
   }
 
+  // Binary output.
   if (cf->cf_bin == true) {
     bin = "yes";
   } else {
     bin = "no";
   }
 
+  // Exit on error.
+  if (cf->cf_err == true) {
+    err = "yes";
+  } else {
+    err = "no";
+  }
+
+  // Round type.
+  if (cf->cf_grp == true) {
+    grp = "grouped";
+  } else {
+    grp = "dispersed";
+  }
+
+  // Internet protocol version.
+  if (cf->cf_ipv4 == true) {
+    ipv = "IPv4";
+  } else {
+    ipv = "IPv6";
+  }
+
+  // Key.
+  if (cf->cf_key == 0) {
+    (void)strncpy(key, "any", sizeof(key));
+  } else {
+    (void)snprintf(key, sizeof(key), "%" PRIu64, cf->cf_key);
+  }
+
+  // Payload length.
+  if (cf->cf_len == 0) {
+    (void)strncpy(len, "any", sizeof(len));
+  } else {
+    (void)snprintf(len, sizeof(len), "%" PRIu64, cf->cf_len);
+  }
+
+  // Final wait.
+  if (cf->cf_wait == 0) {
+    (void)strncpy(wait, "infinite", sizeof(wait));
+  } else {
+    (void)snprintf(wait, sizeof(wait), "%" PRIu64 "ns", cf->cf_wait);
+  }
+
+  // Name resolution.
+  if (cf->cf_rld == 0) {
+    (void)strncpy(rld, "only at start", sizeof(rld));
+  } else {
+    (void)snprintf(rld, sizeof(rld), "%" PRIu64 "ns", cf->cf_rld);
+  }
+
   log(LL_DEBUG, false, "responder UDP port: %" PRIu64, cf->cf_port);
-  log(LL_DEBUG, false, "unique key: %" PRIu64, cf->cf_key);
-  log(LL_DEBUG, false, "Time-To-Live: %" PRIu64, cf->cf_ttl);
-  log(LL_DEBUG, false, "receive buffer size: %" PRIu64 " bytes", cf->cf_rbuf);
-  log(LL_DEBUG, false, "send buffer size: %" PRIu64 " bytes", cf->cf_sbuf);
+  log(LL_DEBUG, false, "unique key: %s", key);
+  log(LL_DEBUG, false, "number of rounds: %" PRIu64, cf->cf_cnt);
+  log(LL_DEBUG, false, "request pattern: %s", grp);
+  log(LL_DEBUG, false, "time-to-live: %" PRIu64, cf->cf_ttl);
+  log(LL_DEBUG, false, "final wait: %s", wait);
+  log(LL_DEBUG, false, "name resolution window: %s", rld);
+  log(LL_DEBUG, false, "payload length: %s", len);
+  log(LL_DEBUG, false, "receive buffer size: %" PRIu64 "%c", cf->cf_rbuf, 'B');
+  log(LL_DEBUG, false, "send buffer size: %" PRIu64 "%c", cf->cf_sbuf, 'B');
+  log(LL_DEBUG, false, "internet protocol version: %s", ipv);
+  log(LL_DEBUG, false, "exit on error: %s", err);
   log(LL_DEBUG, false, "monologue mode: %s", mono);
   log(LL_DEBUG, false, "binary report: %s", bin);
 }

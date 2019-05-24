@@ -456,25 +456,70 @@ log_config(const struct config* cf)
 {
   const char* mono;
   const char* bin;
+  const char* ipv;
+  const char* err;
+  char key[32];
+  char len[32];
+  char ito[32];
 
+  // Monologue mode.
   if (cf->cf_mono == true) {
     mono = "yes";
   } else {
     mono = "no";
   }
 
+  // Binary output.
   if (cf->cf_bin == true) {
     bin = "yes";
   } else {
     bin = "no";
   }
 
+  // Internet protocol version.
+  if (cf->cf_ipv4 == true) {
+    ipv = "IPv4";
+  } else {
+    ipv = "IPv6";
+  }
+
+  // Exit on error.
+  if (cf->cf_err == true) {
+    err = "yes";
+  } else {
+    err = "no";
+  }
+
+  // Key.
+  if (cf->cf_key == 0) {
+    (void)strncpy(key, "any", sizeof(key));
+  } else {
+    (void)snprintf(key, sizeof(key), "%" PRIu64, cf->cf_key);
+  }
+
+  // Payload length.
+  if (cf->cf_len == 0) {
+    (void)strncpy(len, "any", sizeof(len));
+  } else {
+    (void)snprintf(len, sizeof(len), "%" PRIu64 "B", cf->cf_len);
+  }
+
+  // Inactivity timeout.
+  if (cf->cf_ito == 0) {
+    (void)strncpy(ito, "infinity", sizeof(len));
+  } else {
+    (void)snprintf(ito, sizeof(ito), "%" PRIu64, cf->cf_ito);
+  }
+
   log(LL_DEBUG, false, "UDP port: %" PRIu64, cf->cf_port);
-  log(LL_DEBUG, false, "unique key: %" PRIu64, cf->cf_key);
-  log(LL_DEBUG, false, "Time-To-Live: %" PRIu64, cf->cf_ttl);
-  log(LL_DEBUG, false, "payload length: %" PRIu64 " bytes", cf->cf_len);
-  log(LL_DEBUG, false, "receive buffer size: %" PRIu64 " bytes", cf->cf_rbuf);
-  log(LL_DEBUG, false, "send buffer size: %" PRIu64 " bytes", cf->cf_sbuf);
+  log(LL_DEBUG, false, "unique key: %s", key);
+  log(LL_DEBUG, false, "time-to-live: %" PRIu64, cf->cf_ttl);
+  log(LL_DEBUG, false, "inactivity timeout: %s", ito);
+  log(LL_DEBUG, false, "payload length: %s", len);
+  log(LL_DEBUG, false, "send buffer size: %" PRIu64 "%c", cf->cf_sbuf, 'B');
+  log(LL_DEBUG, false, "receive buffer size: %" PRIu64 "%c", cf->cf_sbuf, 'B');
+  log(LL_DEBUG, false, "internet protocol version: %s", ipv);
+  log(LL_DEBUG, false, "exit on error: %s", err);
   log(LL_DEBUG, false, "monologue mode: %s", mono);
   log(LL_DEBUG, false, "binary report: %s", bin);
 }

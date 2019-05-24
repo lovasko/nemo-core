@@ -35,5 +35,6 @@ void terminate_plugins(const struct plugin* pi, const uint64_t npi);
 void notify_plugins(const struct plugin* pi,
                     const uint64_t npi,
                     const struct payload* pl);
+void log_plugins(const struct plugin* pi, const uint64_t npi);
 
 #endif

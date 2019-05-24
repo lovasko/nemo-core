@@ -11,10 +11,12 @@
 #include <dlfcn.h>
 #include <fcntl.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "common/log.h"
 #include "common/payload.h"
 #include "common/plugin.h"
+#include "common/log.h"
 #include "ures/funcs.h"
 #include "ures/types.h"
 
@@ -346,5 +348,18 @@ terminate_plugins(const struct plugin* pi, const uint64_t npi)
     }
 
    log_exit_details(ws);
+  }
+}
+
+void
+log_plugins(const struct plugin* pi, const uint64_t npi)
+{
+  uint64_t i;
+  intmax_t pid;
+
+  log(LL_DEBUG, false, "number of loaded plugins: %" PRIu64, npi);
+  for (i = 0; i < npi; i++) {
+    pid = (intmax_t)pi[i].pi_pid;
+    log(LL_DEBUG, false, "plugin %s has process ID %" PRIdMAX, pi[i].pi_name, pid);
   }
 }

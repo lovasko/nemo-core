@@ -29,6 +29,8 @@
 /// @param[in] cf configuration
 static bool
 handle_interrupt(const struct proto* pr,
+                 const struct plugin* pi,
+                 const uint64_t npi,
                  const struct config* cf)
 {
   log(LL_TRACE, false, "handling interrupt");
@@ -48,6 +50,7 @@ handle_interrupt(const struct proto* pr,
   // Print logging information and continue the process upon receiving SIGUSR1.
   if (susr1 == true) {
     log_config(cf);
+    log_plugins(pi, npi);
     log_stats(pr->pr_name, &pr->pr_stat);
 
     // Reset the signal indicator, so that following signal handling will
@@ -128,7 +131,7 @@ respond_loop(struct proto* pr,
     if (reti == -1) {
       // Check for interrupt (possibly due to a signal).
       if (errno == EINTR) {
-        retb = handle_interrupt(pr, cf);
+        retb = handle_interrupt(pr, pins, npins, cf);
         if (retb == true) {
           continue;
         }

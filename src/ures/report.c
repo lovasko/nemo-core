@@ -34,7 +34,7 @@ report_header(const struct config* cf)
   }
 
   // Print the CSV header of the standard output.
-  (void)printf("Key,SeqNum,SeqLen,IPVer,Addr,Port,DepTTL,ArrTTL,"
+  (void)printf("Key,SeqNum,SeqLen,Addr,Port,DepTTL,ArrTTL,"
                "DepRealTime,DepMonoTime,ArrRealTime,ArrMonoTime\n");
 }
 
@@ -50,7 +50,8 @@ report_event(const struct payload* hpl,
              const struct payload* npl,
              const bool sil,
              const bool bin,
-             const bool ipv4)
+             const bool ipv4,
+             const uint16_t port)
 {
   char addrstr[128];
   struct in_addr a4;
@@ -90,7 +91,6 @@ report_event(const struct payload* hpl,
   (void)printf("%" PRIu64 ","   // Key
                "%" PRIu64 ","   // SeqNum
                "%" PRIu64 ","   // SeqLen
-               "%" PRIu8  ","   // IPVer
                "%s,"            // Addr
                "%" PRIu16 ","   // Port
                "%" PRIu8  ","   // DepTTL
@@ -100,7 +100,7 @@ report_event(const struct payload* hpl,
                "%" PRIu64 ","   // ArrRealTime
                "%" PRIu64 "\n", // ArrMonoTime
                hpl->pl_key, hpl->pl_snum, hpl->pl_slen,
-               hpl->pl_pver, addrstr, hpl->pl_port,
+               addrstr, port,
                hpl->pl_ttl1, ttlstr,
                hpl->pl_rtm1, hpl->pl_mtm1,
                hpl->pl_rtm2, hpl->pl_mtm2);

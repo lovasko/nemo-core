@@ -30,8 +30,7 @@ encode_payload(struct payload* dst, const struct payload* src)
   (void)memcpy(dst, src, sizeof(*src));
 
   // Handle all multi-byte conversions into the network byte order.
-  dst->pl_mgic  = htonl(src->pl_mgic);
-  dst->pl_port  = htons(src->pl_port);
+  dst->pl_mgic  = htons(src->pl_mgic);
   dst->pl_len   = htons(src->pl_len);
   dst->pl_snum  = htonll(src->pl_snum);
   dst->pl_slen  = htonll(src->pl_slen);
@@ -56,8 +55,7 @@ decode_payload(struct payload* dst, const struct payload* src)
   (void)memcpy(dst, src, sizeof(*src));
   
   // Handle all multi-byte conversions into the host byte order.
-  dst->pl_mgic  = ntohl(src->pl_mgic);
-  dst->pl_port  = ntohs(src->pl_port);
+  dst->pl_mgic  = ntohs(src->pl_mgic);
   dst->pl_len   = ntohs(src->pl_len);
   dst->pl_snum  = ntohll(src->pl_snum);
   dst->pl_slen  = ntohll(src->pl_slen);
@@ -83,7 +81,7 @@ verify_payload(struct stats* st, const struct payload* pl)
   // Verify the magic identifier.
   if (pl->pl_mgic != NEMO_PAYLOAD_MAGIC) {
     log(LL_DEBUG, false, "payload identifier unknown, expected: %"
-        PRIx32 ", actual: %" PRIx32, NEMO_PAYLOAD_MAGIC, pl->pl_mgic);
+        PRIx16 ", actual: %" PRIx16, NEMO_PAYLOAD_MAGIC, pl->pl_mgic);
     st->st_remg++;
     return false;
   }

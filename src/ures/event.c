@@ -42,6 +42,26 @@ update_payload(struct payload* pl, const uint8_t ttl, const struct config* cf)
   pl->pl_ttl2 = ttl;
 }
 
+/// Retrieve the UDP port number from an address.
+/// @return port number
+///
+/// @param[in] ss IPv4/IPv6 socket address
+static uint16_t
+retrieve_port(const struct sockaddr_storage* ss)
+{
+  struct sockaddr_in* sin;
+  struct sockaddr_in6* sin6;
+  
+  // Cast the address to the appropriate format based on the address family.
+  if (ss->ss_family == AF_INET) {
+    sin = (struct sockaddr_in*)ss;
+    return sin->sin_port;
+  } else {
+    sin6 = (struct sockaddr_in6*)ss;
+    return sin6->sin6_port;
+  }
+}
+
 /// Handle the event of an incoming datagram.
 /// @return success/failure indication
 ///
@@ -60,6 +80,7 @@ handle_event(struct proto* pr,
   struct payload hpl;
   struct payload npl;
   uint8_t ttl;
+  uint16_t port;
 
   log(LL_TRACE, false, "handling event on the %s socket", pr->pr_name);
 
@@ -79,8 +100,11 @@ handle_event(struct proto* pr,
   // Notify all attached plugins about the payload.
   notify_plugins(pins, npins, &hpl);
 
+  // Retrieve the port of the requester.
+  port = retrieve_port(&addr);
+
   // Report the event as a entry in the CSV output.
-  report_event(&hpl, &npl, cf->cf_sil, cf->cf_bin, cf->cf_ipv4);
+  report_event(&hpl, &npl, cf->cf_sil, cf->cf_bin, cf->cf_ipv4, port);
 
   // Do not respond if the monologue mode is turned on.
   if (cf->cf_mono == true) {

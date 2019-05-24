@@ -11,28 +11,26 @@
 
 
 // Message types.
+#define NEMO_PAYLOAD_TYPE_REQUEST  0
 #define NEMO_PAYLOAD_TYPE_RESPONSE 1
-#define NEMO_PAYLOAD_TYPE_REQUEST  2
 
 // Constants.
-#define NEMO_PAYLOAD_MAGIC 0x6e656d6f
-#define NEMO_PAYLOAD_VERSION        4
+#define NEMO_PAYLOAD_MAGIC   0x444c
+#define NEMO_PAYLOAD_VERSION      5
 
 // Memory size.
-#define NEMO_PAYLOAD_SIZE 88
-
+#define NEMO_PAYLOAD_SIZE 80
+ 
 // Payload.
 struct payload {
-  uint32_t pl_mgic;   ///< Magic identifier.
-  uint8_t  pl_fver;   ///< Format version.
-  uint8_t  pl_type;   ///< Message type.
-  uint16_t pl_port;   ///< UDP port.
+  uint16_t pl_mgic;     ///< Magic identifier.
+  uint16_t pl_len;      ///< Artificial payload length in bytes.
+  uint8_t  pl_fver : 5; ///< Format version.
+  uint8_t  pl_type : 1; ///< Message type.
+  uint8_t  pl_pad  : 2; ///< Padding (unused).
   uint8_t  pl_ttl1;   ///< Time-To-Live when sent from requester.
   uint8_t  pl_ttl2;   ///< Time-To-Live when received by responder.
   uint8_t  pl_ttl3;   ///< Time-To-Live when sent from responder.
-  uint8_t  pl_pver;   ///< IP protocol version.
-  uint16_t pl_len;    ///< Artificial payload length in bytes.
-  uint8_t  pl_pad[2]; ///< Padding (unused).
   uint64_t pl_snum;   ///< Sequence iteration number.
   uint64_t pl_slen;   ///< Sequence length.
   uint64_t pl_laddr;  ///< IP address - low-bits.

@@ -62,7 +62,7 @@ request_loop(struct proto* pr, struct target* tg, const struct config* cf)
   rld = now + cf->cf_rld;
 
   for (i = 0; i < cf->cf_cnt; i++) {
-    log(LL_TRACE, false, "round %" PRIu64 "out of %" PRIu64, i + 1, cf->cf_cnt);
+    log(LL_TRACE, false, "round %" PRIu64 " out of %" PRIu64, i + 1, cf->cf_cnt);
 
     // Check if name resolution needs to happen. This code contains a possible
     // race condition, in case a repeated SIGHUP signal appears between the

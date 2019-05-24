@@ -106,7 +106,7 @@ issue_request(struct proto* pr,
 /// Single round of issued requests with small pauses after each request.
 /// @return success/failure indication
 ///
-/// @param[out] pr  protoco
+/// @param[out] pr  protocol
 /// @param[in]  tg  array of network targets
 /// @param[in]  ntg number of network targets
 /// @param[in]  sn  sequence number

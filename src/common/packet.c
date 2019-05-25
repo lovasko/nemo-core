@@ -273,8 +273,8 @@ receive_packet(struct proto* pr,
   }
 
   // Check for received packet payload size.
-  if (len < (ssize_t)sizeof(*npl) || msg.msg_flags & MSG_TRUNC) {
-    log(lvl, false, "wrong payload size, expected %zd, actual %zu", len, sizeof(*npl));
+  if (msg.msg_flags & MSG_TRUNC) {
+    log(lvl, false, "payload was truncated");
     pr->pr_stat.st_resz++;
     return false;
   }

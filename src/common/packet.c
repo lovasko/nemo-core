@@ -235,7 +235,7 @@ receive_packet(struct proto* pr,
   // Prepare payload data.
   (void)memset(&iov, 0, sizeof(iov));
   iov.iov_base = wrapper;
-  iov.iov_len  = sizeof(*npl);
+  iov.iov_len  = sizeof(wrapper);
 
   // Prepare the message.
   (void)memset(&msg, 0, sizeof(msg));

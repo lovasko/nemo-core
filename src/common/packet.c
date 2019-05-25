@@ -290,13 +290,14 @@ receive_packet(struct proto* pr,
 
   // Unpack the payload from the wrapper and convert the payload from its
   // on-wire format.
-  (void)memcpy(&npl, wrapper, sizeof(npl));
+  (void)memcpy(npl, wrapper, sizeof(*npl));
   decode_payload(hpl, npl);
 
   // Now that the base part of the payload is decoded, we can examine whether
   // the actual length of the datagram matches the expected length.
   if (len != (ssize_t)hpl->pl_len) {
     log(lvl, false, "wrong payload size, expected %zd, actual %" PRIu64, len, hpl->pl_len);
+    return false;
   }
 
   // Obtain the TTL/hops value, if the control data was successfully received.

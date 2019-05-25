@@ -88,19 +88,8 @@ handle_event(struct proto* pr,
     return !cf->cf_err;
   }
 
-  // Notify all attached plugins about the payload.
-  notify_plugins(pins, npins, &hpl);
-
   // Retrieve the port of the requester.
   port = retrieve_port(&addr);
-
-  // Report the event as a entry in the CSV output.
-  report_event(&hpl, &npl, cf->cf_sil, cf->cf_bin, cf->cf_ipv4, port);
-
-  // Do not respond if the monologue mode is turned on.
-  if (cf->cf_mono == true) {
-    return true;
-  }
 
   // Do not respond if a particular key is selected, and the requesters key
   // does not match.
@@ -116,6 +105,17 @@ handle_event(struct proto* pr,
 
   // Update payload.
   update_payload(&hpl, ttl, cf);
+
+  // Report the event as a entry in the CSV output.
+  report_event(&hpl, &npl, cf->cf_sil, cf->cf_bin, cf->cf_ipv4, port);
+
+  // Notify all attached plugins about the payload.
+  notify_plugins(pins, npins, &hpl);
+
+  // Do not respond if the monologue mode is turned on.
+  if (cf->cf_mono == true) {
+    return true;
+  }
 
   // Send a response back.
   retb = send_packet(pr, &hpl, addr, cf->cf_err);

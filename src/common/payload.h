@@ -28,18 +28,18 @@ struct payload {
   uint8_t  pl_fver : 5; ///< Format version.
   uint8_t  pl_type : 1; ///< Message type.
   uint8_t  pl_pad  : 2; ///< Padding (unused).
-  uint8_t  pl_ttl1;   ///< Time-To-Live when sent from requester.
-  uint8_t  pl_ttl2;   ///< Time-To-Live when received by responder.
-  uint8_t  pl_ttl3;   ///< Time-To-Live when sent from responder.
-  uint64_t pl_snum;   ///< Sequence iteration number.
-  uint64_t pl_slen;   ///< Sequence length.
-  uint64_t pl_laddr;  ///< IP address - low-bits.
-  uint64_t pl_haddr;  ///< IP address - high-bits.
-  uint64_t pl_key;    ///< Responder/requester key.
-  uint64_t pl_mtm1;   ///< Steady time of request.
-  uint64_t pl_rtm1;   ///< System time of request.
-  uint64_t pl_mtm2;   ///< Steady time of response.
-  uint64_t pl_rtm2;   ///< System time of response.
+  uint8_t  pl_ttl1;     ///< Time-To-Live when sent from requester.
+  uint8_t  pl_ttl2;     ///< Time-To-Live when received by responder.
+  uint8_t  pl_ttl3;     ///< Time-To-Live when sent from responder.
+  uint64_t pl_snum;     ///< Sequence iteration number.
+  uint64_t pl_slen;     ///< Sequence length.
+  uint64_t pl_laddr;    ///< IP address - low-bits.
+  uint64_t pl_haddr;    ///< IP address - high-bits.
+  uint64_t pl_key;      ///< Responder/requester key.
+  uint64_t pl_mtm1;     ///< Steady time of request.
+  uint64_t pl_rtm1;     ///< System time of request.
+  uint64_t pl_mtm2;     ///< Steady time of response.
+  uint64_t pl_rtm2;     ///< System time of response.
 };
 
 #endif

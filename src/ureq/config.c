@@ -610,7 +610,7 @@ log_config(const struct config* cf)
   if (cf->cf_len == 0) {
     (void)strncpy(len, "any", sizeof(len));
   } else {
-    (void)snprintf(len, sizeof(len), "%" PRIu64, cf->cf_len);
+    (void)snprintf(len, sizeof(len), "%" PRIu64 "B", cf->cf_len);
   }
 
   // Final wait.

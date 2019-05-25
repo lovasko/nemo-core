@@ -26,19 +26,10 @@ update_payload(struct payload* pl, const uint8_t ttl, const struct config* cf)
 {
   log(LL_TRACE, false, "updating payload");
 
-  // Change the message type.
   pl->pl_type = NEMO_PAYLOAD_TYPE_RESPONSE;
-
-  // Sign the payload.
   pl->pl_key = cf->cf_key;
-
-  // Obtain the current monotonic clock value.
   pl->pl_mtm2 = mono_now();
-
-  // Obtain the current real-time clock value.
   pl->pl_rtm2 = real_now();
-
-  // Provide the TTL upon receipt.
   pl->pl_ttl2 = ttl;
 }
 

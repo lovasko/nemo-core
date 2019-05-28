@@ -102,6 +102,8 @@ load_plugins(struct plugin* pi, uint64_t* npi, const char* so[])
       report_error("nemo_free");
       return false;
     }
+
+    pi[i].pi_state = PLUGIN_STATE_PREPARED;
   }
 
   return true;
@@ -258,6 +260,8 @@ start_plugins(struct plugin* pi, const uint64_t npi)
       // Perform the final clean-up and exit the process.
       pi[i].pi_free();
       exit(EXIT_SUCCESS);
+    } else {
+      pi[i].pi_state = PLUGIN_STATE_RUNNING;
     }
   }
 
@@ -280,6 +284,12 @@ notify_plugins(const struct plugin* pi,
   ssize_t retss;
 
   for (i = 0; i < npi; i++) {
+    // Ensure that only running plugins receive events.
+    if (pi[i].pi_state != PLUGIN_STATE_RUNNING) {
+      continue;
+    }
+
+    // Communicate the event.
     retss = write(pi[i].pi_pipe[0], pl, sizeof(*pl));
 
     // Check for error.
@@ -294,25 +304,6 @@ notify_plugins(const struct plugin* pi,
   }
 }
 
-/// Log debugging information about an exit of a child process (plugin).
-///
-/// @param[in] ws wait status
-static void
-log_exit_details(const int ws)
-{
-  // Check for orderly exit.
-  if (WIFEXITED(ws)) {
-    log(LL_DEBUG, false, "plugin exited with code: %d", WEXITSTATUS(ws));
-    return;
-  }
-
-  // Check whether it was killed by a signal.
-  if (WIFSIGNALED(ws)) {
-    log(LL_DEBUG, false, "plugin killed by signal: %s", strsignal(WTERMSIG(ws)));
-    return;
-  }
-}
-
 /// Terminate all plugins. This is done by closing the appropriate pipe,
 /// causing the read loop to terminate. This in turn triggers the clean-up
 /// procedure defined for the plugin. The main process waits for the process
@@ -321,11 +312,10 @@ log_exit_details(const int ws)
 /// @param[in] pi  array of plugins
 /// @param[in] npi number of plugins
 void
-terminate_plugins(const struct plugin* pi, const uint64_t npi)
+terminate_plugins(struct plugin* pi, const uint64_t npi)
 {
   uint64_t i;
   int reti;
-  int ws;
 
   // The loop does not terminate when a particular clean-up routine fails,
   // as the process is already about to terminate. This way all plugins get
@@ -340,14 +330,60 @@ terminate_plugins(const struct plugin* pi, const uint64_t npi)
   // Once the pipe was closed, the main loop of the plugin process should come
   // to end. The final wait on the child process will ensure that the resource
   // usage data gets included in the final report for the main process.
+  wait_plugins(pi, npi);
+}
+
+/// 
+/// 
+/// @param[in] pi array of plugins
+/// @param[in] npi number of plugins
+void
+wait_plugins(struct plugin* pi, const uint64_t npi)
+{
+  uint64_t i;
+  int ws;
+  pid_t retp;
+
   for (i = 0; i < npi; i++) {
-    reti = waitpid(pi[i].pi_pid, &ws, 0);
-    if (reti == -1) {
+    // Attempt to wait for plugin process state change.
+    retp = waitpid(pi[i].pi_pid, &ws, WNOHANG | WCONTINUED);
+    if (retp == -1) {
       log(LL_WARN, true, "unable to wait for plugin %s", pi[i].pi_name);
       continue;
     }
 
-   log_exit_details(ws);
+    // Skip this plugin if no change has occurred.
+    if (retp == 0) {
+      continue;
+    }
+
+    // Check for orderly exit.
+    if (WIFEXITED(ws)) {
+      log(LL_DEBUG, false, "plugin exited with code: %d", WEXITSTATUS(ws));
+      pi[i].pi_state = PLUGIN_STATE_STOPPED;
+      return;
+    }
+
+    // Check whether it was killed by a signal.
+    if (WIFSIGNALED(ws)) {
+      log(LL_DEBUG, false, "plugin killed by signal: %s", strsignal(WTERMSIG(ws)));
+      pi[i].pi_state = PLUGIN_STATE_STOPPED;
+      return;
+    }
+
+    // Check whether it was paused by a signal.
+    if (WIFSTOPPED(ws)) {
+      log(LL_DEBUG, false, "plugin %s has been paused by signal %s", strsignal(WSTOPSIG(ws)));
+      pi[i].pi_state = PLUGIN_STATE_PAUSED;
+      continue;
+    }
+
+    // Check whether it was resumed. The signal SIGCONT is implied in this scenario.
+    if (WIFCONTINUED(ws)) {
+      log(LL_DEBUG, false, "plugin has been resumed");
+      pi[i].pi_state = PLUGIN_STATE_RUNNING;
+      continue;
+    }
   }
 }
 

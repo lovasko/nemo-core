@@ -16,6 +16,12 @@
 
 
 #define PLUG_MAX 32
+#define PLUGIN_VERSION 1
+
+#define PLUGIN_STATE_PREPARED 1
+#define PLUGIN_STATE_RUNNING  2
+#define PLUGIN_STATE_PAUSED   3
+#define PLUGIN_STATE_STOPPED  4
 
 /// Event callback plugin.
 struct plugin {
@@ -27,11 +33,13 @@ struct plugin {
   bool      (*pi_free)(void);               ///< Clean-up procedure.
   pid_t       pi_pid;                       ///< Process ID of the sandbox.
   int         pi_pipe[2];                   ///< Payload notification channel.
+  uint8_t     pi_state;                     ///< Operational state.
 };
 
 bool load_plugins(struct plugin* pi, uint64_t* npi, const char* so[]);
 bool start_plugins(struct plugin* pi, const uint64_t npi);
-void terminate_plugins(const struct plugin* pi, const uint64_t npi);
+void wait_plugins(struct plugin* pi, const uint64_t npi);
+void terminate_plugins(struct plugin* pi, const uint64_t npi);
 void notify_plugins(const struct plugin* pi,
                     const uint64_t npi,
                     const struct payload* pl);

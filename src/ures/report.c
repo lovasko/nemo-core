@@ -79,7 +79,7 @@ report_event(const struct payload* hpl,
     (void)inet_ntop(AF_INET6, &a6, addrstr, sizeof(addrstr));
   }
 
-  // If no TTL was received, report is as not available.
+  // If no TTL was received, report it as not available.
   if (hpl->pl_ttl2 == 0) {
     (void)strncpy(ttlstr, "N/A", 3);
   } else {

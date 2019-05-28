@@ -15,6 +15,7 @@ extern volatile bool sint;
 extern volatile bool sterm;
 extern volatile bool susr1;
 extern volatile bool shup;
+extern volatile bool schld;
 
 bool install_signal_handlers(void);
 void create_signal_mask(sigset_t* mask);

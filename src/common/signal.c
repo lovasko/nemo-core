@@ -16,8 +16,9 @@ volatile bool sint;  ///< SIGINT flag.
 volatile bool sterm; ///< SIGTERM flag.
 volatile bool susr1; ///< SIGUSR1 flag.
 volatile bool shup;  ///< SIGHUP flag.
+volatile bool schld; ///< SIGCHLD flag.
 
-/// Signal handler for the SIGINT, SIGTERM, SIGUSR1, and SIGHUP signals.
+/// Signal handler for the SIGINT, SIGTERM, SIGUSR1, SIGHUP, and SIGCHLD signals.
 ///
 /// This handler does not perform any action, just toggles the indicator
 /// for the signal. The actual signal handling is done by the respond_loop
@@ -27,6 +28,7 @@ volatile bool shup;  ///< SIGHUP flag.
 /// @global sterm
 /// @global susr1
 /// @global shup
+/// @global schld
 ///
 /// @param[in] sn signal number
 static void
@@ -46,6 +48,10 @@ signal_handler(int sn)
 
   if (sn == SIGHUP) {
     shup = true;
+  }
+
+  if (sn == SIGCHLD) {
+    schld = true;
   }
 }
 
@@ -75,11 +81,15 @@ block_all_signals(void)
 /// @global sterm
 /// @global susr1
 /// @global shup
+/// @global schld
 bool
 install_signal_handlers(void)
 {
   struct sigaction sa;
   int reti;
+  int sigs[5] = {SIGINT, SIGTERM, SIGUSR1, SIGHUP, SIGCHLD};
+  char* name;
+  uint8_t i;
 
   log(LL_INFO, false, "installing signal handlers");
 
@@ -88,6 +98,7 @@ install_signal_handlers(void)
   sterm = false;
   susr1 = false;
   shup  = false;
+  schld = false;
 
   // This action makes sure that no system calls or execution context will get
   // interrupted by a signal. The pselect(2) call explicitly enables the
@@ -98,32 +109,14 @@ install_signal_handlers(void)
   (void)memset(&sa, 0, sizeof(sa));
   sa.sa_handler = signal_handler;
 
-  // Install signal handler for SIGINT.
-  reti = sigaction(SIGINT, &sa, NULL);
-  if (reti == -1) {
-    log(LL_WARN, true, "unable to add signal handler for %s", "SIGINT");
-    return false;
-  }
-
-  // Install signal handler for SIGTERM.
-  reti = sigaction(SIGTERM, &sa, NULL);
-  if (reti == -1) {
-    log(LL_WARN, true, "unable to add signal handler for %s", "SIGTERM");
-    return false;
-  }
-
-  // Install signal handler for SIGUSR1.
-  reti = sigaction(SIGUSR1, &sa, NULL);
-  if (reti == -1) {
-    log(LL_WARN, true, "unable to add signal handler for %s", "SIGUSR1");
-    return false;
-  }
-
-  // Install signal handler for SIGHUP.
-  reti = sigaction(SIGHUP, &sa, NULL);
-  if (reti == -1) {
-    log(LL_WARN, true, "unable to add signal handler for %s", "SIGHUP");
-    return false;
+  // Install signal handler for each signal.
+  for (i = 0; i < 5; i++) {
+    reti = sigaction(sigs[i], &sa, NULL);
+    if (reti == -1) {
+      name = strsignal(sigs[i]);
+      log(LL_WARN, true, "unable to add signal handler for %s", name);
+      return false;
+    }
   }
 
   return true;
@@ -143,4 +136,5 @@ create_signal_mask(sigset_t* mask)
   (void)sigdelset(mask, SIGTERM);
   (void)sigdelset(mask, SIGUSR1);
   (void)sigdelset(mask, SIGHUP);
+  (void)sigdelset(mask, SIGCHLD);
 }

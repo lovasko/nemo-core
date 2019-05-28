@@ -37,10 +37,8 @@ bool respond_loop(struct proto* pr,
 void report_header(const struct config* cf);
 void report_event(const struct payload* hpl,
                   const struct payload* npl,
-                  const bool sil,
-                  const bool bin,
-                  const bool ipv4,
-                  const uint16_t port);
+                  const uint16_t port,
+                  const struct config* cf);
 bool flush_report_stream(const struct config* cf);
 
 // Socket.

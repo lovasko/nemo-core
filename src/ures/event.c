@@ -107,7 +107,7 @@ handle_event(struct proto* pr,
   update_payload(&hpl, ttl, cf);
 
   // Report the event as a entry in the CSV output.
-  report_event(&hpl, &npl, cf->cf_sil, cf->cf_bin, cf->cf_ipv4, port);
+  report_event(&hpl, &npl, port, cf);
 
   // Notify all attached plugins about the payload.
   notify_plugins(pins, npins, &hpl);

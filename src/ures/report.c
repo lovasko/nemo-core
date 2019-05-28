@@ -41,17 +41,15 @@ report_header(const struct config* cf)
 /// Report the event of the incoming datagram by printing a CSV-formatted line
 /// to the standard output stream.
 ///
-/// @param[in] hpl payload in host byte order
-/// @param[in] npl payload in network byte order
-/// @param[in] sil silent mode
-/// @param[in] bin binary mode
+/// @param[in] hpl  payload in host byte order
+/// @param[in] npl  payload in network byte order
+/// @param[in] port requesters port
+/// @param[in] cf   configuration
 void
 report_event(const struct payload* hpl,
              const struct payload* npl,
-             const bool sil,
-             const bool bin,
-             const bool ipv4,
-             const uint16_t port)
+             const uint16_t port,
+             const struct config* cf)
 {
   char addrstr[128];
   struct in_addr a4;
@@ -59,12 +57,12 @@ report_event(const struct payload* hpl,
   char ttlstr[8];
 
   // No output to be performed if the silent mode was requested.
-  if (sil == true) {
+  if (cf->cf_sil == true) {
     return;
   }
 
   // Binary mode expects the payload in a on-wire encoding.
-  if (bin == true) {
+  if (cf->cf_bin == true) {
     (void)fwrite(npl, sizeof(*npl), 1, stdout);
     return;
   }
@@ -73,7 +71,7 @@ report_event(const struct payload* hpl,
   (void)memset(ttlstr,  '\0', sizeof(ttlstr));
 
   // Convert the IP address into a string.
-  if (ipv4 == true) {
+  if (cf->cf_ipv4 == true) {
     a4.s_addr = (uint32_t)hpl->pl_laddr;
     (void)inet_ntop(AF_INET, &a4, addrstr, sizeof(addrstr));
   } else {

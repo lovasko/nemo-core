@@ -170,9 +170,11 @@ wait_for_events(struct proto* pr, const uint64_t dur, const struct config* cf)
     }
 
     // Handle the network events by receiving and reporting responses.
-    retb = handle_event(pr, &rfd, cf);
-    if (retb == false) {
-      return false;
+    if (reti > 0) {
+      retb = handle_event(pr, &rfd, cf);
+      if (retb == false) {
+        return false;
+      }
     }
 
     // Update the current time.

@@ -70,14 +70,14 @@ handle_interrupt(const struct proto* pr,
 /// @global sterm
 /// @global susr1
 ///
-/// @param[out] pr    protocol
-/// @param[in]  pins  array of plugins
-/// @param[in]  npins number of plugins
-/// @param[in]  cf    configuration
+/// @param[out] pr  protocol
+/// @param[in]  pi  array of plugins
+/// @param[in]  npi number of plugins
+/// @param[in]  cf  configuration
 bool
 respond_loop(struct proto* pr,
-             const struct plugin* pins,
-             const uint64_t npins,
+             const struct plugin* pi,
+             const uint64_t npi,
              const struct config* cf)
 {
   int reti;
@@ -131,7 +131,7 @@ respond_loop(struct proto* pr,
     if (reti == -1) {
       // Check for interrupt (possibly due to a signal).
       if (errno == EINTR) {
-        retb = handle_interrupt(pr, pins, npins, cf);
+        retb = handle_interrupt(pr, pi, npi, cf);
         if (retb == true) {
           continue;
         }
@@ -149,10 +149,10 @@ respond_loop(struct proto* pr,
       return true;
     }
 
-    // Handle incoming IPv4 datagrams.
+    // Handle incoming datagram.
     reti = FD_ISSET(pr->pr_sock, &rfd);
     if (reti > 0) {
-      retb = handle_event(pr, pins, npins, cf);
+      retb = handle_event(pr, pi, npi, cf);
       if (retb == false) {
         return false;
       }

@@ -57,14 +57,14 @@ retrieve_port(const struct sockaddr_storage* ss)
 /// Handle the event of an incoming datagram.
 /// @return success/failure indication
 ///
-/// @param[out] pr    protocol connection
-/// @param[in]  pins  array of plugins
-/// @param[in]  npins number of plugins
-/// @param[in]  cf    configuration
+/// @param[out] pr  protocol
+/// @param[in]  pi  array of plugins
+/// @param[in]  npi number of plugins
+/// @param[in]  cf  configuration
 bool
 handle_event(struct proto* pr,
-             const struct plugin* pins,
-             const uint64_t npins,
+             const struct plugin* pi,
+             const uint64_t npi,
              const struct config* cf)
 {
   bool retb;
@@ -111,7 +111,7 @@ handle_event(struct proto* pr,
   report_event(&hpl, &npl, port, cf);
 
   // Notify all attached plugins about the payload.
-  notify_plugins(pins, npins, &hpl);
+  notify_plugins(pi, npi, &hpl);
 
   // Do not respond if the monologue mode is turned on.
   if (cf->cf_mono == true) {

@@ -21,8 +21,8 @@ main(int argc, char* argv[])
 {
   bool retb;
   struct config cf;
-  struct plugin pins[PLUG_MAX];
-  uint64_t npins;
+  struct plugin pi[PLUG_MAX];
+  uint64_t npi;
   struct proto pr;
 
   // Parse configuration from command-line options.
@@ -47,14 +47,14 @@ main(int argc, char* argv[])
   }
 
   // Start plugins.
-  retb = load_plugins(pins, &npins, cf.cf_plgs);
+  retb = load_plugins(pi, &npi, cf.cf_plgs);
   if (retb == false) {
     log(LL_ERROR, false, "unable to load all plugins");
     return EXIT_FAILURE;
   }
 
   // Start plugins.
-  retb = start_plugins(pins, npins);
+  retb = start_plugins(pi, npi);
   if (retb == false) {
     log(LL_ERROR, false, "unable to start all plugins");
     return EXIT_FAILURE;
@@ -82,7 +82,7 @@ main(int argc, char* argv[])
   }
 
   // Start the main responding loop.
-  retb = respond_loop(&pr, pins, npins, &cf);
+  retb = respond_loop(&pr, pi, npi, &cf);
   if (retb == false) {
     log(LL_ERROR, false, "responding loop has been terminated");
   }
@@ -91,7 +91,7 @@ main(int argc, char* argv[])
   delete_socket(&pr);
 
   // Terminate plugins.
-  terminate_plugins(pins, npins);
+  terminate_plugins(pi, npi);
 
   // Print final values of counters.
   log_stats(pr.pr_name, &pr.pr_stat);

@@ -50,8 +50,8 @@ report_header(const struct config* cf)
 void
 report_event(const struct payload* hpl,
              const struct payload* npl,
-             const uint64_t mono,
              const uint64_t real,
+             const uint64_t mono,
              const uint8_t ttl,
              const struct config* cf)
 {

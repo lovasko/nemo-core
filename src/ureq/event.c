@@ -40,6 +40,13 @@ handle_event(struct proto* pr, const fd_set* rfd, const struct config* cf)
   struct payload npl;
   struct sockaddr_storage addr;
   uint8_t ttl;
+  uint64_t real;
+  uint64_t mono;
+
+  // Ignore the event in case we are in the monologue mode.
+  if (cf->cf_mono == true) {
+    return true;
+  }
 
   reti = FD_ISSET(pr->pr_sock, rfd);
   if (reti > 0) {
@@ -49,7 +56,13 @@ handle_event(struct proto* pr, const fd_set* rfd, const struct config* cf)
     }
   }
 
-  // TODO report
+  // Capture the time of arrival of the response.
+  real = real_now();
+  mono = mono_now();
+
+  // Create a report entry based on the received payload.
+  report_event(&hpl, &npl, real, mono, ttl, cf);
+
   // TODO notify plugins
 
   return true;

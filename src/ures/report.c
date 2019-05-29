@@ -34,8 +34,8 @@ report_header(const struct config* cf)
   }
 
   // Print the CSV header of the standard output.
-  (void)printf("Key,SeqNum,SeqLen,Addr,Port,DepTTL,ArrTTL,"
-               "DepRealTime,DepMonoTime,ArrRealTime,ArrMonoTime\n");
+  (void)printf("key,seq_num,seq_len,addr_req,port_req,ttl_dep_req,ttl_arr_res,"
+               "real_dep_req,real_arr_res,mono_dep_req,mono_arr_res\n");
 }
 
 /// Report the event of the incoming datagram by printing a CSV-formatted line
@@ -81,27 +81,27 @@ report_event(const struct payload* hpl,
 
   // If no TTL was received, report it as not available.
   if (hpl->pl_ttl2 == 0) {
-    (void)strncpy(ttlstr, "N/A", 3);
+    (void)strncpy(ttlstr, "N/A", sizeof(ttlstr));
   } else {
-    (void)snprintf(ttlstr, 4, "%" PRIu8, hpl->pl_ttl2);
+    (void)snprintf(ttlstr, sizeof(ttlstr), "%" PRIu8, hpl->pl_ttl2);
   }
 
-  (void)printf("%" PRIu64 ","   // Key
-               "%" PRIu64 ","   // SeqNum
-               "%" PRIu64 ","   // SeqLen
-               "%s,"            // Addr
-               "%" PRIu16 ","   // Port
-               "%" PRIu8  ","   // DepTTL
-               "%s,"            // ArrTTL
-               "%" PRIu64 ","   // DepRealTime
-               "%" PRIu64 ","   // DepMonoTime
-               "%" PRIu64 ","   // ArrRealTime
-               "%" PRIu64 "\n", // ArrMonoTime
+  (void)printf("%" PRIu64 ","   // key
+               "%" PRIu64 ","   // seq_num
+               "%" PRIu64 ","   // seq_len
+               "%s,"            // addr_req
+               "%" PRIu16 ","   // port_req
+               "%" PRIu8  ","   // ttl_dep_req
+               "%s,"            // ttl_arr_res
+               "%" PRIu64 ","   // real_dep_req
+               "%" PRIu64 ","   // real_arr_res
+               "%" PRIu64 ","   // mono_dep_req
+               "%" PRIu64 "\n", // mono_arr_res 
                hpl->pl_key, hpl->pl_snum, hpl->pl_slen,
                addrstr, port,
                hpl->pl_ttl1, ttlstr,
-               hpl->pl_rtm1, hpl->pl_mtm1,
-               hpl->pl_rtm2, hpl->pl_mtm2);
+               hpl->pl_rtm1, hpl->pl_rtm2,
+               hpl->pl_mtm1, hpl->pl_mtm2);
 }
 
 /// Flush all data written to the standard output to their respective device.

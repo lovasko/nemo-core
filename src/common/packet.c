@@ -135,6 +135,7 @@ retrieve_ttl(uint8_t* ttl, struct msghdr* msg)
     }
   }
 
+  log(LL_DEBUG, false, "unable to retrieve time-to-live");
   *ttl = 0;
 }
 

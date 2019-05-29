@@ -51,7 +51,7 @@ report_event(const struct payload* hpl,
              const uint16_t port,
              const struct config* cf)
 {
-  char addrstr[128];
+  char addrstr[INET6_ADDRSTRLEN];
   struct in_addr a4;
   struct in6_addr a6;
   char ttlstr[8];

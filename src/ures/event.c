@@ -31,6 +31,7 @@ update_payload(struct payload* pl, const uint8_t ttl, const struct config* cf)
   pl->pl_mtm2 = mono_now();
   pl->pl_rtm2 = real_now();
   pl->pl_ttl2 = ttl;
+  pl->pl_ttl3 = (uint8_t)cf->cf_ttl;
 }
 
 /// Retrieve the UDP port number from an address.

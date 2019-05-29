@@ -132,9 +132,6 @@ wait_for_events(struct proto* pr, const uint64_t dur, const struct config* cf)
   sigset_t mask;
   bool retb;
 
-  // Ensure that all relevant events are registered.
-  FD_ZERO(&rfd);
-  FD_SET(pr->pr_sock, &rfd);
 
   // Create the signal mask used for enabling signals during the pselect(2) waiting.
   create_signal_mask(&mask);
@@ -149,6 +146,10 @@ wait_for_events(struct proto* pr, const uint64_t dur, const struct config* cf)
 
     // Compute the time left to wait for the responses.
     fnanos(&todo, goal - cur);
+
+    // Ensure that all relevant events are registered.
+    FD_ZERO(&rfd);
+    FD_SET(pr->pr_sock, &rfd);
 
     // Start waiting on events. The number of file descriptors is based on the fact
     // that the process is expected to have three standard streams open, plus socket, plus one.

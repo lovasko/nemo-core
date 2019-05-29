@@ -95,10 +95,6 @@ respond_loop(struct proto* pr,
   // Print the CSV header of the standard output.
   report_header(cf);
 
-  // Add the protocol socket to the read event list.
-  FD_ZERO(&rfd);
-  FD_SET(pr->pr_sock, &rfd);
-
   // Create the signal mask used for enabling signals during the pselect(2)
   // waiting.
   create_signal_mask(&mask);
@@ -124,6 +120,10 @@ respond_loop(struct proto* pr,
     }
 
     log(LL_TRACE, false, "waiting for incoming datagrams");
+
+    // Add the protocol socket to the read event list.
+    FD_ZERO(&rfd);
+    FD_SET(pr->pr_sock, &rfd);
 
     // Wait for incoming datagram events. The number of file descriptors is based on the fact
     // that a standard process has three standard streams open, plus the socket, plus one.

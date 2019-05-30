@@ -29,7 +29,7 @@ bool handle_event(struct proto* pr,
 
 // Loop.
 bool respond_loop(struct proto* pr,
-                  const struct plugin* pi,
+                  struct plugin* pi,
                   const uint64_t npi,
                   const struct config* cf);
 

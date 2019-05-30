@@ -24,12 +24,15 @@
 /// @global sint
 /// @global sterm
 /// @global susr1
+/// @global schld
 ///
-/// @param[in] pr protocol
-/// @param[in] cf configuration
+/// @param[in] pr  protocol
+/// @param[in] pi  array of plugins
+/// @param[in] npi number of plugins
+/// @param[in] cf  configuration
 static bool
 handle_interrupt(const struct proto* pr,
-                 const struct plugin* pi,
+                 struct plugin* pi,
                  const uint64_t npi,
                  const struct config* cf)
 {
@@ -45,6 +48,16 @@ handle_interrupt(const struct proto* pr,
   if (sterm == true) {
     log(LL_WARN, false, "received the %s signal", "SIGTERM");
     return false;
+  }
+
+  // Check if any plugin processes changed state.
+  if (schld == true) {
+    log(LL_WARN, false, "received the %s signal", "SIGCHLD");
+    wait_plugins(pi, npi);
+
+    // Reset the signal indicator, so that following signal handling will
+    // avoid the false positive.
+    schld = false;
   }
 
   // Print logging information and continue the process upon receiving SIGUSR1.
@@ -66,17 +79,13 @@ handle_interrupt(const struct proto* pr,
 /// Start responding to requests on both IPv4 and IPv6 sockets.
 /// @return success/failure indication
 ///
-/// @global sint
-/// @global sterm
-/// @global susr1
-///
 /// @param[out] pr  protocol
 /// @param[in]  pi  array of plugins
 /// @param[in]  npi number of plugins
 /// @param[in]  cf  configuration
 bool
 respond_loop(struct proto* pr,
-             const struct plugin* pi,
+             struct plugin* pi,
              const uint64_t npi,
              const struct config* cf)
 {

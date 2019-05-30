@@ -15,10 +15,10 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include "ureq/funcs.h"
-#include "ureq/types.h"
 #include "common/convert.h"
 #include "common/log.h"
+#include "ureq/funcs.h"
+#include "ureq/types.h"
 
 
 /// Create a part of a IPv6 address by converting array of bytes into a

@@ -79,5 +79,18 @@ main(int argc, char* argv[])
   free(tg);
   free(cf.cf_tg);
 
+  // Delete the socket.
+  delete_socket(&pr);
+
+  // Print final values of counters.
+  log_stats(pr.pr_name, &pr.pr_stat);
+
+  // Flush the standard output and error streams.
+  retb = flush_report_stream(&cf);
+  if (retb == false) {
+    log(LL_ERROR, false, "unable to flush the report stream");
+    return EXIT_FAILURE;
+  }
+
   return EXIT_SUCCESS;
 }

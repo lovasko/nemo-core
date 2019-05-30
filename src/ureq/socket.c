@@ -8,6 +8,7 @@
 
 #include <netinet/in.h>
 
+#include <unistd.h>
 #include <string.h>
 #include <inttypes.h>
 
@@ -219,5 +220,19 @@ log_socket_port(const struct proto* pr)
   retb = get_assigned_port(&port, pr);
   if (retb == true) {
     log(LL_DEBUG, false, "local %s UDP port: %" PRIu16, pr->pr_name, port);
+  }
+}
+
+/// Delete the protocol socket.
+///
+/// @param[in] pr protocol connection
+void
+delete_socket(const struct proto* pr)
+{
+  int reti;
+
+  reti = close(pr->pr_sock);
+  if (reti == -1) {
+    log(LL_WARN, true, "unable to close the %s socket", pr->pr_name);
   }
 }

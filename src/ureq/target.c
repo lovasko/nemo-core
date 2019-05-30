@@ -112,9 +112,7 @@ resolve_name(struct target* tg,
     (void)snprintf(estr, sizeof(estr), "unable to resolve name '%%s': %s", gai_strerror(reti));
     log(lvl, false, estr, name);
 
-    if (cf->cf_err == true) {
-      return false;
-    }
+    return !cf->cf_err;
   }
 
   // Traverse the returned address information.

@@ -81,6 +81,14 @@ create_socket4(struct proto* pr, const struct config* cf)
     return false;
   }
 
+  // Request the ancillary control message for IP TTL value.
+  val = 1;
+  reti = setsockopt(pr->pr_sock, IPPROTO_IP, IP_RECVTTL, &val, sizeof(val));
+  if (reti == -1) {
+    log(LL_WARN, true, "unable to request Time-To-Live values on the socket");
+    return false;
+  }
+
   return true;
 }
 
@@ -155,6 +163,14 @@ create_socket6(struct proto* pr, const struct config* cf)
   reti = setsockopt(pr->pr_sock, IPPROTO_IPV6, IPV6_UNICAST_HOPS, &val, sizeof(val));
   if (reti == -1) {
     log(LL_WARN, true, "unable to set time-to-live to %d", val);
+    return false;
+  }
+
+  // Request the ancillary control message for hop counts.
+  val = 1;
+  reti = setsockopt(pr->pr_sock, IPPROTO_IPV6, IPV6_RECVHOPLIMIT, &val, sizeof(val));
+  if (reti == -1) {
+    log(LL_WARN, true, "unable to request hop count values");
     return false;
   }
 

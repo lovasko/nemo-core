@@ -407,6 +407,7 @@ set_defaults(struct config* cf)
   cf->cf_bin  = DEF_BINARY;
   cf->cf_grp  = DEF_GROUP;
   cf->cf_key  = DEF_KEY;
+  cf->cf_len  = DEF_LENGTH;
   cf->cf_llvl = (log_lvl = DEF_LOG_LEVEL);
   cf->cf_lcol = (log_col = DEF_LOG_COLOR);
   cf->cf_ipv4 = DEF_PROTO_VERSION_4;

@@ -6,5 +6,4 @@ main.o
 relay.o
 report.o
 round.o
-socket.o
 target.o

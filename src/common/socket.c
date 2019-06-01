@@ -10,19 +10,26 @@
 
 #include <unistd.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "common/log.h"
-#include "ures/funcs.h"
-#include "ures/types.h"
+#include "common/socket.h"
 
 
 /// Create the IPv4 socket.
 /// @return success/failure indication
 ///
-/// @param[out] pr protocol connection
-/// @param[in]  cf configuration
+/// @param[in] pr   protocol
+/// @param[in] port UDP port
+/// @param[in] rbuf receive buffer size in bytes
+/// @param[in] sbuf send buffer size in bytes
+/// @param[in] ttl  time-to-live value
 bool
-create_socket4(struct proto* pr, const struct config* cf)
+create_socket4(struct proto* pr,
+               const uint16_t port,
+               const uint64_t rbuf,
+               const uint64_t sbuf,
+               const uint8_t ttl)
 {
   int reti;
   struct sockaddr_in addr;
@@ -48,16 +55,16 @@ create_socket4(struct proto* pr, const struct config* cf)
   // Bind the socket to the selected port and local address.
   (void)memset(&addr, 0, sizeof(addr));
   addr.sin_family      = AF_INET;
-  addr.sin_port        = htons((uint16_t)cf->cf_port);
+  addr.sin_port        = htons(port);
   addr.sin_addr.s_addr = INADDR_ANY;
   reti = bind(pr->pr_sock, (struct sockaddr*)&addr, sizeof(addr));
   if (reti == -1) {
-    log(LL_WARN, true, "unable to bind the socket");
+    log(LL_WARN, true, "unable to bind the socket to port %" PRIu16, port);
     return false;
   }
 
   // Set the socket receive buffer size.
-  val = (int)cf->cf_rbuf;
+  val = (int)rbuf;
   reti = setsockopt(pr->pr_sock, SOL_SOCKET, SO_RCVBUF, &val, sizeof(val));
   if (reti == -1) {
     log(LL_WARN, true, "unable to set the socket receive buffer size to %d", val);
@@ -65,7 +72,7 @@ create_socket4(struct proto* pr, const struct config* cf)
   }
 
   // Set the socket send buffer size.
-  val = (int)cf->cf_sbuf;
+  val = (int)sbuf;
   reti = setsockopt(pr->pr_sock, SOL_SOCKET, SO_SNDBUF, &val, sizeof(val));
   if (reti == -1) {
     log(LL_WARN, true, "unable to set the socket send buffer size to %d", val);
@@ -73,11 +80,10 @@ create_socket4(struct proto* pr, const struct config* cf)
   }
 
   // Set the outgoing Time-To-Live value.
-  val = (int)cf->cf_ttl;
+  val = (int)ttl;
   reti = setsockopt(pr->pr_sock, IPPROTO_IP, IP_TTL, &val, sizeof(val));
   if (reti == -1) {
-    log(LL_WARN, true, "unable to set the socket Time-To-Live to %d",
-      val);
+    log(LL_WARN, true, "unable to set the socket time-to-live to %d", val);
     return false;
   }
 
@@ -85,7 +91,7 @@ create_socket4(struct proto* pr, const struct config* cf)
   val = 1;
   reti = setsockopt(pr->pr_sock, IPPROTO_IP, IP_RECVTTL, &val, sizeof(val));
   if (reti == -1) {
-    log(LL_WARN, true, "unable to request Time-To-Live values on the socket");
+    log(LL_WARN, true, "unable to request time-to-live values on the socket");
     return false;
   }
 
@@ -95,10 +101,17 @@ create_socket4(struct proto* pr, const struct config* cf)
 /// Create the IPv6 socket.
 /// @return success/failure indication
 ///
-/// @param[out] pr protocol connection
-/// @param[in]  cf configuration
+/// @param[in] pr   protocol connection
+/// @param[in] port UDP port
+/// @param[in] rbuf receive buffer size in bytes
+/// @param[in] sbuf send buffer size in bytes
+/// @param[in] hops time-to-live value
 bool
-create_socket6(struct proto* pr, const struct config* cf)
+create_socket6(struct proto* pr,
+               const uint16_t port,
+               const uint64_t rbuf,
+               const uint64_t sbuf,
+               const uint8_t hops)
 {
   int reti;
   struct sockaddr_in6 addr;
@@ -132,7 +145,7 @@ create_socket6(struct proto* pr, const struct config* cf)
   // Bind the socket to the selected port and local address.
   (void)memset(&addr, 0, sizeof(addr));
   addr.sin6_family = AF_INET6;
-  addr.sin6_port   = htons((uint16_t)cf->cf_port);
+  addr.sin6_port   = htons(port);
   addr.sin6_addr   = in6addr_any;
   reti = bind(pr->pr_sock, (struct sockaddr*)&addr, sizeof(addr));
   if (reti == -1) {
@@ -141,7 +154,7 @@ create_socket6(struct proto* pr, const struct config* cf)
   }
 
   // Set the socket receive buffer size.
-  val = (int)cf->cf_rbuf;
+  val = (int)rbuf;
   reti = setsockopt(pr->pr_sock, SOL_SOCKET, SO_RCVBUF, &val, sizeof(val));
   if (reti == -1) {
     log(LL_WARN, true, "unable to set the receive buffer size to %d", val);
@@ -149,7 +162,7 @@ create_socket6(struct proto* pr, const struct config* cf)
   }
 
   // Set the socket send buffer size.
-  val = (int)cf->cf_sbuf;
+  val = (int)sbuf;
   reti = setsockopt(pr->pr_sock, SOL_SOCKET, SO_SNDBUF, &val, sizeof(val));
   if (reti == -1) {
     log(LL_WARN, true, "unable to set the send buffer size to %d", val);
@@ -157,7 +170,7 @@ create_socket6(struct proto* pr, const struct config* cf)
   }
 
   // Set the outgoing hop count.
-  val = (int)cf->cf_ttl;
+  val = (int)hops;
   reti = setsockopt(pr->pr_sock, IPPROTO_IPV6, IPV6_UNICAST_HOPS, &val, sizeof(val));
   if (reti == -1) {
     log(LL_WARN, true, "unable to set hop count to %d", val);
@@ -173,6 +186,68 @@ create_socket6(struct proto* pr, const struct config* cf)
   }
 
   return true;
+}
+
+/// Obtain the port assigned to the socket during binding. This functions works
+/// for both versions of the IP protocol.
+/// @return sucess/failure indication
+///
+/// @param[out] pn port number
+/// @param[in]  pr protocol connection
+bool
+get_assigned_port(uint16_t* pn, const struct proto* pr)
+{
+  int reti;
+  struct sockaddr_storage ss;
+  struct sockaddr_in* s4;
+  struct sockaddr_in6* s6;
+  socklen_t len;
+
+  len = sizeof(ss);
+
+  // Request the socket details.
+  reti = getsockname(pr->pr_sock, (struct sockaddr*)&ss, &len);
+  if (reti == -1) {
+    log(LL_WARN, true, "unable to obtain address of the %s socket", pr->pr_name);
+    return false;
+  }
+  
+  // Assign an invalid number as the result.
+  *pn = 0;
+
+  // Obtain the address details based on the protocol family.
+  if (ss.ss_family == PF_INET) {
+    s4 = (struct sockaddr_in*)&ss;
+    *pn = s4->sin_port;
+  } 
+
+  if (ss.ss_family == PF_INET6) {
+    s6 = (struct sockaddr_in6*)&ss;
+    *pn = s6->sin6_port;
+  }
+
+  // Verify that the result is valid.
+  if (*pn == 0) {
+    log(LL_WARN, false, "unable to retrieve the port number");
+    return false;
+  }
+
+  return true;
+}
+
+/// Log the UDP port associated with the socket.
+///
+/// @param[in] pr protocol connection
+void
+log_socket_port(const struct proto* pr)
+{
+  bool retb;
+  uint16_t port;
+
+  retb = get_assigned_port(&port, pr);
+  if (retb == true) {
+    log(LL_DEBUG, false, "local %s UDP port: %" PRIu16, pr->pr_name, port);
+  }
 }
 
 /// Delete the protocol socket.

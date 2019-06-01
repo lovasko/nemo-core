@@ -7,3 +7,4 @@ plugin.o
 signal.o
 stats.o
 ttl.o
+socket.o

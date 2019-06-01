@@ -9,6 +9,7 @@
 #include "common/log.h"
 #include "common/payload.h"
 #include "common/signal.h"
+#include "common/socket.h"
 #include "ureq/funcs.h"
 #include "ureq/types.h"
 
@@ -46,14 +47,14 @@ main(int argc, char* argv[])
   // Initialize the IPv4 or IPv6 protocols.
   if (cf.cf_ipv4 == true) {
     pr.pr_name = "IPv4";
-    retb = create_socket4(&pr, &cf);
+    retb = create_socket4(&pr, 0, cf.cf_rbuf, cf.cf_sbuf, (uint8_t)cf.cf_ttl);
     if (retb == false) {
       log(LL_ERROR, false, "unable to create %s socket", pr.pr_name);
       return EXIT_FAILURE;
     }
   } else {
     pr.pr_name = "IPv6";
-    retb = create_socket6(&pr, &cf);
+    retb = create_socket6(&pr, 0, cf.cf_rbuf, cf.cf_sbuf, (uint8_t)cf.cf_ttl);
     if (retb == false) {
       log(LL_ERROR, false, "unable to create %s socket", pr.pr_name);
       return EXIT_FAILURE;

@@ -41,9 +41,4 @@ void report_event(const struct payload* hpl,
                   const struct config* cf);
 bool flush_report_stream(const struct config* cf);
 
-// Socket.
-bool create_socket4(struct proto* pr, const struct config* cf);
-bool create_socket6(struct proto* pr, const struct config* cf);
-void delete_socket(const struct proto* pr);
-
 #endif

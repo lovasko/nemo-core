@@ -4,4 +4,3 @@ event.o
 loop.o
 main.o
 report.o
-socket.o

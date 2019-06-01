@@ -21,6 +21,7 @@
 #include "common/now.h"
 #include "common/signal.h"
 #include "common/packet.h"
+#include "common/socket.h"
 #include "ureq/funcs.h"
 #include "ureq/types.h"
 

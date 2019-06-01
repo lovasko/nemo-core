@@ -20,13 +20,13 @@ bin/ureq: obj/common/convert.o \
           obj/common/packet.o  \
           obj/common/signal.o  \
           obj/common/stats.o   \
+          obj/common/socket.o  \
           obj/ureq/config.o    \
           obj/ureq/event.o     \
           obj/ureq/loop.o      \
           obj/ureq/main.o      \
           obj/ureq/report.o    \
           obj/ureq/round.o     \
-          obj/ureq/socket.o    \
           obj/ureq/target.o
 	$(CC) -o bin/ureq    \
   obj/common/convert.o \
@@ -36,13 +36,13 @@ bin/ureq: obj/common/convert.o \
   obj/common/packet.o  \
   obj/common/signal.o  \
   obj/common/stats.o   \
+  obj/common/socket.o  \
   obj/ureq/config.o    \
   obj/ureq/event.o     \
   obj/ureq/loop.o      \
   obj/ureq/main.o      \
   obj/ureq/report.o    \
   obj/ureq/round.o     \
-  obj/ureq/socket.o    \
   obj/ureq/target.o    \
   $(LDFLAGS)
 
@@ -55,12 +55,12 @@ bin/ures: obj/common/convert.o \
           obj/common/plugin.o  \
           obj/common/signal.o  \
           obj/common/stats.o   \
+          obj/common/socket.o  \
           obj/ures/config.o    \
           obj/ures/event.o     \
           obj/ures/loop.o      \
           obj/ures/main.o      \
-          obj/ures/report.o    \
-          obj/ures/socket.o
+          obj/ures/report.o
 	$(CC) -o bin/ures    \
   obj/common/convert.o \
   obj/common/log.o     \
@@ -70,12 +70,12 @@ bin/ures: obj/common/convert.o \
   obj/common/plugin.o  \
   obj/common/signal.o  \
   obj/common/stats.o   \
+  obj/common/socket.o  \
   obj/ures/config.o    \
   obj/ures/event.o     \
   obj/ures/loop.o      \
   obj/ures/main.o      \
   obj/ures/report.o    \
-  obj/ures/socket.o    \
   $(LDFLAGS)
 
 # unicast requester object files
@@ -97,9 +97,6 @@ obj/ureq/report.o: src/ureq/report.c
 obj/ureq/round.o: src/ureq/round.c
 	$(CC) $(CFLAGS) -c src/ureq/round.c     -o obj/ureq/round.o
 
-obj/ureq/socket.o: src/ureq/socket.c
-	$(CC) $(CFLAGS) -c src/ureq/socket.c    -o obj/ureq/socket.o
-
 obj/ureq/target.o: src/ureq/target.c
 	$(CC) $(CFLAGS) -c src/ureq/target.c    -o obj/ureq/target.o
 
@@ -118,9 +115,6 @@ obj/ures/main.o: src/ures/main.c
 
 obj/ures/report.o: src/ures/report.c
 	$(CC) $(CFLAGS) -c src/ures/report.c    -o obj/ures/report.o
-
-obj/ures/socket.o: src/ures/socket.c
-	$(CC) $(CFLAGS) -c src/ures/socket.c    -o obj/ures/socket.o
 
 # common object files
 obj/common/convert.o: src/common/convert.c
@@ -147,6 +141,9 @@ obj/common/signal.o: src/common/signal.c
 obj/common/stats.o: src/common/stats.c
 	$(CC) $(CFLAGS) -c src/common/stats.c   -o obj/common/stats.o
 
+obj/common/socket.o: src/common/socket.c
+	$(CC) $(CFLAGS) -c src/common/socket.c  -o obj/common/socket.o
+
 clean:
 	rm -f bin/ureq
 	rm -f bin/ures
@@ -158,17 +155,16 @@ clean:
 	rm -f obj/common/plugin.o
 	rm -f obj/common/signal.o
 	rm -f obj/common/stats.o
+	rm -f obj/common/socket.o
 	rm -f obj/ureq/config.o
 	rm -f obj/ureq/event.o
 	rm -f obj/ureq/loop.o
 	rm -f obj/ureq/main.o
 	rm -f obj/ureq/report.o
 	rm -f obj/ureq/round.o
-	rm -f obj/ureq/socket.o
 	rm -f obj/ureq/target.o
 	rm -f obj/ures/config.o
 	rm -f obj/ures/event.o
 	rm -f obj/ures/loop.o
 	rm -f obj/ures/main.o
 	rm -f obj/ures/report.o
-	rm -f obj/ures/socket.o

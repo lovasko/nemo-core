@@ -44,13 +44,6 @@ bool grouped_round(struct proto* pr,
                    const uint64_t snum,
                    const struct config* cf);
 
-// Socket.
-bool create_socket4(struct proto* pr, const struct config* cf);
-bool create_socket6(struct proto* pr, const struct config* cf);
-bool get_assigned_port(uint16_t* pn, const struct proto* pr);
-void log_socket_port(const struct proto* pr);
-void delete_socket(const struct proto* pr);
-
 // Target.
 void log_targets(const struct target tg[], const uint64_t cnt, const struct config* cf);
 bool load_targets(struct target* tg, uint64_t* cnt, const struct config* cf);

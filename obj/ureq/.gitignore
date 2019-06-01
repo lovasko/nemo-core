@@ -1,9 +1,7 @@
 config.o
-counters.o
 event.o
 loop.o
 main.o
-relay.o
 report.o
 round.o
 target.o

@@ -7,8 +7,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+#include "common/channel.h"
 #include "common/payload.h"
-#include "common/proto.h"
 #include "ureq/types.h"
 
 
@@ -17,10 +17,10 @@ bool parse_config(struct config* cf, int argc, char* argv[]);
 void log_config(const struct config* cf);
 
 // Event.
-bool wait_for_events(struct proto* pr, const uint64_t dur, const struct config* cf);
+bool wait_for_events(struct channel* ch, const uint64_t dur, const struct config* cf);
 
 // Loop.
-bool request_loop(struct proto* pr, struct target* tg, const struct config* cf);
+bool request_loop(struct channel* ch, struct target* tg, const struct config* cf);
 
 // Report.
 void report_header(const struct config* cf);
@@ -33,12 +33,12 @@ void report_event(const struct payload* hpl,
 bool flush_report_stream(const struct config* cf);
 
 // Round.
-bool dispersed_round(struct proto* pr,
+bool dispersed_round(struct channel* ch,
                      const struct target* tg,
                      const uint64_t ntg,
                      const uint64_t snum,
                      const struct config* cf);
-bool grouped_round(struct proto* pr,
+bool grouped_round(struct channel* ch,
                    const struct target* tg,
                    const uint64_t ntg,
                    const uint64_t snum,

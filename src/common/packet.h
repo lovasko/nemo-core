@@ -13,14 +13,14 @@
 #include <stdbool.h>
 
 #include "common/payload.h"
-#include "common/proto.h"
+#include "common/channel.h"
 
 
-bool send_packet(struct proto* pr,
+bool send_packet(struct channel* ch,
                  const struct payload* hpl,
                  const struct sockaddr_storage addr,
                  const bool err);
-bool receive_packet(struct proto* pr,
+bool receive_packet(struct channel* ch,
                     struct sockaddr_storage* addr,
                     struct payload* hpl,
                     struct payload* npl,

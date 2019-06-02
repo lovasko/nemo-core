@@ -7,11 +7,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "common/channel.h"
 #include "common/plugin.h"
 #include "common/log.h"
 #include "common/payload.h"
 #include "common/signal.h"
-#include "common/socket.h"
 #include "ures/funcs.h"
 #include "ures/types.h"
 
@@ -24,7 +24,7 @@ main(int argc, char* argv[])
   struct config cf;
   struct plugin pi[PLUG_MAX];
   uint64_t npi;
-  struct proto pr;
+  struct channel ch;
 
   // Parse configuration from command-line options.
   retb = parse_config(&cf, argc, argv);
@@ -63,39 +63,33 @@ main(int argc, char* argv[])
 
   // Initialize the IPv4 or IPv6 connection.
   if (cf.cf_ipv4 == true) {
-    reset_stats(&pr.pr_stat);
-    pr.pr_name = "IPv4";
-
-    retb = create_socket4(&pr, (uint16_t)cf.cf_port, cf.cf_rbuf, cf.cf_sbuf, (uint8_t)cf.cf_ttl);
+    retb = open_channel4(&ch, (uint16_t)cf.cf_port, cf.cf_rbuf, cf.cf_sbuf, (uint8_t)cf.cf_ttl);
     if (retb == false) {
-      log(LL_ERROR, false, "unable to create %s socket", pr.pr_name);
+      log(LL_ERROR, false, "unable to create the %s channel", ch.ch_name);
       return EXIT_FAILURE;
     }
   } else {
-    reset_stats(&pr.pr_stat);
-    pr.pr_name = "IPv6";
-
-    retb = create_socket6(&pr, (uint16_t)cf.cf_port, cf.cf_rbuf, cf.cf_sbuf, (uint8_t)cf.cf_ttl);
+    retb = open_channel6(&ch, (uint16_t)cf.cf_port, cf.cf_rbuf, cf.cf_sbuf, (uint8_t)cf.cf_ttl);
     if (retb == false) {
-      log(LL_ERROR, false, "unable to create %s socket", pr.pr_name);
+      log(LL_ERROR, false, "unable to create the %s channel", ch.ch_name);
       return EXIT_FAILURE;
     }
   }
 
   // Start the main responding loop.
-  retb = respond_loop(&pr, pi, npi, &cf);
+  retb = respond_loop(&ch, pi, npi, &cf);
   if (retb == false) {
     log(LL_ERROR, false, "responding loop has been terminated");
   }
 
   // Delete the socket.
-  delete_socket(&pr);
+  close_channel(&ch);
 
   // Terminate plugins.
   terminate_plugins(pi, npi);
 
   // Print final values of counters.
-  log_stats(pr.pr_name, &pr.pr_stat);
+  log_channel(&ch);
 
   // Flush the standard output and error streams.
   retb = flush_report_stream(&cf);

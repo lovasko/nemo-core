@@ -6,10 +6,10 @@
 
 #include <stdlib.h>
 
+#include "common/channel.h"
 #include "common/log.h"
 #include "common/payload.h"
 #include "common/signal.h"
-#include "common/socket.h"
 #include "ureq/funcs.h"
 #include "ureq/types.h"
 
@@ -20,7 +20,7 @@ main(int argc, char* argv[])
 {
   struct target* tg;
   struct config cf;
-  struct proto pr;
+  struct channel ch;
   bool retb;
 
   // Parse command-line options.
@@ -46,21 +46,18 @@ main(int argc, char* argv[])
 
   // Initialize the IPv4 or IPv6 protocols.
   if (cf.cf_ipv4 == true) {
-    pr.pr_name = "IPv4";
-    retb = create_socket4(&pr, 0, cf.cf_rbuf, cf.cf_sbuf, (uint8_t)cf.cf_ttl);
+    retb = open_channel4(&ch, 0, cf.cf_rbuf, cf.cf_sbuf, (uint8_t)cf.cf_ttl);
     if (retb == false) {
-      log(LL_ERROR, false, "unable to create %s socket", pr.pr_name);
+      log(LL_ERROR, false, "unable to create the %s channel", ch.ch_name);
       return EXIT_FAILURE;
     }
   } else {
-    pr.pr_name = "IPv6";
-    retb = create_socket6(&pr, 0, cf.cf_rbuf, cf.cf_sbuf, (uint8_t)cf.cf_ttl);
+    retb = open_channel6(&ch, 0, cf.cf_rbuf, cf.cf_sbuf, (uint8_t)cf.cf_ttl);
     if (retb == false) {
-      log(LL_ERROR, false, "unable to create %s socket", pr.pr_name);
+      log(LL_ERROR, false, "unable to create %s socket", ch.ch_name);
       return EXIT_FAILURE;
     }
   }
-  reset_stats(&pr.pr_stat);
 
   // Allocate the targets.
   tg = calloc((size_t)cf.cf_ntg, sizeof(*tg));
@@ -70,7 +67,7 @@ main(int argc, char* argv[])
   }
 
   // Start issuing requests and waiting for responses.
-  retb = request_loop(&pr, tg, &cf);
+  retb = request_loop(&ch, tg, &cf);
   if (retb == false) {
     log(LL_ERROR, false, "the request loop has terminated");
     return EXIT_FAILURE;
@@ -80,11 +77,11 @@ main(int argc, char* argv[])
   free(tg);
   free(cf.cf_tg);
 
-  // Delete the socket.
-  delete_socket(&pr);
+  // Close the channel.
+  close_channel(&ch);
 
   // Print final values of counters.
-  log_stats(pr.pr_name, &pr.pr_stat);
+  log_channel(&ch);
 
   // Flush the standard output and error streams.
   retb = flush_report_stream(&cf);

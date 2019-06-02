@@ -16,12 +16,12 @@
 #include <inttypes.h>
 #include <errno.h>
 
+#include "common/channel.h"
 #include "common/log.h"
 #include "common/convert.h"
 #include "common/now.h"
 #include "common/signal.h"
 #include "common/packet.h"
-#include "common/socket.h"
 #include "ureq/funcs.h"
 #include "ureq/types.h"
 
@@ -29,11 +29,11 @@
 /// Handle a network event by attempting to receive responses on all available sockets.
 /// @return success/failure indication
 ///
-/// @param[out] pr  protocol
-/// @param[in]  rfd read file descriptors
-/// @param[in]  cf  configuration
+/// @param[in] ch  channel
+/// @param[in] rfd read file descriptors
+/// @param[in] cf  configuration
 static bool
-handle_event(struct proto* pr, const fd_set* rfd, const struct config* cf)
+handle_event(struct channel* ch, const fd_set* rfd, const struct config* cf)
 {
   int reti;
   bool retb;
@@ -49,9 +49,9 @@ handle_event(struct proto* pr, const fd_set* rfd, const struct config* cf)
     return true;
   }
 
-  reti = FD_ISSET(pr->pr_sock, rfd);
+  reti = FD_ISSET(ch->ch_sock, rfd);
   if (reti > 0) {
-    retb = receive_packet(pr, &addr, &hpl, &npl, &ttl, cf->cf_err);
+    retb = receive_packet(ch, &addr, &hpl, &npl, &ttl, cf->cf_err);
     if (retb == false) {
       return false;
     }
@@ -76,10 +76,10 @@ handle_event(struct proto* pr, const fd_set* rfd, const struct config* cf)
 /// @global sterm
 /// @global susr1
 ///
-/// @param[in] pr protocol
+/// @param[in] ch channel
 /// @param[in] cf configuration
 static bool
-handle_interrupt(const struct proto* pr, const struct config* cf)
+handle_interrupt(const struct channel* ch, const struct config* cf)
 {
   log(LL_TRACE, false, "handling interrupt");
 
@@ -98,8 +98,7 @@ handle_interrupt(const struct proto* pr, const struct config* cf)
   // Print logging information and continue the process upon receiving SIGUSR1.
   if (susr1 == true) {
     log_config(cf);
-    log_stats(pr->pr_name, &pr->pr_stat);
-    log_socket_port(pr);
+    log_channel(ch);
 
     // Reset the signal indicator, so that following signal handling will avoid
     // the false positive.
@@ -119,11 +118,11 @@ handle_interrupt(const struct proto* pr, const struct config* cf)
 /// @global sterm
 /// @global susr1
 ///
-/// @param[out] pr  protocol
-/// @param[in]  dur duration to wait for responses
-/// @param[in]  cf  configuration
+/// @param[in] ch  channel
+/// @param[in] dur duration to wait for responses
+/// @param[in] cf  configuration
 bool
-wait_for_events(struct proto* pr, const uint64_t dur, const struct config* cf)
+wait_for_events(struct channel* ch, const uint64_t dur, const struct config* cf)
 {
   int reti;
   uint64_t cur;
@@ -132,7 +131,6 @@ wait_for_events(struct proto* pr, const uint64_t dur, const struct config* cf)
   fd_set rfd;
   sigset_t mask;
   bool retb;
-
 
   // Create the signal mask used for enabling signals during the pselect(2) waiting.
   create_signal_mask(&mask);
@@ -150,7 +148,7 @@ wait_for_events(struct proto* pr, const uint64_t dur, const struct config* cf)
 
     // Ensure that all relevant events are registered.
     FD_ZERO(&rfd);
-    FD_SET(pr->pr_sock, &rfd);
+    FD_SET(ch->ch_sock, &rfd);
 
     // Start waiting on events. The number of file descriptors is based on the fact
     // that the process is expected to have three standard streams open, plus socket, plus one.
@@ -158,7 +156,7 @@ wait_for_events(struct proto* pr, const uint64_t dur, const struct config* cf)
     if (reti == -1) {
       // Check for interrupt (possibly due to a signal).
       if (errno == EINTR) {
-        retb = handle_interrupt(pr, cf);
+        retb = handle_interrupt(ch, cf);
         if (retb == true) {
           continue;
         }
@@ -172,7 +170,7 @@ wait_for_events(struct proto* pr, const uint64_t dur, const struct config* cf)
 
     // Handle the network events by receiving and reporting responses.
     if (reti > 0) {
-      retb = handle_event(pr, &rfd, cf);
+      retb = handle_event(ch, &rfd, cf);
       if (retb == false) {
         return false;
       }

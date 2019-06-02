@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <signal.h>
 
+#include "common/channel.h"
 #include "common/convert.h"
 #include "common/log.h"
 #include "common/now.h"
@@ -26,12 +27,12 @@
 /// @global susr1
 /// @global schld
 ///
-/// @param[in] pr  protocol
+/// @param[in] ch  channel
 /// @param[in] pi  array of plugins
 /// @param[in] npi number of plugins
 /// @param[in] cf  configuration
 static bool
-handle_interrupt(const struct proto* pr,
+handle_interrupt(const struct channel* ch,
                  struct plugin* pi,
                  const uint64_t npi,
                  const struct config* cf)
@@ -64,7 +65,7 @@ handle_interrupt(const struct proto* pr,
   if (susr1 == true) {
     log_config(cf);
     log_plugins(pi, npi);
-    log_stats(pr->pr_name, &pr->pr_stat);
+    log_channel(ch);
 
     // Reset the signal indicator, so that following signal handling will
     // avoid the false positive.
@@ -76,15 +77,15 @@ handle_interrupt(const struct proto* pr,
   return false;
 }
 
-/// Start responding to requests on both IPv4 and IPv6 sockets.
+/// Start responding to requests on a channel.
 /// @return success/failure indication
 ///
-/// @param[out] pr  protocol
-/// @param[in]  pi  array of plugins
-/// @param[in]  npi number of plugins
-/// @param[in]  cf  configuration
+/// @param[in] ch  channel
+/// @param[in] pi  array of plugins
+/// @param[in] npi number of plugins
+/// @param[in] cf  configuration
 bool
-respond_loop(struct proto* pr,
+respond_loop(struct channel* ch,
              struct plugin* pi,
              const uint64_t npi,
              const struct config* cf)
@@ -130,9 +131,9 @@ respond_loop(struct proto* pr,
 
     log(LL_TRACE, false, "waiting for incoming datagrams");
 
-    // Add the protocol socket to the read event list.
+    // Add the channel socket to the read event list.
     FD_ZERO(&rfd);
-    FD_SET(pr->pr_sock, &rfd);
+    FD_SET(ch->ch_sock, &rfd);
 
     // Wait for incoming datagram events. The number of file descriptors is based on the fact
     // that a standard process has three standard streams open, plus the socket, plus one.
@@ -140,7 +141,7 @@ respond_loop(struct proto* pr,
     if (reti == -1) {
       // Check for interrupt (possibly due to a signal).
       if (errno == EINTR) {
-        retb = handle_interrupt(pr, pi, npi, cf);
+        retb = handle_interrupt(ch, pi, npi, cf);
         if (retb == true) {
           continue;
         }
@@ -159,9 +160,9 @@ respond_loop(struct proto* pr,
     }
 
     // Handle incoming datagram.
-    reti = FD_ISSET(pr->pr_sock, &rfd);
+    reti = FD_ISSET(ch->ch_sock, &rfd);
     if (reti > 0) {
-      retb = handle_event(pr, pi, npi, cf);
+      retb = handle_event(ch, pi, npi, cf);
       if (retb == false) {
         return false;
       }

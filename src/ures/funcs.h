@@ -11,9 +11,9 @@
 
 #include <stdlib.h>
 
+#include "common/channel.h"
 #include "common/payload.h"
 #include "common/plugin.h"
-#include "common/proto.h"
 #include "ures/types.h"
 
 
@@ -22,13 +22,13 @@ bool parse_config(struct config* cf, int argc, char* argv[]);
 void log_config(const struct config* cf);
 
 // Event.
-bool handle_event(struct proto* pr,
+bool handle_event(struct channel* ch,
                   const struct plugin* pi,
                   const uint64_t npi,
                   const struct config* cf);
 
 // Loop.
-bool respond_loop(struct proto* pr,
+bool respond_loop(struct channel* ch,
                   struct plugin* pi,
                   const uint64_t npi,
                   const struct config* cf);

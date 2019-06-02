@@ -19,8 +19,7 @@ bin/ureq: obj/common/convert.o \
           obj/common/parse.o   \
           obj/common/packet.o  \
           obj/common/signal.o  \
-          obj/common/stats.o   \
-          obj/common/socket.o  \
+          obj/common/channel.o \
           obj/ureq/config.o    \
           obj/ureq/event.o     \
           obj/ureq/loop.o      \
@@ -35,8 +34,7 @@ bin/ureq: obj/common/convert.o \
   obj/common/parse.o   \
   obj/common/packet.o  \
   obj/common/signal.o  \
-  obj/common/stats.o   \
-  obj/common/socket.o  \
+  obj/common/channel.o \
   obj/ureq/config.o    \
   obj/ureq/event.o     \
   obj/ureq/loop.o      \
@@ -54,8 +52,7 @@ bin/ures: obj/common/convert.o \
           obj/common/packet.o  \
           obj/common/plugin.o  \
           obj/common/signal.o  \
-          obj/common/stats.o   \
-          obj/common/socket.o  \
+          obj/common/channel.o \
           obj/ures/config.o    \
           obj/ures/event.o     \
           obj/ures/loop.o      \
@@ -69,8 +66,7 @@ bin/ures: obj/common/convert.o \
   obj/common/packet.o  \
   obj/common/plugin.o  \
   obj/common/signal.o  \
-  obj/common/stats.o   \
-  obj/common/socket.o  \
+  obj/common/channel.o \
   obj/ures/config.o    \
   obj/ures/event.o     \
   obj/ures/loop.o      \
@@ -138,11 +134,8 @@ obj/common/plugin.o: src/common/plugin.c
 obj/common/signal.o: src/common/signal.c
 	$(CC) $(CFLAGS) -c src/common/signal.c  -o obj/common/signal.o
 
-obj/common/stats.o: src/common/stats.c
-	$(CC) $(CFLAGS) -c src/common/stats.c   -o obj/common/stats.o
-
-obj/common/socket.o: src/common/socket.c
-	$(CC) $(CFLAGS) -c src/common/socket.c  -o obj/common/socket.o
+obj/common/channel.o: src/common/channel.c
+	$(CC) $(CFLAGS) -c src/common/channel.c -o obj/common/channel.o
 
 clean:
 	rm -f bin/ureq
@@ -154,8 +147,7 @@ clean:
 	rm -f obj/common/packet.o
 	rm -f obj/common/plugin.o
 	rm -f obj/common/signal.o
-	rm -f obj/common/stats.o
-	rm -f obj/common/socket.o
+	rm -f obj/common/channel.o
 	rm -f obj/ureq/config.o
 	rm -f obj/ureq/event.o
 	rm -f obj/ureq/loop.o

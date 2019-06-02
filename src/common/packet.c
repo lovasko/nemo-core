@@ -9,6 +9,7 @@
 #include <string.h>
 #include <inttypes.h>
 
+#include "common/channel.h"
 #include "common/convert.h"
 #include "common/packet.h"
 #include "common/log.h"
@@ -71,26 +72,26 @@ decode_payload(struct payload* dst, const struct payload* src)
 /// Verify the incoming payload for correctness.
 /// @return success/failure indication
 ///
-/// @param[out] st protocol event statistics 
-/// @param[in]  pl payload
+/// @param[in] ch  channel
+/// @param[in] hpl payload in host byte order
 static bool
-verify_payload(struct stats* st, const struct payload* pl)
+verify_payload(struct channel* ch, const struct payload* hpl)
 {
   log(LL_TRACE, false, "verifying payload");
 
   // Verify the magic identifier.
-  if (pl->pl_mgic != NEMO_PAYLOAD_MAGIC) {
+  if (hpl->pl_mgic != NEMO_PAYLOAD_MAGIC) {
     log(LL_DEBUG, false, "payload identifier unknown, expected: %"
-        PRIx16 ", actual: %" PRIx16, NEMO_PAYLOAD_MAGIC, pl->pl_mgic);
-    st->st_remg++;
+        PRIx16 ", actual: %" PRIx16, NEMO_PAYLOAD_MAGIC, hpl->pl_mgic);
+    ch->ch_remg++;
     return false;
   }
 
   // Verify the payload version.
-  if (pl->pl_fver != NEMO_PAYLOAD_VERSION) {
+  if (hpl->pl_fver != NEMO_PAYLOAD_VERSION) {
     log(LL_DEBUG, false, "unsupported payload version, expected: %"
-        PRIu8 ", actual: %" PRIu8, NEMO_PAYLOAD_VERSION, pl->pl_fver);
-    st->st_repv++;
+        PRIu8 ", actual: %" PRIu8, NEMO_PAYLOAD_VERSION, hpl->pl_fver);
+    ch->ch_repv++;
     return false;
   }
 
@@ -144,12 +145,12 @@ retrieve_ttl(uint8_t* ttl, struct msghdr* msg)
 ///
 /// @global wrapper
 ///
-/// @param[in] pr   protocol connection
+/// @param[in] ch   channel 
 /// @param[in] hpl  payload in host byte order
 /// @param[in] addr IPv4/IPv6 address
 /// @param[in] err  fail on error
 bool
-send_packet(struct proto* pr,
+send_packet(struct channel* ch,
             const struct payload* hpl,
             struct sockaddr_storage ad,
             const bool er)
@@ -190,13 +191,13 @@ send_packet(struct proto* pr,
   }
 
   // Send the UDP datagram in a non-blocking mode.
-  pr->pr_stat.st_sall++;
-  len = sendmsg(pr->pr_sock, &msg, MSG_DONTWAIT);
+  ch->ch_sall++;
+  len = sendmsg(ch->ch_sock, &msg, MSG_DONTWAIT);
 
   // Verify if sending has completed successfully.
   if (len == -1 || len != (ssize_t)hpl->pl_len) {
     log(lvl, true, "unable to send a payload");
-    pr->pr_stat.st_seni++;
+    ch->ch_seni++;
     return false;
   }
 
@@ -208,7 +209,7 @@ send_packet(struct proto* pr,
 ///
 /// @global wrapper
 ///
-/// @param[in]  pr   protocol connection
+/// @param[in]  ch   channel
 /// @param[in]  addr IPv4/IPv6 address of the sender
 /// @param[out] hpl  payload in host byte order
 /// @param[out] npl  payload in network byte order
@@ -216,7 +217,7 @@ send_packet(struct proto* pr,
 /// @param[in]  msg  message headers
 /// @param[in]  err  exit on error
 bool
-receive_packet(struct proto* pr,
+receive_packet(struct channel* ch,
                struct sockaddr_storage* addr,
                struct payload* hpl,
                struct payload* npl,
@@ -256,27 +257,27 @@ receive_packet(struct proto* pr,
   }
 
   // Receive the message and handle potential errors.
-  pr->pr_stat.st_rall++;
-  len = recvmsg(pr->pr_sock, &msg, MSG_DONTWAIT | MSG_TRUNC);
+  ch->ch_rall++;
+  len = recvmsg(ch->ch_sock, &msg, MSG_DONTWAIT | MSG_TRUNC);
 
   // Check for errors during the receipt.
   if (len < 0) {
     log(lvl, true, "receiving has failed");
-    pr->pr_stat.st_reni++;
+    ch->ch_reni++;
     return false;
   }
 
   // Ensure that at least the base payload has arrived.
   if (len < (ssize_t)sizeof(*npl)) {
     log(lvl, false, "insufficient payload length");
-    pr->pr_stat.st_resz++;
+    ch->ch_resz++;
     return false;
   }
 
   // Check for received packet payload size.
   if (msg.msg_flags & MSG_TRUNC) {
     log(lvl, false, "payload was truncated");
-    pr->pr_stat.st_resz++;
+    ch->ch_resz++;
     return false;
   }
 
@@ -310,7 +311,7 @@ receive_packet(struct proto* pr,
   }
 
   // Verify the payload correctness.
-  retb = verify_payload(&pr->pr_stat, hpl);
+  retb = verify_payload(ch, hpl);
   if (retb == false) {
     log(LL_WARN, false, "invalid payload");
     return false;

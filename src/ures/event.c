@@ -6,6 +6,7 @@
 
 #include <sys/socket.h>
 
+#include "common/channel.h"
 #include "common/convert.h"
 #include "common/log.h"
 #include "common/now.h"
@@ -54,15 +55,15 @@ retrieve_port(const struct sockaddr_storage* ss)
   }
 }
 
-/// Handle the event of an incoming datagram.
+/// Handle the event of an incoming events.
 /// @return success/failure indication
 ///
-/// @param[out] pr  protocol
-/// @param[in]  pi  array of plugins
-/// @param[in]  npi number of plugins
-/// @param[in]  cf  configuration
+/// @param[in] ch  channel
+/// @param[in] pi  array of plugins
+/// @param[in] npi number of plugins
+/// @param[in] cf  configuration
 bool
-handle_event(struct proto* pr,
+handle_event(struct channel* ch,
              const struct plugin* pi,
              const uint64_t npi,
              const struct config* cf)
@@ -74,10 +75,10 @@ handle_event(struct proto* pr,
   uint8_t ttl;
   uint16_t port;
 
-  log(LL_TRACE, false, "handling event on the %s socket", pr->pr_name);
+  log(LL_TRACE, false, "handling event on the %s channel", ch->ch_name);
 
   // Receive a request.
-  retb = receive_packet(pr, &addr, &hpl, &npl, &ttl, cf->cf_err);
+  retb = receive_packet(ch, &addr, &hpl, &npl, &ttl, cf->cf_err);
   if (retb == false) {
     log(LL_WARN, false, "unable to receive datagram on the socket");
 
@@ -119,7 +120,7 @@ handle_event(struct proto* pr,
   }
 
   // Send a response back.
-  retb = send_packet(pr, &hpl, addr, cf->cf_err);
+  retb = send_packet(ch, &hpl, addr, cf->cf_err);
   if (retb == false) {
     log(LL_WARN, false, "unable to send datagram on the socket");
 

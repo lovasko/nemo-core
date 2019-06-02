@@ -8,6 +8,7 @@
 
 #include <string.h>
 
+#include "common/channel.h"
 #include "common/packet.h"
 #include "common/log.h"
 #include "common/now.h"
@@ -75,12 +76,12 @@ set_address(struct sockaddr_storage* ss,
 /// Issue a request against a target.
 /// @return success/failure indication
 ///
-/// @param[out] pr   protocol
-/// @param[in]  snum sequence number
-/// @param[in]  tg   network target
-/// @param[in]  cf   configuration
+/// @param[in] ch   channel
+/// @param[in] snum sequence number
+/// @param[in] tg   network target
+/// @param[in] cf   configuration
 static bool
-issue_request(struct proto* pr,
+issue_request(struct channel* ch,
               const uint64_t snum,
               const struct target* tg,
               const struct config* cf)
@@ -93,8 +94,8 @@ issue_request(struct proto* pr,
   fill_payload(&hpl, tg, snum, cf);
   set_address(&addr, tg, cf);
 
-  // Handle the IPv4 case.
-  retb = send_packet(pr, &hpl, addr, cf->cf_err);
+  // Issue the request.
+  retb = send_packet(ch, &hpl, addr, cf->cf_err);
   if (retb == false) {
     log(LL_WARN, false, "unable to send a request");
     return false;
@@ -106,13 +107,13 @@ issue_request(struct proto* pr,
 /// Single round of issued requests with small pauses after each request.
 /// @return success/failure indication
 ///
-/// @param[out] pr  protocol
-/// @param[in]  tg  array of network targets
-/// @param[in]  ntg number of network targets
-/// @param[in]  sn  sequence number
-/// @param[in]  cf  configuration
+/// @param[in] ch  channel
+/// @param[in] tg  array of network targets
+/// @param[in] ntg number of network targets
+/// @param[in] sn  sequence number
+/// @param[in] cf  configuration
 bool
-dispersed_round(struct proto* pr,
+dispersed_round(struct channel* ch,
                 const struct target* tg,
                 const uint64_t ntg,
                 const uint64_t snum,
@@ -124,7 +125,7 @@ dispersed_round(struct proto* pr,
 
   // In case there are no targets, just sleep throughout the whole round.
   if (ntg == 0) {
-    retb = wait_for_events(pr, cf->cf_int, cf);
+    retb = wait_for_events(ch, cf->cf_int, cf);
     if (retb == false) {
       log(LL_WARN, false, "unable to wait for events");
       return false;
@@ -140,13 +141,13 @@ dispersed_round(struct proto* pr,
 
   // Issue all requests.
   for (i = 0; i < ntg; i++) {
-    retb = issue_request(pr, snum, &tg[i], cf);
+    retb = issue_request(ch, snum, &tg[i], cf);
     if (retb == false) {
       return false;
     }
 
     // Await events for the appropriate fraction of the round.
-    retb = wait_for_events(pr, part, cf);
+    retb = wait_for_events(ch, part, cf);
     if (retb == false) {
       log(LL_WARN, false, "unable to wait for events");
       return false;
@@ -160,13 +161,13 @@ dispersed_round(struct proto* pr,
 /// by a single full pause.
 /// @return success/failure indication
 ///
-/// @param[out] pr  protocol
-/// @param[in]  tg  array of network targets
-/// @param[in]  ntg number of network targets
-/// @param[in]  sn  sequence number
-/// @param[in]  cf  configuration
+/// @param[in] ch  channel
+/// @param[in] tg  array of network targets
+/// @param[in] ntg number of network targets
+/// @param[in] sn  sequence number
+/// @param[in] cf  configuration
 bool
-grouped_round(struct proto* pr,
+grouped_round(struct channel* ch,
               const struct target* tg,
               const uint64_t ntg,
               const uint64_t snum,
@@ -177,14 +178,14 @@ grouped_round(struct proto* pr,
 
   // Issue all requests.
   for (i = 0; i < ntg; i++) {
-    retb = issue_request(pr, snum, &tg[i], cf);
+    retb = issue_request(ch, snum, &tg[i], cf);
     if (retb == false) {
       return false;
     }
   }
 
   // Await events for the remainder of the interval.
-  retb = wait_for_events(pr, cf->cf_int, cf);
+  retb = wait_for_events(ch, cf->cf_int, cf);
   if (retb == false) {
     log(LL_WARN, false, "unable to wait for events");
     return false;

@@ -1,3 +1,4 @@
+channel.o
 convert.o
 log.o
 now.o
@@ -5,6 +6,3 @@ parse.o
 packet.o
 plugin.o
 signal.o
-stats.o
-ttl.o
-socket.o

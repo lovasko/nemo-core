@@ -62,18 +62,10 @@ main(int argc, char* argv[])
   }
 
   // Initialize the IPv4 or IPv6 connection.
-  if (cf.cf_ipv4 == true) {
-    retb = open_channel4(&ch, (uint16_t)cf.cf_port, cf.cf_rbuf, cf.cf_sbuf, (uint8_t)cf.cf_ttl);
-    if (retb == false) {
-      log(LL_ERROR, false, "unable to create the %s channel", ch.ch_name);
-      return EXIT_FAILURE;
-    }
-  } else {
-    retb = open_channel6(&ch, (uint16_t)cf.cf_port, cf.cf_rbuf, cf.cf_sbuf, (uint8_t)cf.cf_ttl);
-    if (retb == false) {
-      log(LL_ERROR, false, "unable to create the %s channel", ch.ch_name);
-      return EXIT_FAILURE;
-    }
+  retb = open_channel(&ch, cf.cf_ipv4, (uint16_t)cf.cf_port, cf.cf_rbuf, cf.cf_sbuf, (uint8_t)cf.cf_ttl);
+  if (retb == false) {
+    log(LL_ERROR, false, "unable to create the %s channel", ch.ch_name);
+    return EXIT_FAILURE;
   }
 
   // Start the main responding loop.

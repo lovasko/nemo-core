@@ -27,16 +27,12 @@ struct channel {
   uint8_t     ch_pad[2]; ///< Padding (unused).
 };
 
-bool open_channel4(struct channel* ch,
-                   const uint16_t port,
-                   const uint64_t rbuf,
-                   const uint64_t sbuf,
-                   const uint8_t ttl);
-bool open_channel6(struct channel* ch,
-                   const uint16_t port,
-                   const uint64_t rbuf,
-                   const uint64_t sbuf,
-                   const uint8_t hops);
+bool open_channel(struct channel* ch,
+                  const bool ipv4,
+                  const uint16_t port,
+                  const uint64_t rbuf,
+                  const uint64_t sbuf,
+                  const uint8_t ttl);
 void log_channel(const struct channel* ch);
 void close_channel(const struct channel* ch);
 

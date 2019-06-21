@@ -45,18 +45,10 @@ main(int argc, char* argv[])
   }
 
   // Initialize the IPv4 or IPv6 protocols.
-  if (cf.cf_ipv4 == true) {
-    retb = open_channel4(&ch, 0, cf.cf_rbuf, cf.cf_sbuf, (uint8_t)cf.cf_ttl);
-    if (retb == false) {
-      log(LL_ERROR, false, "unable to create the %s channel", ch.ch_name);
-      return EXIT_FAILURE;
-    }
-  } else {
-    retb = open_channel6(&ch, 0, cf.cf_rbuf, cf.cf_sbuf, (uint8_t)cf.cf_ttl);
-    if (retb == false) {
-      log(LL_ERROR, false, "unable to create %s socket", ch.ch_name);
-      return EXIT_FAILURE;
-    }
+  retb = open_channel(&ch, cf.cf_ipv4, 0, cf.cf_rbuf, cf.cf_sbuf, (uint8_t)cf.cf_ttl);
+  if (retb == false) {
+    log(LL_ERROR, false, "unable to create the %s channel", ch.ch_name);
+    return EXIT_FAILURE;
   }
 
   // Allocate the targets.

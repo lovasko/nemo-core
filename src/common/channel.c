@@ -18,9 +18,8 @@
 
 /// Obtain the port assigned to the socket during binding. This functions works
 /// for both versions of the IP protocol.
-/// @return success/failure indication
+/// @return port number
 ///
-/// @param[out] port port number
 /// @param[in]  ch   channel
 static uint16_t
 get_assigned_port(const struct channel* ch)
@@ -66,37 +65,80 @@ reset_stats(struct channel* ch)
   ch->ch_seni = 0;
 }
 
-/// Create the IPv4 channel.
+/// Initialise the local address.
+///
+/// @param[out] ss   socket address
+/// @param[out] len  address length
+/// @param[in]  port UDP port
+/// @param[in]  ipv4 usage of the IPv4 protocol
+static void
+init_address(struct sockaddr_storage* ss,
+             size_t* len,
+             const uint16_t port,
+             const bool ipv4)
+{
+  struct sockaddr_in* s4;
+  struct sockaddr_in6* s6;
+
+  (void)memset(ss, 0, sizeof(*ss));
+
+  if (ipv4 == true) {
+    *len = sizeof(*s4);
+    s4   = (struct sockaddr_in*)ss;
+
+    s4->sin_family      = AF_INET;
+    s4->sin_port        = htons(port);
+    s4->sin_addr.s_addr = INADDR_ANY;
+  } else {
+    *len = sizeof(*s6);
+    s6   = (struct sockaddr_in6*)ss;
+
+    s6->sin6_family     = AF_INET6;
+    s6->sin6_port       = htons(port);
+    s6->sin6_addr       = in6addr_any;
+  }
+}
+
+/// Create a IPv4/IPv6 UDP socket.
 /// @return success/failure indication
 ///
 /// @param[in] ch   channel
-/// @param[in] port UDP port
-/// @param[in] rbuf receive buffer size in bytes
-/// @param[in] sbuf send buffer size in bytes
-/// @param[in] ttl  time-to-live value
-bool
-open_channel4(struct channel* ch,
-              const uint16_t port,
-              const uint64_t rbuf,
-              const uint64_t sbuf,
-              const uint8_t ttl)
+/// @param[in] ipv4 usage of the IPv4 protocol
+static bool
+create_socket(struct channel* ch, const bool ipv4)
 {
-  int reti;
-  struct sockaddr_in addr;
-  int val;
+  int pf;
 
-  log(LL_INFO, false, "creating the %s channel", "IPv4");
-
-  reset_stats(ch);
-  ch->ch_name = "IPv4";
-  (void)memset(ch->ch_pad, 0, sizeof(ch->ch_pad));
+  // Select the appropriate protocol family.
+  if (ipv4 == true) {
+    pf = PF_INET;
+  } else {
+    pf = PF_INET6;
+  }
 
   // Create a UDP socket.
-  ch->ch_sock = socket(AF_INET, SOCK_DGRAM, 0);
+  ch->ch_sock = socket(pf, SOCK_DGRAM, IPPROTO_UDP);
   if (ch->ch_sock == -1) {
     log(LL_WARN, true, "unable to initialise the socket");
     return false;
   }
+
+  return true;
+}
+
+/// Attach the channel to a local name. 
+/// @return success/failure indication
+///
+/// @param[in] ch   channel
+/// @param[in] port UDP port number
+/// @param[in] ipv4 usage of the IPv4 protocol
+static bool
+assign_name(struct channel* ch, const uint16_t port, const bool ipv4)
+{
+  int val;
+  int reti;
+  struct sockaddr_storage ss;
+  size_t len;
 
   // Set the socket binding to be re-usable.
   val = 1;
@@ -106,17 +148,43 @@ open_channel4(struct channel* ch,
     return false;
   }
 
-  // Bind the socket to the selected port and local address.
-  (void)memset(&addr, 0, sizeof(addr));
-  addr.sin_family      = AF_INET;
-  addr.sin_port        = htons(port);
-  addr.sin_addr.s_addr = INADDR_ANY;
-  reti = bind(ch->ch_sock, (struct sockaddr*)&addr, sizeof(addr));
+  // Set the socket to only receive IPv6 traffic.
+  if (ipv4 == false) {
+    val = 1;
+    reti = setsockopt(ch->ch_sock, IPPROTO_IPV6, IPV6_V6ONLY, &val, sizeof(val));
+    if (reti == -1) {
+      log(LL_WARN, true, "unable to disable IPv4 traffic on the socket");
+      return false;
+    }
+  }
+
+  // Initialise the appropriate local address.
+  init_address(&ss, &len, ipv4, port);
+
+  // Bind the socket to the address.
+  reti = bind(ch->ch_sock, (struct sockaddr*)&ss, (socklen_t)len);
   if (reti == -1) {
     log(LL_WARN, true, "unable to bind the socket to port %" PRIu16, port);
     return false;
   }
+
+  // Retrieve the assigned port.
   ch->ch_port = get_assigned_port(ch);
+
+  return true;
+}
+
+/// Set the advisory socket buffer sizes.
+/// @return success/failure indication
+/// 
+/// @param[in] ch   channel
+/// @param[in] rbuf receive buffer size in bytes
+/// @param[in] sbuf send buffer size in bytes
+static bool
+set_buffer_sizes(struct channel* ch, const uint64_t rbuf, const uint64_t sbuf)
+{
+  int val;
+  int reti;
 
   // Set the socket receive buffer size.
   val = (int)rbuf;
@@ -134,9 +202,38 @@ open_channel4(struct channel* ch,
     return false;
   }
 
+  return true;
+}
+
+/// Apply time-to-live/hops settings.
+/// @return success/failure indication
+///
+/// @param[in] ch   channel
+/// @param[in] ttl  time-to-live/hops value
+/// @param[in] ipv4 usage of the IPv4 protocol
+static bool
+apply_ttl_prefs(struct channel* ch, const uint8_t ttl, const bool ipv4)
+{
+  int val;
+  int reti;
+  int lvl;
+  int opt_hops;
+  int opt_recv;
+
+  // Select appropriate protocol and option identifiers.
+  if (ipv4 == true) {
+    lvl      = IPPROTO_IP;
+    opt_hops = IP_TTL;
+    opt_recv = IP_RECVTTL;
+  } else {
+    lvl      = IPPROTO_IPV6;
+    opt_hops = IPV6_UNICAST_HOPS;
+    opt_recv = IPV6_RECVHOPLIMIT;
+  }
+
   // Set the outgoing Time-To-Live value.
   val = (int)ttl;
-  reti = setsockopt(ch->ch_sock, IPPROTO_IP, IP_TTL, &val, sizeof(val));
+  reti = setsockopt(ch->ch_sock, lvl, opt_hops, &val, sizeof(val));
   if (reti == -1) {
     log(LL_WARN, true, "unable to set the socket time-to-live to %d", val);
     return false;
@@ -144,7 +241,7 @@ open_channel4(struct channel* ch,
 
   // Request the ancillary control message for IP TTL value.
   val = 1;
-  reti = setsockopt(ch->ch_sock, IPPROTO_IP, IP_RECVTTL, &val, sizeof(val));
+  reti = setsockopt(ch->ch_sock, lvl, opt_recv, &val, sizeof(val));
   if (reti == -1) {
     log(LL_WARN, true, "unable to request time-to-live values on the socket");
     return false;
@@ -153,90 +250,51 @@ open_channel4(struct channel* ch,
   return true;
 }
 
-/// Create the IPv6 channel.
+/// Create the channel.
 /// @return success/failure indication
 ///
 /// @param[in] ch   channel
+/// @param[in] ipv4 IPv4 protocol usage
 /// @param[in] port UDP port
 /// @param[in] rbuf receive buffer size in bytes
 /// @param[in] sbuf send buffer size in bytes
-/// @param[in] hops time-to-live value
+/// @param[in] ttl  time-to-live value
 bool
-open_channel6(struct channel* ch,
-              const uint16_t port,
-              const uint64_t rbuf,
-              const uint64_t sbuf,
-              const uint8_t hops)
+open_channel(struct channel* ch,
+             const bool ipv4,
+             const uint16_t port,
+             const uint64_t rbuf,
+             const uint64_t sbuf,
+             const uint8_t ttl)
 {
-  int reti;
-  struct sockaddr_in6 addr;
-  int val;
+  int retb;
 
-  log(LL_INFO, false, "creating the %s channel", "IPv6");
+  log(LL_INFO, false, "creating the %s channel", "IPv4");
+
+  (void)memset(ch, 0, sizeof(*ch));
+  reset_stats(ch);
 
   // Create a UDP socket.
-  ch->ch_sock = socket(AF_INET6, SOCK_DGRAM, 0);
-  if (ch->ch_sock == -1) {
-    log(LL_WARN, true, "unable to initialize the socket");
+  retb = create_socket(ch, ipv4);
+  if (retb == false) {
     return false;
   }
 
-  // Set the socket binding to be re-usable.
-  val = 1;
-  reti = setsockopt(ch->ch_sock, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val));
-  if (reti == -1) {
-    log(LL_WARN, true, "unable to set the socket address reusable");
+  // Bind the socket to a local address and port.
+  retb = assign_name(ch, port, ipv4);
+  if (retb == false) {
     return false;
   }
 
-  // Set the socket to only receive IPv6 traffic.
-  val = 1;
-  reti = setsockopt(ch->ch_sock, IPPROTO_IPV6, IPV6_V6ONLY, &val, sizeof(val));
-  if (reti == -1) {
-    log(LL_WARN, true, "unable to disable IPv4 traffic on the socket");
+  // Request buffer sizes from the kernel.
+  retb = set_buffer_sizes(ch, rbuf, sbuf);
+  if (retb == false) {
     return false;
   }
 
-  // Bind the socket to the selected port and local address.
-  (void)memset(&addr, 0, sizeof(addr));
-  addr.sin6_family = AF_INET6;
-  addr.sin6_port   = htons(port);
-  addr.sin6_addr   = in6addr_any;
-  reti = bind(ch->ch_sock, (struct sockaddr*)&addr, sizeof(addr));
-  if (reti == -1) {
-    log(LL_WARN, true, "unable to bind the socket");
-    return false;
-  }
-
-  // Set the socket receive buffer size.
-  val = (int)rbuf;
-  reti = setsockopt(ch->ch_sock, SOL_SOCKET, SO_RCVBUF, &val, sizeof(val));
-  if (reti == -1) {
-    log(LL_WARN, true, "unable to set the receive buffer size to %d", val);
-    return false;
-  }
-
-  // Set the socket send buffer size.
-  val = (int)sbuf;
-  reti = setsockopt(ch->ch_sock, SOL_SOCKET, SO_SNDBUF, &val, sizeof(val));
-  if (reti == -1) {
-    log(LL_WARN, true, "unable to set the send buffer size to %d", val);
-    return false;
-  }
-
-  // Set the outgoing hop count.
-  val = (int)hops;
-  reti = setsockopt(ch->ch_sock, IPPROTO_IPV6, IPV6_UNICAST_HOPS, &val, sizeof(val));
-  if (reti == -1) {
-    log(LL_WARN, true, "unable to set hop count to %d", val);
-    return false;
-  }
-
-  // Request the ancillary control message for hop counts.
-  val = 1;
-  reti = setsockopt(ch->ch_sock, IPPROTO_IPV6, IPV6_RECVHOPLIMIT, &val, sizeof(val));
-  if (reti == -1) {
-    log(LL_WARN, true, "unable to request hop count values");
+  // Apply settings that relate to the IP time-to-live value.
+  retb = apply_ttl_prefs(ch, ttl, ipv4);
+  if (retb == false) {
     return false;
   }
 

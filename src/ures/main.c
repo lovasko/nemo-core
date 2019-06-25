@@ -35,7 +35,7 @@ main(int argc, char* argv[])
 
   // Verify that the compiled payload is exactly the expected size in bytes.
   if (sizeof(struct payload) != NEMO_PAYLOAD_SIZE) {
-    log(LL_ERROR, false, "wrong payload size: expected %d, actual %z",
+    log(LL_ERROR, false, "wrong payload size: expected %d, actual %zu",
       NEMO_PAYLOAD_SIZE, sizeof(struct payload));
     return EXIT_FAILURE;
   }

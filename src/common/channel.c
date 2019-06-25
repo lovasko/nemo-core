@@ -269,7 +269,13 @@ open_channel(struct channel* ch,
 {
   int retb;
 
-  log(LL_INFO, false, "creating the %s channel", "IPv4");
+  if (ipv4 == true) {
+    ch->ch_name = "IPv4";
+  } else {
+    ch->ch_name = "IPv6";
+  }
+
+  log(LL_INFO, false, "creating the %s channel", ch->ch_name);
 
   (void)memset(ch, 0, sizeof(*ch));
   reset_stats(ch);

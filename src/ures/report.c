@@ -34,8 +34,11 @@ report_header(const struct config* cf)
   }
 
   // Print the CSV header of the standard output.
-  (void)printf("key,seq_num,seq_len,addr_req,port_req,ttl_dep_req,ttl_arr_res,"
-               "real_dep_req,real_arr_res,mono_dep_req,mono_arr_res\n");
+  (void)printf("key,seq_num,seq_len,"
+               "host_req,addr_req,port_req,host_res,"
+               "ttl_dep_req,ttl_arr_res,"
+               "real_dep_req,real_arr_res,"
+               "mono_dep_req,mono_arr_res\n");
 }
 
 /// Report the event of the incoming datagram by printing a CSV-formatted line
@@ -43,11 +46,13 @@ report_header(const struct config* cf)
 ///
 /// @param[in] hpl  payload in host byte order
 /// @param[in] npl  payload in network byte order
+/// @param[in] hn   local host name
 /// @param[in] port requesters port
 /// @param[in] cf   configuration
 void
 report_event(const struct payload* hpl,
              const struct payload* npl,
+             const char hn[static NEMO_HOST_NAME_SIZE],
              const uint16_t port,
              const struct config* cf)
 {
@@ -89,8 +94,10 @@ report_event(const struct payload* hpl,
   (void)printf("%" PRIu64 ","   // key
                "%" PRIu64 ","   // seq_num
                "%" PRIu64 ","   // seq_len
+               "%.*s,"          // host_req
                "%s,"            // addr_req
                "%" PRIu16 ","   // port_req
+               "%.*s,"          // host_res
                "%" PRIu8  ","   // ttl_dep_req
                "%s,"            // ttl_arr_res
                "%" PRIu64 ","   // real_dep_req
@@ -98,7 +105,9 @@ report_event(const struct payload* hpl,
                "%" PRIu64 ","   // mono_dep_req
                "%" PRIu64 "\n", // mono_arr_res 
                hpl->pl_key, hpl->pl_snum, hpl->pl_slen,
+               NEMO_HOST_NAME_SIZE, hpl->pl_host,
                addrstr, port,
+               NEMO_HOST_NAME_SIZE, hn, 
                hpl->pl_ttl1, ttlstr,
                hpl->pl_rtm1, hpl->pl_rtm2,
                hpl->pl_mtm1, hpl->pl_mtm2);

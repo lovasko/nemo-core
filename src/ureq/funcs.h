@@ -17,7 +17,10 @@ bool parse_config(struct config* cf, int argc, char* argv[]);
 void log_config(const struct config* cf);
 
 // Event.
-bool wait_for_events(struct channel* ch, const uint64_t dur, const struct config* cf);
+bool wait_for_events(struct channel* ch,
+                     const uint64_t dur,
+                     const char hn[static NEMO_HOST_NAME_SIZE],
+                     const struct config* cf);
 
 // Loop.
 bool request_loop(struct channel* ch, struct target* tg, const struct config* cf);
@@ -26,6 +29,7 @@ bool request_loop(struct channel* ch, struct target* tg, const struct config* cf
 void report_header(const struct config* cf);
 void report_event(const struct payload* hpl,
                   const struct payload* npl,
+                  const char hn[static NEMO_HOST_NAME_SIZE],
                   const uint64_t real,
                   const uint64_t mono, 
                   const uint8_t ttl,
@@ -37,11 +41,13 @@ bool dispersed_round(struct channel* ch,
                      const struct target* tg,
                      const uint64_t ntg,
                      const uint64_t snum,
+                     const char hn[static NEMO_HOST_NAME_SIZE],
                      const struct config* cf);
 bool grouped_round(struct channel* ch,
                    const struct target* tg,
                    const uint64_t ntg,
                    const uint64_t snum,
+                   const char hn[static NEMO_HOST_NAME_SIZE],
                    const struct config* cf);
 
 // Target.

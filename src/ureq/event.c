@@ -31,9 +31,13 @@
 ///
 /// @param[in] ch  channel
 /// @param[in] rfd read file descriptors
+/// @param[in] hn  local host name
 /// @param[in] cf  configuration
 static bool
-handle_event(struct channel* ch, const fd_set* rfd, const struct config* cf)
+handle_event(struct channel* ch,
+             const fd_set* rfd,
+             const char hn[static NEMO_HOST_NAME_SIZE],
+             const struct config* cf)
 {
   int reti;
   bool retb;
@@ -62,7 +66,7 @@ handle_event(struct channel* ch, const fd_set* rfd, const struct config* cf)
   mono = mono_now();
 
   // Create a report entry based on the received payload.
-  report_event(&hpl, &npl, real, mono, ttl, cf);
+  report_event(&hpl, &npl, hn, real, mono, ttl, cf);
 
   // TODO notify plugins
 
@@ -120,9 +124,13 @@ handle_interrupt(const struct channel* ch, const struct config* cf)
 ///
 /// @param[in] ch  channel
 /// @param[in] dur duration to wait for responses
+/// @param[in] hn  local host name
 /// @param[in] cf  configuration
 bool
-wait_for_events(struct channel* ch, const uint64_t dur, const struct config* cf)
+wait_for_events(struct channel* ch,
+                const uint64_t dur,
+                const char hn[static NEMO_HOST_NAME_SIZE],
+                const struct config* cf)
 {
   int reti;
   uint64_t cur;
@@ -170,7 +178,7 @@ wait_for_events(struct channel* ch, const uint64_t dur, const struct config* cf)
 
     // Handle the network events by receiving and reporting responses.
     if (reti > 0) {
-      retb = handle_event(ch, &rfd, cf);
+      retb = handle_event(ch, &rfd, hn, cf);
       if (retb == false) {
         return false;
       }

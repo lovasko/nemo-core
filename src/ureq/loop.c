@@ -13,6 +13,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include <unistd.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -45,9 +46,19 @@ request_loop(struct channel* ch, struct target* tg, const struct config* cf)
   uint64_t rld;
   uint64_t now;
   bool retb;
+  int reti;
+  char hn[NEMO_HOST_NAME_SIZE];
 
   // Log the current configuration.
   log_config(cf);
+
+  // Obtain the host name.
+  (void)memset(hn, 0, sizeof(hn));
+  reti = gethostname(hn, sizeof(hn) - 1);
+  if (reti == -1) {
+    log(LL_WARN, true, "unable to obtain host name");
+    return false;
+  }
 
   // Print the CSV header of the standard output.
   report_header(cf);
@@ -90,12 +101,12 @@ request_loop(struct channel* ch, struct target* tg, const struct config* cf)
 
     // Select the appropriate type of issuing requests in the round.
     if (cf->cf_grp == true) {
-      retb = grouped_round(ch, tg, ntg, i, cf);
+      retb = grouped_round(ch, tg, ntg, i, hn, cf);
       if (retb == false) {
         return false;
       }
     } else {
-      retb = dispersed_round(ch, tg, ntg, i, cf);
+      retb = dispersed_round(ch, tg, ntg, i, hn, cf);
       if (retb == false) {
         return false;
       }
@@ -105,7 +116,7 @@ request_loop(struct channel* ch, struct target* tg, const struct config* cf)
   // Await events after issuing all requests. The intention is to wait for
   // potential responses to the last few requests.
   log(LL_TRACE, false, "waiting for final events");
-  retb = wait_for_events(ch, cf->cf_wait, cf);
+  retb = wait_for_events(ch, cf->cf_wait, hn, cf);
   if (retb == false) {
     log(LL_WARN, false, "unable to wait for final events");
     return false;

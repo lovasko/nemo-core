@@ -6,6 +6,8 @@
 
 #include <sys/socket.h>
 
+#include <string.h>
+
 #include "common/channel.h"
 #include "common/convert.h"
 #include "common/log.h"
@@ -20,10 +22,14 @@
 /// @return success/failure indication
 ///
 /// @param[in] pl  payload
-/// @param[in] ttl Time-To-Live value
+/// @param[in] hn  local host name
+/// @param[in] ttl time-to-live value
 /// @param[in] cf  configuration
 static void 
-update_payload(struct payload* pl, const uint8_t ttl, const struct config* cf)
+update_payload(struct payload* pl,
+               const char hn[static NEMO_HOST_NAME_SIZE],
+               const uint8_t ttl,
+               const struct config* cf)
 {
   log(LL_TRACE, false, "updating payload");
 
@@ -33,6 +39,7 @@ update_payload(struct payload* pl, const uint8_t ttl, const struct config* cf)
   pl->pl_rtm2 = real_now();
   pl->pl_ttl2 = ttl;
   pl->pl_ttl3 = (uint8_t)cf->cf_ttl;
+  (void)memcpy(pl->pl_host, hn, NEMO_HOST_NAME_SIZE);
 }
 
 /// Retrieve the UDP port number from an address.
@@ -59,11 +66,13 @@ retrieve_port(const struct sockaddr_storage* ss)
 /// @return success/failure indication
 ///
 /// @param[in] ch  channel
+/// @param[in] hn  host name
 /// @param[in] pi  array of plugins
 /// @param[in] npi number of plugins
 /// @param[in] cf  configuration
 bool
 handle_event(struct channel* ch,
+             const char hn[static NEMO_HOST_NAME_SIZE],
              const struct plugin* pi,
              const uint64_t npi,
              const struct config* cf)
@@ -106,10 +115,10 @@ handle_event(struct channel* ch,
   }
 
   // Update payload.
-  update_payload(&hpl, ttl, cf);
+  update_payload(&hpl, hn, ttl, cf);
 
   // Report the event as a entry in the CSV output.
-  report_event(&hpl, &npl, port, cf);
+  report_event(&hpl, &npl, hn, port, cf);
 
   // Notify all attached plugins about the payload.
   notify_plugins(pi, npi, &hpl);

@@ -6,6 +6,8 @@
 
 #include <sys/select.h>
 
+#include <unistd.h>
+#include <string.h>
 #include <stdbool.h>
 #include <errno.h>
 #include <signal.h>
@@ -98,12 +100,21 @@ respond_loop(struct channel* ch,
   struct timespec* ptout;
   uint64_t lim;
   uint64_t cur;
+  char hn[NEMO_HOST_NAME_SIZE];
 
   log(LL_INFO, false, "starting the response loop");
   log_config(cf);
 
   // Print the CSV header of the standard output.
   report_header(cf);
+
+  // Obtain the host name.
+  (void)memset(hn, 0, sizeof(hn));
+  reti = gethostname(hn, sizeof(hn) - 1);
+  if (reti == -1) {
+    log(LL_WARN, true, "unable to obtain host name");
+    return false;
+  }
 
   // Create the signal mask used for enabling signals during the pselect(2)
   // waiting.
@@ -162,7 +173,7 @@ respond_loop(struct channel* ch,
     // Handle incoming datagram.
     reti = FD_ISSET(ch->ch_sock, &rfd);
     if (reti > 0) {
-      retb = handle_event(ch, pi, npi, cf);
+      retb = handle_event(ch, hn, pi, npi, cf);
       if (retb == false) {
         return false;
       }

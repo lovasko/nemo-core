@@ -22,11 +22,13 @@
 /// @param[in] hpl  payload in host byte order
 /// @param[in] tg   network target
 /// @param[in] snum sequence number
+/// @param[in] hn   local host name
 /// @param[in] cf   configuration
 static void
 fill_payload(struct payload *hpl,
              const struct target* tg,
              const uint64_t snum,
+             const char hn[static NEMO_HOST_NAME_SIZE],
              const struct config* cf)
 {
   (void)memset(hpl, 0, sizeof(*hpl));
@@ -42,12 +44,14 @@ fill_payload(struct payload *hpl,
   hpl->pl_haddr = tg->tg_haddr;
   hpl->pl_rtm1  = real_now();
   hpl->pl_mtm1  = mono_now();
+  (void)memcpy(hpl->pl_host, hn, NEMO_HOST_NAME_SIZE);
 }
 
 /// Convert the target address to a universal standard address type.
 ///
 /// @param[out] ss universal address type
 /// @param[in]  tg network target
+/// @param[in]  cf configuration
 static void
 set_address(struct sockaddr_storage* ss,
             const struct target* tg,
@@ -79,11 +83,13 @@ set_address(struct sockaddr_storage* ss,
 /// @param[in] ch   channel
 /// @param[in] snum sequence number
 /// @param[in] tg   network target
+/// @param[in] hn   local host name
 /// @param[in] cf   configuration
 static bool
 issue_request(struct channel* ch,
               const uint64_t snum,
               const struct target* tg,
+              const char hn[static NEMO_HOST_NAME_SIZE],
               const struct config* cf)
 {
   bool retb;
@@ -91,7 +97,7 @@ issue_request(struct channel* ch,
   struct sockaddr_storage addr;
 
   // Prepare data for transmission.
-  fill_payload(&hpl, tg, snum, cf);
+  fill_payload(&hpl, tg, snum, hn, cf);
   set_address(&addr, tg, cf);
 
   // Issue the request.
@@ -111,12 +117,14 @@ issue_request(struct channel* ch,
 /// @param[in] tg  array of network targets
 /// @param[in] ntg number of network targets
 /// @param[in] sn  sequence number
+/// @param[in] hn  local host name
 /// @param[in] cf  configuration
 bool
 dispersed_round(struct channel* ch,
                 const struct target* tg,
                 const uint64_t ntg,
                 const uint64_t snum,
+                const char hn[static NEMO_HOST_NAME_SIZE],
                 const struct config* cf)
 {
   uint64_t i;
@@ -125,7 +133,7 @@ dispersed_round(struct channel* ch,
 
   // In case there are no targets, just sleep throughout the whole round.
   if (ntg == 0) {
-    retb = wait_for_events(ch, cf->cf_int, cf);
+    retb = wait_for_events(ch, cf->cf_int, hn, cf);
     if (retb == false) {
       log(LL_WARN, false, "unable to wait for events");
       return false;
@@ -141,13 +149,13 @@ dispersed_round(struct channel* ch,
 
   // Issue all requests.
   for (i = 0; i < ntg; i++) {
-    retb = issue_request(ch, snum, &tg[i], cf);
+    retb = issue_request(ch, snum, &tg[i], hn, cf);
     if (retb == false) {
       return false;
     }
 
     // Await events for the appropriate fraction of the round.
-    retb = wait_for_events(ch, part, cf);
+    retb = wait_for_events(ch, part, hn, cf);
     if (retb == false) {
       log(LL_WARN, false, "unable to wait for events");
       return false;
@@ -165,12 +173,14 @@ dispersed_round(struct channel* ch,
 /// @param[in] tg  array of network targets
 /// @param[in] ntg number of network targets
 /// @param[in] sn  sequence number
+/// @param[in] hn  local host name
 /// @param[in] cf  configuration
 bool
 grouped_round(struct channel* ch,
               const struct target* tg,
               const uint64_t ntg,
               const uint64_t snum,
+              const char hn[static NEMO_HOST_NAME_SIZE],
               const struct config* cf)
 {
   uint64_t i;
@@ -178,14 +188,14 @@ grouped_round(struct channel* ch,
 
   // Issue all requests.
   for (i = 0; i < ntg; i++) {
-    retb = issue_request(ch, snum, &tg[i], cf);
+    retb = issue_request(ch, snum, &tg[i], hn, cf);
     if (retb == false) {
       return false;
     }
   }
 
   // Await events for the remainder of the interval.
-  retb = wait_for_events(ch, cf->cf_int, cf);
+  retb = wait_for_events(ch, cf->cf_int, hn, cf);
   if (retb == false) {
     log(LL_WARN, false, "unable to wait for events");
     return false;

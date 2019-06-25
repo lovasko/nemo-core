@@ -23,6 +23,7 @@ void log_config(const struct config* cf);
 
 // Event.
 bool handle_event(struct channel* ch,
+                  const char hn[static NEMO_HOST_NAME_SIZE],
                   const struct plugin* pi,
                   const uint64_t npi,
                   const struct config* cf);
@@ -37,6 +38,7 @@ bool respond_loop(struct channel* ch,
 void report_header(const struct config* cf);
 void report_event(const struct payload* hpl,
                   const struct payload* npl,
+                  const char hn[static NEMO_HOST_NAME_SIZE],
                   const uint16_t port,
                   const struct config* cf);
 bool flush_report_stream(const struct config* cf);

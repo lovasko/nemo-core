@@ -34,7 +34,7 @@ report_header(const struct config* cf)
   }
 
   // Print the CSV header of the standard output.
-  (void)printf("key,seq_num,seq_len,addr_res,"
+  (void)printf("key,seq_num,seq_len,addr_res,host_req,host_res,"
                "ttl_dep_req,ttl_arr_res,ttl_dep_res,ttl_arr_req,"
                "real_dep_req,real_arr_res,real_arr_req,"
                "mono_dep_req,mono_arr_res,mono_arr_req\n");
@@ -45,11 +45,15 @@ report_header(const struct config* cf)
 ///
 /// @param[in] hpl  payload in host byte order
 /// @param[in] npl  payload in network byte order
-/// @param[in] port requesters port
+/// @param[in] hn   local host name
+/// @param[in] real real-time of the receipt
+/// @param[in] mono monotonic time of receipt
+/// @param[in] ttl  time-to-live upon receipt
 /// @param[in] cf   configuration
 void
 report_event(const struct payload* hpl,
              const struct payload* npl,
+             const char hn[static NEMO_HOST_NAME_SIZE],
              const uint64_t real,
              const uint64_t mono,
              const uint8_t ttl,
@@ -102,6 +106,8 @@ report_event(const struct payload* hpl,
                "%" PRIu64 ","   // seq_num
                "%" PRIu64 ","   // seq_len
                "%s,"            // addr_res
+               "%*.s,"          // host_req
+               "%*.s,"          // host_res
                "%" PRIu8  ","   // ttl_dep_req
                "%s,"            // ttl_arr_res
                "%" PRIu8  ","   // ttl_dep_res
@@ -113,6 +119,8 @@ report_event(const struct payload* hpl,
                "%" PRIu64 ","   // mono_arr_res
                "%" PRIu64 "\n", // mono_arr_req
                hpl->pl_key,  hpl->pl_snum, hpl->pl_slen, addrstr,
+               NEMO_HOST_NAME_SIZE, hn,
+               NEMO_HOST_NAME_SIZE, hpl->pl_host,
                hpl->pl_ttl1, ttl2str, hpl->pl_ttl3, ttl4str,
                hpl->pl_rtm1, hpl->pl_rtm2, real,
                hpl->pl_mtm1, hpl->pl_mtm2, mono);

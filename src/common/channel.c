@@ -159,7 +159,7 @@ assign_name(struct channel* ch, const uint16_t port, const bool ipv4)
   }
 
   // Initialise the appropriate local address.
-  init_address(&ss, &len, ipv4, port);
+  init_address(&ss, &len, port, ipv4);
 
   // Bind the socket to the address.
   reti = bind(ch->ch_sock, (struct sockaddr*)&ss, (socklen_t)len);

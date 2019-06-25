@@ -44,7 +44,7 @@ main(int argc, char* argv[])
     return EXIT_FAILURE;
   }
 
-  // Initialize the IPv4 or IPv6 protocols.
+  // Initialize the channel used to send and receive payloads.
   retb = open_channel(&ch, cf.cf_ipv4, 0, cf.cf_rbuf, cf.cf_sbuf, (uint8_t)cf.cf_ttl);
   if (retb == false) {
     log(LL_ERROR, false, "unable to create the %s channel", ch.ch_name);

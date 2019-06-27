@@ -126,7 +126,7 @@ obj/common/parse.o: src/common/parse.c
 	$(CC) $(CFLAGS) -c src/common/parse.c   -o obj/common/parse.o
 
 obj/common/packet.o: src/common/packet.c
-	$(CC) $(CFLAGS) -c src/common/packet.c -o obj/common/packet.o
+	$(CC) $(CFLAGS) -c src/common/packet.c  -o obj/common/packet.o
 
 obj/common/plugin.o: src/common/plugin.c
 	$(CC) $(CFLAGS) -c src/common/plugin.c  -o obj/common/plugin.o

@@ -28,7 +28,7 @@
 #define DEF_INTERVAL       1000000000 ///< One second pause between payloads.
 #define DEF_FINAL_WAIT     2000000000 ///< Two second wait time for responses.
 #define DEF_UPDATE         60000000000 ///< One minute period of name resolution update.
-#define DEF_TIME_TO_LIVE   32         ///< IP Time-To-Live value.
+#define DEF_TIME_TO_LIVE   64          ///< IP Time-To-Live value.
 #define DEF_EXIT_ON_ERROR  false      ///< Process exit on publishing error.
 #define DEF_LOG_LEVEL      LL_WARN    ///< Log errors and warnings by default.
 #define DEF_LOG_COLOR      true       ///< Colors in the notification output.

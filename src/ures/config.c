@@ -28,7 +28,6 @@
 #define DEF_TIME_TO_LIVE        64
 #define DEF_MONOLOGUE           false
 #define DEF_SILENT              false
-#define DEF_BINARY              false
 #define DEF_KEY                 0
 #define DEF_TIMEOUT             0
 #define DEF_LENGTH              0
@@ -50,7 +49,6 @@ print_usage(void)
     "Options:\n"
     "  -6      Use the IPv6 protocol.\n"
     "  -a OBJ  Attach a plugin from a shared object file.\n"
-    "  -b      Reporting data to be in binary format.\n"
     "  -d DUR  Time-out for lack of incoming requests.\n"
     "  -e      Stop the process on first transmission error.\n"
     "  -h      Print this help message.\n"
@@ -105,20 +103,6 @@ option_a(struct config* cf, const char* in)
 
   cf->cf_plgs[i] = in;
   i++;
-
-  return true;
-}
-
-/// Change the reporting to binary mode.
-/// @return success/failure indication
-///
-/// @param[out] cf configuration
-/// @param[in]  in argument input (unused)
-static bool
-option_b(struct config* cf, const char* in)
-{
-  (void)in;
-  cf->cf_bin = true;
 
   return true;
 }
@@ -322,7 +306,6 @@ set_defaults(struct config* cf)
   cf->cf_ttl  = DEF_TIME_TO_LIVE;
   cf->cf_mono = DEF_MONOLOGUE;
   cf->cf_sil  = DEF_SILENT;
-  cf->cf_bin  = DEF_BINARY;
   cf->cf_llvl = (log_lvl = DEF_LOG_LEVEL);
   cf->cf_lcol = (log_col = DEF_LOG_COLOR);
   cf->cf_ipv4 = DEF_PROTO_VERSION_4;
@@ -373,10 +356,9 @@ parse_config(struct config* cf, int argc, char* argv[])
   bool retb;
   uint64_t i;
   char optdsl[128];
-  struct option opts[16] = {
+  struct option opts[15] = {
     { '6',  false, option_6 },
     { 'a',  true , option_a },
-    { 'b',  false, option_b },
     { 'd',  true,  option_d },
     { 'e',  false, option_e },
     { 'h',  false, option_h },
@@ -395,7 +377,7 @@ parse_config(struct config* cf, int argc, char* argv[])
   log(LL_INFO, false, "parsing command-line options");
 
   (void)memset(optdsl, '\0', sizeof(optdsl));
-  generate_getopt_string(optdsl, opts, 16);
+  generate_getopt_string(optdsl, opts, 15);
 
   // Set optional arguments to sensible defaults.
   retb = set_defaults(cf);
@@ -421,7 +403,7 @@ parse_config(struct config* cf, int argc, char* argv[])
     }
 
     // Find the relevant option.
-    for (i = 0; i < 16; i++) {
+    for (i = 0; i < 15; i++) {
       if (opts[i].op_name == (char)opt) {
         retb = opts[i].op_act(cf, optarg);
         if (retb == false) {
@@ -455,7 +437,6 @@ void
 log_config(const struct config* cf)
 {
   const char* mono;
-  const char* bin;
   const char* ipv;
   const char* err;
   char key[32];
@@ -467,13 +448,6 @@ log_config(const struct config* cf)
     mono = "yes";
   } else {
     mono = "no";
-  }
-
-  // Binary output.
-  if (cf->cf_bin == true) {
-    bin = "yes";
-  } else {
-    bin = "no";
   }
 
   // Internet protocol version.
@@ -521,5 +495,4 @@ log_config(const struct config* cf)
   log(LL_DEBUG, false, "internet protocol version: %s", ipv);
   log(LL_DEBUG, false, "exit on error: %s", err);
   log(LL_DEBUG, false, "monologue mode: %s", mono);
-  log(LL_DEBUG, false, "binary report: %s", bin);
 }

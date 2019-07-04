@@ -28,11 +28,6 @@ report_header(const struct config* cf)
     return;
   }
 
-  // Binary mode has no header.
-  if (cf->cf_bin == true) {
-    return;
-  }
-
   // Print the CSV header of the standard output.
   (void)printf("key,seq_num,seq_len,"
                "host_req,addr_req,port_req,host_res,"
@@ -44,14 +39,12 @@ report_header(const struct config* cf)
 /// Report the event of the incoming datagram by printing a CSV-formatted line
 /// to the standard output stream.
 ///
-/// @param[in] hpl  payload in host byte order
-/// @param[in] npl  payload in network byte order
+/// @param[in] pl  payload in host byte order
 /// @param[in] hn   local host name
 /// @param[in] port requesters port
 /// @param[in] cf   configuration
 void
-report_event(const struct payload* hpl,
-             const struct payload* npl,
+report_event(const struct payload* pl,
              const char hn[static NEMO_HOST_NAME_SIZE],
              const uint16_t port,
              const struct config* cf)
@@ -66,29 +59,23 @@ report_event(const struct payload* hpl,
     return;
   }
 
-  // Binary mode expects the payload in a on-wire encoding.
-  if (cf->cf_bin == true) {
-    (void)fwrite(npl, sizeof(*npl), 1, stdout);
-    return;
-  }
-
   (void)memset(addrstr, '\0', sizeof(addrstr));
   (void)memset(ttlstr,  '\0', sizeof(ttlstr));
 
   // Convert the IP address into a string.
   if (cf->cf_ipv4 == true) {
-    a4.s_addr = (uint32_t)hpl->pl_laddr;
+    a4.s_addr = (uint32_t)pl->pl_laddr;
     (void)inet_ntop(AF_INET, &a4, addrstr, sizeof(addrstr));
   } else {
-    tipv6(&a6, hpl->pl_laddr, hpl->pl_haddr);
+    tipv6(&a6, pl->pl_laddr, pl->pl_haddr);
     (void)inet_ntop(AF_INET6, &a6, addrstr, sizeof(addrstr));
   }
 
   // If no TTL was received, report it as not available.
-  if (hpl->pl_ttl2 == 0) {
+  if (pl->pl_ttl2 == 0) {
     (void)strncpy(ttlstr, "N/A", sizeof(ttlstr));
   } else {
-    (void)snprintf(ttlstr, sizeof(ttlstr), "%" PRIu8, hpl->pl_ttl2);
+    (void)snprintf(ttlstr, sizeof(ttlstr), "%" PRIu8, pl->pl_ttl2);
   }
 
   (void)printf("%" PRIu64 ","   // key
@@ -104,13 +91,13 @@ report_event(const struct payload* hpl,
                "%" PRIu64 ","   // real_arr_res
                "%" PRIu64 ","   // mono_dep_req
                "%" PRIu64 "\n", // mono_arr_res 
-               hpl->pl_key, hpl->pl_snum, hpl->pl_slen,
-               NEMO_HOST_NAME_SIZE, hpl->pl_host,
+               pl->pl_key, pl->pl_snum, pl->pl_slen,
+               NEMO_HOST_NAME_SIZE, pl->pl_host,
                addrstr, port,
                NEMO_HOST_NAME_SIZE, hn, 
-               hpl->pl_ttl1, ttlstr,
-               hpl->pl_rtm1, hpl->pl_rtm2,
-               hpl->pl_mtm1, hpl->pl_mtm2);
+               pl->pl_ttl1, ttlstr,
+               pl->pl_rtm1, pl->pl_rtm2,
+               pl->pl_mtm1, pl->pl_mtm2);
 }
 
 /// Flush all data written to the standard output to their respective device.

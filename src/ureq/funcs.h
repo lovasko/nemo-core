@@ -28,7 +28,6 @@ bool request_loop(struct channel* ch, struct target* tg, const struct config* cf
 // Report.
 void report_header(const struct config* cf);
 void report_event(const struct payload* hpl,
-                  const struct payload* npl,
                   const char hn[static NEMO_HOST_NAME_SIZE],
                   const uint64_t real,
                   const uint64_t mono, 

@@ -41,8 +41,7 @@ handle_event(struct channel* ch,
 {
   int reti;
   bool retb;
-  struct payload hpl;
-  struct payload npl;
+  struct payload pl;
   struct sockaddr_storage addr;
   uint8_t ttl;
   uint64_t real;
@@ -55,7 +54,7 @@ handle_event(struct channel* ch,
 
   reti = FD_ISSET(ch->ch_sock, rfd);
   if (reti > 0) {
-    retb = receive_packet(ch, &addr, &hpl, &npl, &ttl, cf->cf_err);
+    retb = receive_packet(ch, &addr, &pl, &ttl, cf->cf_err);
     if (retb == false) {
       return false;
     }
@@ -66,7 +65,7 @@ handle_event(struct channel* ch,
   mono = mono_now();
 
   // Create a report entry based on the received payload.
-  report_event(&hpl, &npl, hn, real, mono, ttl, cf);
+  report_event(&pl, hn, real, mono, ttl, cf);
 
   // TODO notify plugins
 

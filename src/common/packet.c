@@ -72,25 +72,25 @@ decode_payload(struct payload* dst, const struct payload* src)
 /// Verify the incoming payload for correctness.
 /// @return success/failure indication
 ///
-/// @param[in] ch  channel
-/// @param[in] hpl payload in host byte order
+/// @param[in] ch channel
+/// @param[in] pl payload
 static bool
-verify_payload(struct channel* ch, const struct payload* hpl)
+verify_payload(struct channel* ch, const struct payload* pl)
 {
   log(LL_TRACE, false, "verifying payload");
 
   // Verify the magic identifier.
-  if (hpl->pl_mgic != NEMO_PAYLOAD_MAGIC) {
+  if (pl->pl_mgic != NEMO_PAYLOAD_MAGIC) {
     log(LL_DEBUG, false, "payload identifier unknown, expected: %"
-        PRIx16 ", actual: %" PRIx16, NEMO_PAYLOAD_MAGIC, hpl->pl_mgic);
+        PRIx16 ", actual: %" PRIx16, NEMO_PAYLOAD_MAGIC, pl->pl_mgic);
     ch->ch_remg++;
     return false;
   }
 
   // Verify the payload version.
-  if (hpl->pl_fver != NEMO_PAYLOAD_VERSION) {
+  if (pl->pl_fver != NEMO_PAYLOAD_VERSION) {
     log(LL_DEBUG, false, "unsupported payload version, expected: %"
-        PRIu8 ", actual: %" PRIu8, NEMO_PAYLOAD_VERSION, hpl->pl_fver);
+        PRIu8 ", actual: %" PRIu8, NEMO_PAYLOAD_VERSION, pl->pl_fver);
     ch->ch_repv++;
     return false;
   }
@@ -146,12 +146,12 @@ retrieve_ttl(uint8_t* ttl, struct msghdr* msg)
 /// @global wrapper
 ///
 /// @param[in] ch   channel 
-/// @param[in] hpl  payload in host byte order
+/// @param[in] pl   payload in host byte order
 /// @param[in] addr IPv4/IPv6 address
 /// @param[in] err  fail on error
 bool
 send_packet(struct channel* ch,
-            const struct payload* hpl,
+            const struct payload* pl,
             struct sockaddr_storage ad,
             const bool er)
 {
@@ -167,11 +167,11 @@ send_packet(struct channel* ch,
   // to ensure correct handling of endianness of the multi-byte integers.
   // Second step consists of placing the encoded payload at start of the
   // wrapper buffer to allow for artificially extending the payload.
-  encode_payload(&npl, hpl);
+  encode_payload(&npl, pl);
   (void)memcpy(wrapper, &npl, sizeof(npl));
   (void)memset(&iov, 0, sizeof(iov));
   iov.iov_base = wrapper;
-  iov.iov_len  = hpl->pl_len;
+  iov.iov_len  = pl->pl_len;
 
   // Prepare the message.
   (void)memset(&msg, 0, sizeof(msg));
@@ -195,7 +195,7 @@ send_packet(struct channel* ch,
   len = sendmsg(ch->ch_sock, &msg, MSG_DONTWAIT);
 
   // Verify if sending has completed successfully.
-  if (len == -1 || len != (ssize_t)hpl->pl_len) {
+  if (len == -1 || len != (ssize_t)pl->pl_len) {
     log(lvl, true, "unable to send a payload");
     ch->ch_seni++;
     return false;
@@ -211,19 +211,18 @@ send_packet(struct channel* ch,
 ///
 /// @param[in]  ch   channel
 /// @param[in]  addr IPv4/IPv6 address of the sender
-/// @param[out] hpl  payload in host byte order
-/// @param[out] npl  payload in network byte order
+/// @param[out] pl   payload in host byte order
 /// @param[out] ttl  time to live
 /// @param[in]  msg  message headers
 /// @param[in]  err  exit on error
 bool
 receive_packet(struct channel* ch,
                struct sockaddr_storage* addr,
-               struct payload* hpl,
-               struct payload* npl,
+               struct payload* pl,
                uint8_t* ttl,
                const bool err)
 {
+  struct payload npl;
   ssize_t len;
   bool retb;
   uint8_t lvl;
@@ -268,7 +267,7 @@ receive_packet(struct channel* ch,
   }
 
   // Ensure that at least the base payload has arrived.
-  if (len < (ssize_t)sizeof(*npl)) {
+  if (len < (ssize_t)sizeof(npl)) {
     log(lvl, false, "insufficient payload length");
     ch->ch_resz++;
     return false;
@@ -292,13 +291,13 @@ receive_packet(struct channel* ch,
 
   // Unpack the payload from the wrapper and convert the payload from its
   // on-wire format.
-  (void)memcpy(npl, wrapper, sizeof(*npl));
-  decode_payload(hpl, npl);
+  (void)memcpy(&npl, wrapper, sizeof(npl));
+  decode_payload(pl, &npl);
 
   // Now that the base part of the payload is decoded, we can examine whether
   // the actual length of the datagram matches the expected length.
-  if (len != (ssize_t)hpl->pl_len) {
-    log(lvl, false, "wrong payload size, expected %zd, actual %" PRIu64, len, hpl->pl_len);
+  if (len != (ssize_t)pl->pl_len) {
+    log(lvl, false, "wrong payload size, expected %zd, actual %" PRIu64, len, pl->pl_len);
     return false;
   }
 
@@ -311,7 +310,7 @@ receive_packet(struct channel* ch,
   }
 
   // Verify the payload correctness.
-  retb = verify_payload(ch, hpl);
+  retb = verify_payload(ch, pl);
   if (retb == false) {
     log(LL_WARN, false, "invalid payload");
     return false;

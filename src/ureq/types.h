@@ -34,9 +34,9 @@ struct config {
   bool        cf_err;          ///< Process exit policy on publishing error.
   bool        cf_mono;         ///< Do not capture responses (monologue mode).
   bool        cf_sil;          ///< Suppress reporting output.
-  bool        cf_bin;          ///< Binary reporting mode.
   bool        cf_grp;          ///< Group requests at the beginning of a round.
   bool        cf_ipv4;         ///< Usage of Internet Protocol version 4.
+  uint8_t     cf_pad;          ///< Padding (unused).
 };
 
 /// Command-line option.

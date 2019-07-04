@@ -79,15 +79,14 @@ handle_event(struct channel* ch,
 {
   bool retb;
   struct sockaddr_storage addr;
-  struct payload hpl;
-  struct payload npl;
+  struct payload pl;
   uint8_t ttl;
   uint16_t port;
 
   log(LL_TRACE, false, "handling event on the %s channel", ch->ch_name);
 
   // Receive a request.
-  retb = receive_packet(ch, &addr, &hpl, &npl, &ttl, cf->cf_err);
+  retb = receive_packet(ch, &addr, &pl, &ttl, cf->cf_err);
   if (retb == false) {
     log(LL_WARN, false, "unable to receive datagram on the socket");
 
@@ -104,24 +103,24 @@ handle_event(struct channel* ch,
 
   // Do not respond if a particular key is selected, and the requesters key
   // does not match.
-  if (cf->cf_key != 0 && (hpl.pl_key != cf->cf_key)) {
+  if (cf->cf_key != 0 && (pl.pl_key != cf->cf_key)) {
     return true;
   }
 
   // Do not respond if the overall length of the packet does not match the
   // expected length.
-  if (cf->cf_len != 0 && (hpl.pl_len != cf->cf_len)) {
+  if (cf->cf_len != 0 && (pl.pl_len != cf->cf_len)) {
     return true;
   }
 
   // Update payload.
-  update_payload(&hpl, hn, ttl, cf);
+  update_payload(&pl, hn, ttl, cf);
 
   // Report the event as a entry in the CSV output.
-  report_event(&hpl, &npl, hn, port, cf);
+  report_event(&pl, hn, port, cf);
 
   // Notify all attached plugins about the payload.
-  notify_plugins(pi, npi, &hpl);
+  notify_plugins(pi, npi, &pl);
 
   // Do not respond if the monologue mode is turned on.
   if (cf->cf_mono == true) {
@@ -129,7 +128,7 @@ handle_event(struct channel* ch,
   }
 
   // Send a response back.
-  retb = send_packet(ch, &hpl, addr, cf->cf_err);
+  retb = send_packet(ch, &pl, addr, cf->cf_err);
   if (retb == false) {
     log(LL_WARN, false, "unable to send datagram on the socket");
 

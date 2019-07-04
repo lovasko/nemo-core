@@ -36,8 +36,7 @@ bool respond_loop(struct channel* ch,
 
 // Report.
 void report_header(const struct config* cf);
-void report_event(const struct payload* hpl,
-                  const struct payload* npl,
+void report_event(const struct payload* pl,
                   const char hn[static NEMO_HOST_NAME_SIZE],
                   const uint16_t port,
                   const struct config* cf);

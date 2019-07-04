@@ -17,13 +17,12 @@
 
 
 bool send_packet(struct channel* ch,
-                 const struct payload* hpl,
+                 const struct payload* pl,
                  const struct sockaddr_storage addr,
                  const bool err);
 bool receive_packet(struct channel* ch,
                     struct sockaddr_storage* addr,
-                    struct payload* hpl,
-                    struct payload* npl,
+                    struct payload* pl,
                     uint8_t* ttl,
                     const bool err);
 

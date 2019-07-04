@@ -28,11 +28,6 @@ report_header(const struct config* cf)
     return;
   }
 
-  // Binary mode has no header.
-  if (cf->cf_bin == true) {
-    return;
-  }
-
   // Print the CSV header of the standard output.
   (void)printf("key,seq_num,seq_len,addr_res,host_req,host_res,"
                "ttl_dep_req,ttl_arr_res,ttl_dep_res,ttl_arr_req,"
@@ -43,8 +38,7 @@ report_header(const struct config* cf)
 /// Report the event of the incoming datagram by printing a CSV-formatted line
 /// to the standard output stream.
 ///
-/// @param[in] hpl  payload in host byte order
-/// @param[in] npl  payload in network byte order
+/// @param[in] pl   payload in host byte order
 /// @param[in] hn   local host name
 /// @param[in] real real-time of the receipt
 /// @param[in] mono monotonic time of receipt
@@ -52,7 +46,6 @@ report_header(const struct config* cf)
 /// @param[in] cf   configuration
 void
 report_event(const struct payload* hpl,
-             const struct payload* npl,
              const char hn[static NEMO_HOST_NAME_SIZE],
              const uint64_t real,
              const uint64_t mono,
@@ -67,12 +60,6 @@ report_event(const struct payload* hpl,
 
   // No output to be performed if the silent mode was requested.
   if (cf->cf_sil == true) {
-    return;
-  }
-
-  // Binary mode expects the payload in a on-wire encoding.
-  if (cf->cf_bin == true) {
-    (void)fwrite(npl, sizeof(*npl), 1, stdout);
     return;
   }
 

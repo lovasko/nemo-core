@@ -29,8 +29,7 @@ struct config {
   bool        cf_lcol;           ///< Log coloring policy.
   bool        cf_mono;           ///< Monologue mode (no responses).
   bool        cf_sil;            ///< Standard output presence.
-  bool        cf_bin;            ///< Binary reporting mode.
-  uint8_t     cf_pad;            ///< Padding (unused).
+  uint8_t     cf_pad[2];         ///< Padding (unused).
 };
 
 /// Command-line option.

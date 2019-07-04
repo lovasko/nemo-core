@@ -37,7 +37,6 @@
 #define DEF_RECEIVE_BUFFER 2000000    ///< Socket receive buffer memory size.
 #define DEF_SEND_BUFFER    2000000    ///< Socket send buffer memory size.
 #define DEF_SILENT         false      ///< Do not suppress reporting.
-#define DEF_BINARY         false      ///< CSV reporting by default.
 #define DEF_GROUP          false      ///< Do not group requests.
 #define DEF_KEY            0          ///< Issue promiscuous requests.
 #define DEF_LENGTH         NEMO_PAYLOAD_SIZE
@@ -123,20 +122,6 @@ option_a(struct config* cf, const char* in)
 
   cf->cf_pi[i] = in;
   i++;
-
-  return true;
-}
-
-/// Change the reporting to binary mode.
-/// @return success/failure indication
-///
-/// @param[out] cf configuration
-/// @param[in]  in argument input (unused)
-static bool
-option_b(struct config* cf, const char* in)
-{
-  (void)in;
-  cf->cf_bin = true;
 
   return true;
 }
@@ -404,7 +389,6 @@ set_defaults(struct config* cf)
   cf->cf_rld  = DEF_UPDATE;
   cf->cf_mono = DEF_MONOLOGUE;
   cf->cf_sil  = DEF_SILENT;
-  cf->cf_bin  = DEF_BINARY;
   cf->cf_grp  = DEF_GROUP;
   cf->cf_key  = DEF_KEY;
   cf->cf_len  = DEF_LENGTH;
@@ -455,10 +439,9 @@ parse_config(struct config* cf, int argc, char* argv[])
   bool retb;
   uint64_t i;
   char optdsl[128];
-  struct option opts[21] = {
+  struct option opts[20] = {
     { '6',  false, option_6 },
     { 'a',  true , option_a },
-    { 'b',  false, option_b },
     { 'c',  true,  option_c },
     { 'e',  false, option_e },
     { 'g',  false, option_g },
@@ -482,7 +465,7 @@ parse_config(struct config* cf, int argc, char* argv[])
   log(LL_INFO, false, "parsing command-line options");
 
   (void)memset(optdsl, '\0', sizeof(optdsl));
-  generate_getopt_string(optdsl, opts, 21);
+  generate_getopt_string(optdsl, opts, 20);
 
   // Set optional arguments to sensible defaults.
   set_defaults(cf);
@@ -504,7 +487,7 @@ parse_config(struct config* cf, int argc, char* argv[])
     }
 
     // Find the relevant option.
-    for (i = 0; i < 21; i++) {
+    for (i = 0; i < 20; i++) {
       if (opts[i].op_name == (char)opt) {
         retb = opts[i].op_act(cf, optarg);
         if (retb == false) {
@@ -555,7 +538,6 @@ parse_config(struct config* cf, int argc, char* argv[])
 void
 log_config(const struct config* cf)
 {
-  const char* bin;
   const char* mono;
   const char* err;
   const char* grp;
@@ -570,13 +552,6 @@ log_config(const struct config* cf)
     mono = "yes";
   } else {
     mono = "no";
-  }
-
-  // Binary output.
-  if (cf->cf_bin == true) {
-    bin = "yes";
-  } else {
-    bin = "no";
   }
 
   // Exit on error.
@@ -641,5 +616,4 @@ log_config(const struct config* cf)
   log(LL_DEBUG, false, "internet protocol version: %s", ipv);
   log(LL_DEBUG, false, "exit on error: %s", err);
   log(LL_DEBUG, false, "monologue mode: %s", mono);
-  log(LL_DEBUG, false, "binary report: %s", bin);
 }

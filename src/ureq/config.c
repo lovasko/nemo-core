@@ -193,6 +193,11 @@ option_i(struct config* cf, const char* in)
   return parse_scalar(&cf->cf_int, in, "ns", 1, UINT64_MAX, parse_time_unit);
 }
 
+/// Maximal number of targets.
+/// @return success/failure indication
+///
+/// @param[in] cf configuration
+/// @param[in] in argument input
 static bool
 option_j(struct config* cf, const char* in)
 {

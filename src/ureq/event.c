@@ -53,7 +53,7 @@ ipv6_part(const uint8_t* ab)
 static void
 retrieve_address(uint64_t* la,
                  uint64_t* ha,
-								 const struct sockaddr_storage* ss) 
+                 const struct sockaddr_storage* ss) 
 {
   struct sockaddr_in* s4;
   struct sockaddr_in6* s6;
@@ -107,7 +107,7 @@ handle_event(struct channel* ch,
   }
 
   // Retrieve the address of the responder.
-	retrieve_address(&la, &ha, &ss);
+  retrieve_address(&la, &ha, &ss);
 
   // Capture the time of arrival of the response.
   real = real_now();

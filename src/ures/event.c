@@ -89,7 +89,7 @@ retrieve_port(uint16_t* pn, const struct sockaddr_storage* ss)
 static void
 retrieve_address(uint64_t* la,
                  uint64_t* ha,
-								 const struct sockaddr_storage* ss) 
+                 const struct sockaddr_storage* ss) 
 {
   struct sockaddr_in* s4;
   struct sockaddr_in6* s6;
@@ -146,7 +146,7 @@ handle_event(struct channel* ch,
 
   // Retrieve the port and address of the requester.
   retrieve_port(&pn, &ss);
-	retrieve_address(&la, &ha, &ss);
+  retrieve_address(&la, &ha, &ss);
 
   // Do not respond if a particular key is selected, and the requesters key
   // does not match.

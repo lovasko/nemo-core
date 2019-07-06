@@ -21,7 +21,7 @@
 // Memory size.
 #define NEMO_PAYLOAD_SIZE  104
 #define NEMO_HOST_NAME_SIZE 36
- 
+
 // Payload.
 struct payload {
   uint16_t pl_mgic;     ///< Magic identifier.

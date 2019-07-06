@@ -52,7 +52,7 @@ decode_payload(struct payload* dst, const struct payload* src)
   // Copy the whole payload. This ensures that all single-byte fields are
   // copied correctly, future-proofing the code for future field additions.
   (void)memcpy(dst, src, sizeof(*src));
-  
+
   // Handle all multi-byte conversions into the host byte order.
   dst->pl_mgic  = ntohs(src->pl_mgic);
   dst->pl_len   = ntohs(src->pl_len);
@@ -141,7 +141,7 @@ retrieve_ttl(uint8_t* ttl, struct msghdr* msg)
 ///
 /// @global wrapper
 ///
-/// @param[in] ch   channel 
+/// @param[in] ch   channel
 /// @param[in] pl   payload in host byte order
 /// @param[in] addr IPv4/IPv6 address
 /// @param[in] err  fail on error
@@ -302,7 +302,7 @@ receive_packet(struct channel* ch,
   if (ctl == true) {
     retrieve_ttl(ttl, &msg);
   } else {
-    *ttl = 0;   
+    *ttl = 0;
   }
 
   // Verify the payload correctness.

@@ -94,11 +94,11 @@ report_event(const struct payload* pl,
                "%" PRIu64 ","   // real_dep_req
                "%" PRIu64 ","   // real_arr_res
                "%" PRIu64 ","   // mono_dep_req
-               "%" PRIu64 "\n", // mono_arr_res 
+               "%" PRIu64 "\n", // mono_arr_res
                pl->pl_key, pl->pl_snum, pl->pl_slen,
                NEMO_HOST_NAME_SIZE, pl->pl_host,
                addrstr, pn,
-               NEMO_HOST_NAME_SIZE, hn, 
+               NEMO_HOST_NAME_SIZE, hn,
                pl->pl_ttl1, ttlstr,
                pl->pl_rtm1, pl->pl_rtm2,
                pl->pl_mtm1, pl->pl_mtm2);

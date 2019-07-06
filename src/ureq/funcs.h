@@ -30,7 +30,7 @@ void report_header(const struct config* cf);
 void report_event(const struct payload* hpl,
                   const char hn[static NEMO_HOST_NAME_SIZE],
                   const uint64_t real,
-                  const uint64_t mono, 
+                  const uint64_t mono,
                   const uint8_t ttl,
                   const uint64_t la,
                   const uint64_t ha,

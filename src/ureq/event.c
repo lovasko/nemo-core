@@ -30,7 +30,7 @@
 /// single integer.
 /// @return portion of IPv6 address
 ///
-/// @param[in] ab address bytes 
+/// @param[in] ab address bytes
 static uint64_t
 ipv6_part(const uint8_t* ab)
 {
@@ -53,7 +53,7 @@ ipv6_part(const uint8_t* ab)
 static void
 retrieve_address(uint64_t* la,
                  uint64_t* ha,
-                 const struct sockaddr_storage* ss) 
+                 const struct sockaddr_storage* ss)
 {
   struct sockaddr_in* s4;
   struct sockaddr_in6* s6;

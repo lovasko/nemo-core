@@ -38,12 +38,12 @@ get_assigned_port(const struct channel* ch)
     log(LL_WARN, true, "unable to obtain address of the %s socket", ch->ch_name);
     return false;
   }
-  
+
   // Obtain the address details based on the protocol family.
   if (ss.ss_family == PF_INET) {
     s4 = (struct sockaddr_in*)&ss;
     return s4->sin_port;
-  } else { 
+  } else {
     s6 = (struct sockaddr_in6*)&ss;
     return s6->sin6_port;
   }
@@ -126,7 +126,7 @@ create_socket(struct channel* ch, const bool ipv4)
   return true;
 }
 
-/// Attach the channel to a local name. 
+/// Attach the channel to a local name.
 /// @return success/failure indication
 ///
 /// @param[in] ch   channel
@@ -176,7 +176,7 @@ assign_name(struct channel* ch, const uint16_t port, const bool ipv4)
 
 /// Set the advisory socket buffer sizes.
 /// @return success/failure indication
-/// 
+///
 /// @param[in] ch   channel
 /// @param[in] rbuf receive buffer size in bytes
 /// @param[in] sbuf send buffer size in bytes
@@ -310,7 +310,7 @@ open_channel(struct channel* ch,
 /// Log all channel information.
 ///
 /// @param[in] ch channel
-void 
+void
 log_channel(const struct channel* ch)
 {
   log(LL_DEBUG, false, "local UDP port: %" PRIu16, ch->ch_port);

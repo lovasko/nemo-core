@@ -32,14 +32,14 @@ bool    log_col; ///< Coloring policy.
 /// @param[in] inp input string (NUL-terminated)
 /// @param[in] cur current length of the output string
 /// @param[in] max maximal length of the output string
-static size_t 
+static size_t
 append(char* out, const char* inp, const size_t cur, const size_t max)
 {
   size_t rem; // Remaining space.
   size_t len; // Length of the input string.
   size_t act; // Actual addition length.
 
-  // Early exit if the string is already full. 
+  // Early exit if the string is already full.
   if (cur == max) {
     return cur;
   }

@@ -25,7 +25,7 @@
 /// @param[in] hn  local host name
 /// @param[in] ttl time-to-live value
 /// @param[in] cf  configuration
-static void 
+static void
 update_payload(struct payload* pl,
                const char hn[static NEMO_HOST_NAME_SIZE],
                const uint8_t ttl,
@@ -46,7 +46,7 @@ update_payload(struct payload* pl,
 /// single integer.
 /// @return portion of IPv6 address
 ///
-/// @param[in] ab address bytes 
+/// @param[in] ab address bytes
 static uint64_t
 ipv6_part(const uint8_t* ab)
 {
@@ -65,12 +65,12 @@ ipv6_part(const uint8_t* ab)
 ///
 /// @param[out] pn port number
 /// @param[in]  ss IPv4/IPv6 socket address
-static void 
+static void
 retrieve_port(uint16_t* pn, const struct sockaddr_storage* ss)
 {
   struct sockaddr_in* s4;
   struct sockaddr_in6* s6;
-  
+
   // Cast the address to the appropriate format based on the address family.
   if (ss->ss_family == AF_INET) {
     s4  = (struct sockaddr_in*)ss;
@@ -89,7 +89,7 @@ retrieve_port(uint16_t* pn, const struct sockaddr_storage* ss)
 static void
 retrieve_address(uint64_t* la,
                  uint64_t* ha,
-                 const struct sockaddr_storage* ss) 
+                 const struct sockaddr_storage* ss)
 {
   struct sockaddr_in* s4;
   struct sockaddr_in6* s6;

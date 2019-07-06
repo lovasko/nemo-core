@@ -188,7 +188,7 @@ option_m(struct config* cf, const char* in)
 /// Turn off coloring and highlights in the logging output.
 /// @return success/failure indication
 ///
-/// @param[out] cf configuration 
+/// @param[out] cf configuration
 /// @param[in]  in argument input (unused)
 static bool
 option_n(struct config* cf, const char* in)
@@ -290,7 +290,7 @@ option_v(struct config* cf, const char* in)
 /// @return success/failure indication
 ///
 /// @param[out] cf configuration
-static bool 
+static bool
 set_defaults(struct config* cf)
 {
   intmax_t i;

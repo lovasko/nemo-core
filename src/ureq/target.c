@@ -25,7 +25,7 @@
 /// single integer.
 /// @return portion of IPv6 address
 ///
-/// @param[in] ab address bytes 
+/// @param[in] ab address bytes
 static uint64_t
 ipv6_part(const uint8_t* ab)
 {
@@ -147,7 +147,7 @@ resolve_name(struct target* tg,
 }
 
 /// Parse a string into a network target.
-/// @return success/failure indication 
+/// @return success/failure indication
 ///
 /// @param[out] tg   array of targets
 /// @param[out] tcnt number of targets
@@ -316,14 +316,14 @@ load_targets(struct target* tg,
     (void)memcpy(tg + tall, tg2, (size_t)tcnt2 * sizeof(tg2[0]));
     tall += tcnt2;
   }
- 
+
   // Final normalization sweep.
   normalize_targets(tg, tcnt, tcnt2);
 
   return true;
 }
 
-/// Print all targets and their sources as debugging log entries. 
+/// Print all targets and their sources as debugging log entries.
 ///
 /// @param[in] tg  array of targets
 /// @param[in] cnt number of targets

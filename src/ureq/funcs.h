@@ -32,6 +32,8 @@ void report_event(const struct payload* hpl,
                   const uint64_t real,
                   const uint64_t mono, 
                   const uint8_t ttl,
+                  const uint64_t la,
+                  const uint64_t ha,
                   const struct config* cf);
 bool flush_report_stream(const struct config* cf);
 

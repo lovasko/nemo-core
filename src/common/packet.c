@@ -35,8 +35,6 @@ encode_payload(struct payload* dst, const struct payload* src)
   dst->pl_len   = htons(src->pl_len);
   dst->pl_snum  = htonll(src->pl_snum);
   dst->pl_slen  = htonll(src->pl_slen);
-  dst->pl_laddr = htonll(src->pl_laddr);
-  dst->pl_haddr = htonll(src->pl_haddr);
   dst->pl_key   = htonll(src->pl_key);
   dst->pl_mtm1  = htonll(src->pl_mtm1);
   dst->pl_rtm1  = htonll(src->pl_rtm1);
@@ -60,8 +58,6 @@ decode_payload(struct payload* dst, const struct payload* src)
   dst->pl_len   = ntohs(src->pl_len);
   dst->pl_snum  = ntohll(src->pl_snum);
   dst->pl_slen  = ntohll(src->pl_slen);
-  dst->pl_laddr = ntohll(src->pl_laddr);
-  dst->pl_haddr = ntohll(src->pl_haddr);
   dst->pl_key   = ntohll(src->pl_key);
   dst->pl_mtm1  = ntohll(src->pl_mtm1);
   dst->pl_rtm1  = ntohll(src->pl_rtm1);

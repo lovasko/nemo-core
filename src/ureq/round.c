@@ -20,13 +20,11 @@
 /// Fill the payload with default and selected data.
 ///
 /// @param[in] hpl  payload in host byte order
-/// @param[in] tg   network target
 /// @param[in] snum sequence number
 /// @param[in] hn   local host name
 /// @param[in] cf   configuration
 static void
 fill_payload(struct payload *hpl,
-             const struct target* tg,
              const uint64_t snum,
              const char hn[static NEMO_HOST_NAME_SIZE],
              const struct config* cf)
@@ -40,8 +38,6 @@ fill_payload(struct payload *hpl,
   hpl->pl_snum  = snum;
   hpl->pl_slen  = cf->cf_cnt;
   hpl->pl_key   = cf->cf_key;
-  hpl->pl_laddr = tg->tg_laddr;
-  hpl->pl_haddr = tg->tg_haddr;
   hpl->pl_rtm1  = real_now();
   hpl->pl_mtm1  = mono_now();
   (void)memcpy(hpl->pl_host, hn, NEMO_HOST_NAME_SIZE);
@@ -97,7 +93,7 @@ issue_request(struct channel* ch,
   struct sockaddr_storage addr;
 
   // Prepare data for transmission.
-  fill_payload(&hpl, tg, snum, hn, cf);
+  fill_payload(&hpl, snum, hn, cf);
   set_address(&addr, tg, cf);
 
   // Issue the request.

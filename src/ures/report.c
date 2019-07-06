@@ -39,14 +39,18 @@ report_header(const struct config* cf)
 /// Report the event of the incoming datagram by printing a CSV-formatted line
 /// to the standard output stream.
 ///
-/// @param[in] pl  payload in host byte order
-/// @param[in] hn   local host name
-/// @param[in] port requesters port
-/// @param[in] cf   configuration
+/// @param[in] pl payload
+/// @param[in] hn local host name
+/// @param[in] la low address bits of the requester
+/// @param[in] ha high address bits of the requester
+/// @param[in] pn UDP port of the requester
+/// @param[in] cf configuration
 void
 report_event(const struct payload* pl,
              const char hn[static NEMO_HOST_NAME_SIZE],
-             const uint16_t port,
+             const uint64_t la,
+             const uint64_t ha,
+             const uint16_t pn,
              const struct config* cf)
 {
   char addrstr[INET6_ADDRSTRLEN];
@@ -64,10 +68,10 @@ report_event(const struct payload* pl,
 
   // Convert the IP address into a string.
   if (cf->cf_ipv4 == true) {
-    a4.s_addr = (uint32_t)pl->pl_laddr;
+    a4.s_addr = (uint32_t)la;
     (void)inet_ntop(AF_INET, &a4, addrstr, sizeof(addrstr));
   } else {
-    tipv6(&a6, pl->pl_laddr, pl->pl_haddr);
+    tipv6(&a6, la, ha);
     (void)inet_ntop(AF_INET6, &a6, addrstr, sizeof(addrstr));
   }
 
@@ -93,7 +97,7 @@ report_event(const struct payload* pl,
                "%" PRIu64 "\n", // mono_arr_res 
                pl->pl_key, pl->pl_snum, pl->pl_slen,
                NEMO_HOST_NAME_SIZE, pl->pl_host,
-               addrstr, port,
+               addrstr, pn,
                NEMO_HOST_NAME_SIZE, hn, 
                pl->pl_ttl1, ttlstr,
                pl->pl_rtm1, pl->pl_rtm2,

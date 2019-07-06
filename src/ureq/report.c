@@ -29,7 +29,7 @@ report_header(const struct config* cf)
   }
 
   // Print the CSV header of the standard output.
-  (void)printf("key,seq_num,seq_len,addr_res,host_req,host_res,"
+  (void)printf("key,seq_num,seq_len,host_req,host_res,addr_res,port_res,"
                "ttl_dep_req,ttl_arr_res,ttl_dep_res,ttl_arr_req,"
                "real_dep_req,real_arr_res,real_arr_req,"
                "mono_dep_req,mono_arr_res,mono_arr_req\n");
@@ -43,6 +43,8 @@ report_header(const struct config* cf)
 /// @param[in] real real-time of the receipt
 /// @param[in] mono monotonic time of receipt
 /// @param[in] ttl  time-to-live upon receipt
+/// @param[in] la   low address of the responder
+/// @param[in] ha   high address of the responder
 /// @param[in] cf   configuration
 void
 report_event(const struct payload* hpl,
@@ -50,6 +52,8 @@ report_event(const struct payload* hpl,
              const uint64_t real,
              const uint64_t mono,
              const uint8_t ttl,
+             const uint64_t la,
+             const uint64_t ha,
              const struct config* cf)
 {
   char addrstr[INET6_ADDRSTRLEN];
@@ -69,10 +73,10 @@ report_event(const struct payload* hpl,
 
   // Convert the IP address into a string.
   if (cf->cf_ipv4 == true) {
-    a4.s_addr = (uint32_t)hpl->pl_laddr;
+    a4.s_addr = (uint32_t)la;
     (void)inet_ntop(AF_INET, &a4, addrstr, sizeof(addrstr));
   } else {
-    tipv6(&a6, hpl->pl_laddr, hpl->pl_haddr);
+    tipv6(&a6, la, ha);
     (void)inet_ntop(AF_INET6, &a6, addrstr, sizeof(addrstr));
   }
 
@@ -92,9 +96,10 @@ report_event(const struct payload* hpl,
   (void)printf("%" PRIu64 ","   // key
                "%" PRIu64 ","   // seq_num
                "%" PRIu64 ","   // seq_len
-               "%s,"            // addr_res
                "%*.s,"          // host_req
                "%*.s,"          // host_res
+               "%s,"            // addr_res
+               "%" PRIu64 ","   // port_res
                "%" PRIu8  ","   // ttl_dep_req
                "%s,"            // ttl_arr_res
                "%" PRIu8  ","   // ttl_dep_res
@@ -105,9 +110,10 @@ report_event(const struct payload* hpl,
                "%" PRIu64 ","   // mono_dep_req
                "%" PRIu64 ","   // mono_arr_res
                "%" PRIu64 "\n", // mono_arr_req
-               hpl->pl_key,  hpl->pl_snum, hpl->pl_slen, addrstr,
+               hpl->pl_key,  hpl->pl_snum, hpl->pl_slen,
                NEMO_HOST_NAME_SIZE, hn,
                NEMO_HOST_NAME_SIZE, hpl->pl_host,
+               addrstr, cf->cf_port,
                hpl->pl_ttl1, ttl2str, hpl->pl_ttl3, ttl4str,
                hpl->pl_rtm1, hpl->pl_rtm2, real,
                hpl->pl_mtm1, hpl->pl_mtm2, mono);

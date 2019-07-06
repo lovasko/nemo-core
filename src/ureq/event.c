@@ -26,6 +26,50 @@
 #include "ureq/types.h"
 
 
+/// Create a part of a IPv6 address by converting array of bytes into a
+/// single integer.
+/// @return portion of IPv6 address
+///
+/// @param[in] ab address bytes 
+static uint64_t
+ipv6_part(const uint8_t* ab)
+{
+  uint64_t res;
+  uint8_t i;
+
+  res = 0;
+  for (i = 0; i < 8; i++) {
+    res |= ((uint64_t)ab[i] << (i * 8));
+  }
+
+  return res;
+}
+
+/// Retrieve the IP address from a socket address.
+///
+/// @param[out] la low address bits
+/// @param[out] ha high address bits
+/// @param[in]  ss IPv4/IPv6 socket address
+static void
+retrieve_address(uint64_t* la,
+                 uint64_t* ha,
+								 const struct sockaddr_storage* ss) 
+{
+  struct sockaddr_in* s4;
+  struct sockaddr_in6* s6;
+
+  // Cast the address to the appropriate format based on the address family.
+  if (ss->ss_family == AF_INET) {
+    s4  = (struct sockaddr_in*)ss;
+    *la = (uint64_t)s4->sin_addr.s_addr;
+    *ha = (uint64_t)0;
+  } else {
+    s6  = (struct sockaddr_in6*)ss;
+    *la = ipv6_part(&s6->sin6_addr.s6_addr[0]);
+    *ha = ipv6_part(&s6->sin6_addr.s6_addr[7]);
+  }
+}
+
 /// Handle a network event by attempting to receive responses on all available sockets.
 /// @return success/failure indication
 ///
@@ -42,10 +86,12 @@ handle_event(struct channel* ch,
   int reti;
   bool retb;
   struct payload pl;
-  struct sockaddr_storage addr;
+  struct sockaddr_storage ss;
   uint8_t ttl;
   uint64_t real;
   uint64_t mono;
+  uint64_t la;
+  uint64_t ha;
 
   // Ignore the event in case we are in the monologue mode.
   if (cf->cf_mono == true) {
@@ -54,18 +100,21 @@ handle_event(struct channel* ch,
 
   reti = FD_ISSET(ch->ch_sock, rfd);
   if (reti > 0) {
-    retb = receive_packet(ch, &addr, &pl, &ttl, cf->cf_err);
+    retb = receive_packet(ch, &ss, &pl, &ttl, cf->cf_err);
     if (retb == false) {
       return false;
     }
   }
+
+  // Retrieve the address of the responder.
+	retrieve_address(&la, &ha, &ss);
 
   // Capture the time of arrival of the response.
   real = real_now();
   mono = mono_now();
 
   // Create a report entry based on the received payload.
-  report_event(&pl, hn, real, mono, ttl, cf);
+  report_event(&pl, hn, real, mono, ttl, la, ha, cf);
 
   // TODO notify plugins
 

@@ -42,23 +42,67 @@ update_payload(struct payload* pl,
   (void)memcpy(pl->pl_host, hn, NEMO_HOST_NAME_SIZE);
 }
 
-/// Retrieve the UDP port number from an address.
-/// @return port number
+/// Create a part of a IPv6 address by converting array of bytes into a
+/// single integer.
+/// @return portion of IPv6 address
 ///
-/// @param[in] ss IPv4/IPv6 socket address
-static uint16_t
-retrieve_port(const struct sockaddr_storage* ss)
+/// @param[in] ab address bytes 
+static uint64_t
+ipv6_part(const uint8_t* ab)
 {
-  struct sockaddr_in* sin;
-  struct sockaddr_in6* sin6;
+  uint64_t res;
+  uint8_t i;
+
+  res = 0;
+  for (i = 0; i < 8; i++) {
+    res |= ((uint64_t)ab[i] << (i * 8));
+  }
+
+  return res;
+}
+
+/// Retrieve the UDP port number from a socket address.
+///
+/// @param[out] pn port number
+/// @param[in]  ss IPv4/IPv6 socket address
+static void 
+retrieve_port(uint16_t* pn, const struct sockaddr_storage* ss)
+{
+  struct sockaddr_in* s4;
+  struct sockaddr_in6* s6;
   
   // Cast the address to the appropriate format based on the address family.
   if (ss->ss_family == AF_INET) {
-    sin = (struct sockaddr_in*)ss;
-    return sin->sin_port;
+    s4  = (struct sockaddr_in*)ss;
+    *pn = s4->sin_port;
   } else {
-    sin6 = (struct sockaddr_in6*)ss;
-    return sin6->sin6_port;
+    s6  = (struct sockaddr_in6*)ss;
+    *pn = s6->sin6_port;
+  }
+}
+
+/// Retrieve the IP address from a socket address.
+///
+/// @param[out] la low address bits
+/// @param[out] ha high address bits
+/// @param[in]  ss IPv4/IPv6 socket address
+static void
+retrieve_address(uint64_t* la,
+                 uint64_t* ha,
+								 const struct sockaddr_storage* ss) 
+{
+  struct sockaddr_in* s4;
+  struct sockaddr_in6* s6;
+
+  // Cast the address to the appropriate format based on the address family.
+  if (ss->ss_family == AF_INET) {
+    s4  = (struct sockaddr_in*)ss;
+    *la = (uint64_t)s4->sin_addr.s_addr;
+    *ha = (uint64_t)0;
+  } else {
+    s6  = (struct sockaddr_in6*)ss;
+    *la = ipv6_part(&s6->sin6_addr.s6_addr[0]);
+    *ha = ipv6_part(&s6->sin6_addr.s6_addr[7]);
   }
 }
 
@@ -78,15 +122,17 @@ handle_event(struct channel* ch,
              const struct config* cf)
 {
   bool retb;
-  struct sockaddr_storage addr;
+  struct sockaddr_storage ss;
   struct payload pl;
   uint8_t ttl;
-  uint16_t port;
+  uint16_t pn;
+  uint64_t la;
+  uint64_t ha;
 
   log(LL_TRACE, false, "handling event on the %s channel", ch->ch_name);
 
   // Receive a request.
-  retb = receive_packet(ch, &addr, &pl, &ttl, cf->cf_err);
+  retb = receive_packet(ch, &ss, &pl, &ttl, cf->cf_err);
   if (retb == false) {
     log(LL_WARN, false, "unable to receive datagram on the socket");
 
@@ -98,8 +144,9 @@ handle_event(struct channel* ch,
     return !cf->cf_err;
   }
 
-  // Retrieve the port of the requester.
-  port = retrieve_port(&addr);
+  // Retrieve the port and address of the requester.
+  retrieve_port(&pn, &ss);
+	retrieve_address(&la, &ha, &ss);
 
   // Do not respond if a particular key is selected, and the requesters key
   // does not match.
@@ -117,7 +164,7 @@ handle_event(struct channel* ch,
   update_payload(&pl, hn, ttl, cf);
 
   // Report the event as a entry in the CSV output.
-  report_event(&pl, hn, port, cf);
+  report_event(&pl, hn, la, ha, pn, cf);
 
   // Notify all attached plugins about the payload.
   notify_plugins(pi, npi, &pl);
@@ -128,7 +175,7 @@ handle_event(struct channel* ch,
   }
 
   // Send a response back.
-  retb = send_packet(ch, &pl, addr, cf->cf_err);
+  retb = send_packet(ch, &pl, ss, cf->cf_err);
   if (retb == false) {
     log(LL_WARN, false, "unable to send datagram on the socket");
 

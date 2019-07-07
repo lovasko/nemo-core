@@ -22,23 +22,31 @@
 /// @return success/failure indication
 ///
 /// @param[in] pl  payload
-/// @param[in] hn  local host name
 /// @param[in] ttl time-to-live value
-/// @param[in] cf  configuration
 static void
-update_payload(struct payload* pl,
-               const char hn[static NEMO_HOST_NAME_SIZE],
-               const uint8_t ttl,
-               const struct config* cf)
+fill_payload(struct payload* pl,
+             const uint8_t ttl)
 {
   log(LL_TRACE, false, "updating payload");
 
   pl->pl_type = NEMO_PAYLOAD_TYPE_RESPONSE;
-  pl->pl_key = cf->cf_key;
   pl->pl_mtm2 = mono_now();
   pl->pl_rtm2 = real_now();
   pl->pl_ttl2 = ttl;
-  pl->pl_ttl3 = (uint8_t)cf->cf_ttl;
+}
+
+/// Update existing fields of the payload to new values.
+///
+/// @param[in] pl payload
+/// @param[in] hn local host name
+/// @param[in] cf configuration
+static void
+update_payload(struct payload* pl,
+               const char hn[static NEMO_HOST_NAME_SIZE],
+               const struct config* cf)
+{
+  pl->pl_key  = cf->cf_key;
+  pl->pl_ttl1 = (uint8_t)cf->cf_ttl;
   (void)memcpy(pl->pl_host, hn, NEMO_HOST_NAME_SIZE);
 }
 
@@ -160,14 +168,17 @@ handle_event(struct channel* ch,
     return true;
   }
 
-  // Update payload.
-  update_payload(&pl, hn, ttl, cf);
+  // Fill unassigned fields in the payload.
+  fill_payload(&pl, ttl);
 
   // Report the event as a entry in the CSV output.
   report_event(&pl, hn, la, ha, pn, cf);
 
   // Notify all attached plugins about the payload.
   notify_plugins(pi, npi, &pl);
+
+  // Update the payload by overwriting certain fields.
+  update_payload(&pl, hn, cf);
 
   // Do not respond if the monologue mode is turned on.
   if (cf->cf_mono == true) {

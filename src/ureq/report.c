@@ -96,11 +96,11 @@ report_event(const struct payload* hpl,
   (void)printf("%" PRIu64 ","   // key
                "%" PRIu64 ","   // seq_num
                "%" PRIu64 ","   // seq_len
-               "%*.s,"          // host_req
-               "%*.s,"          // host_res
+               "%.*s,"          // host_req
+               "%.*s,"          // host_res
                "%s,"            // addr_res
                "%" PRIu64 ","   // port_res
-               "%" PRIu8  ","   // ttl_dep_req
+               "%" PRIu64 ","   // ttl_dep_req
                "%s,"            // ttl_arr_res
                "%" PRIu8  ","   // ttl_dep_res
                "%s,"            // ttl_arr_req
@@ -114,7 +114,7 @@ report_event(const struct payload* hpl,
                NEMO_HOST_NAME_SIZE, hn,
                NEMO_HOST_NAME_SIZE, hpl->pl_host,
                addrstr, cf->cf_port,
-               hpl->pl_ttl1, ttl2str, hpl->pl_ttl3, ttl4str,
+               cf->cf_ttl, ttl2str, hpl->pl_ttl1, ttl4str,
                hpl->pl_rtm1, hpl->pl_rtm2, real,
                hpl->pl_mtm1, hpl->pl_mtm2, mono);
 }

@@ -16,7 +16,7 @@
 
 // Constants.
 #define NEMO_PAYLOAD_MAGIC   0x444c
-#define NEMO_PAYLOAD_VERSION      7
+#define NEMO_PAYLOAD_VERSION      8
 
 // Memory size.
 #define NEMO_PAYLOAD_SIZE  104
@@ -29,9 +29,9 @@ struct payload {
   uint8_t  pl_fver : 5; ///< Format version.
   uint8_t  pl_type : 1; ///< Message type.
   uint8_t  pl_pad  : 2; ///< Padding (unused).
-  uint8_t  pl_ttl1;     ///< Time-To-Live when sent from requester.
-  uint8_t  pl_ttl2;     ///< Time-To-Live when received by responder.
-  uint8_t  pl_ttl3;     ///< Time-To-Live when sent from responder.
+  uint8_t  pl_pad2;     ///< Padding (unused).
+  uint8_t  pl_ttl1;     ///< Time-To-Live when sent.
+  uint8_t  pl_ttl2;     ///< Time-To-Live when received.
   uint64_t pl_snum;     ///< Sequence iteration number.
   uint64_t pl_slen;     ///< Sequence length.
   uint64_t pl_key;      ///< Responder/requester key.

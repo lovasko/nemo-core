@@ -29,7 +29,7 @@ report_header(const struct config* cf)
   }
 
   // Print the CSV header of the standard output.
-  (void)printf("key,seq_num,seq_len,"
+  (void)printf("key,len,seq_num,seq_len,"
                "host_req,addr_req,port_req,host_res,"
                "ttl_dep_req,ttl_arr_res,"
                "real_dep_req,real_arr_res,"
@@ -83,6 +83,7 @@ report_event(const struct payload* pl,
   }
 
   (void)printf("%" PRIu64 ","   // key
+               "%" PRIu64 ","   // len
                "%" PRIu64 ","   // seq_num
                "%" PRIu64 ","   // seq_len
                "%.*s,"          // host_req
@@ -95,7 +96,7 @@ report_event(const struct payload* pl,
                "%" PRIu64 ","   // real_arr_res
                "%" PRIu64 ","   // mono_dep_req
                "%" PRIu64 "\n", // mono_arr_res
-               pl->pl_key, pl->pl_snum, pl->pl_slen,
+               pl->pl_key, pl->pl_len, pl->pl_snum, pl->pl_slen,
                NEMO_HOST_NAME_SIZE, pl->pl_host,
                addrstr, pn,
                NEMO_HOST_NAME_SIZE, hn,

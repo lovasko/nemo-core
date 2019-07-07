@@ -98,12 +98,16 @@ handle_event(struct channel* ch,
     return true;
   }
 
+  // Ensure that there is data available on the channel.
   reti = FD_ISSET(ch->ch_sock, rfd);
-  if (reti > 0) {
-    retb = receive_packet(ch, &ss, &pl, &ttl, cf->cf_err);
-    if (retb == false) {
-      return false;
-    }
+  if (reti == 0) {
+    return true;
+  }
+
+  // Receive the incoming packet.
+  retb = receive_packet(ch, &ss, &pl, &ttl, cf->cf_err);
+  if (retb == false) {
+    return false;
   }
 
   // Retrieve the address of the responder.

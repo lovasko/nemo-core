@@ -24,7 +24,7 @@
 
 // Default values for optional arguments.
 #define DEF_TARGET_COUNT   64         ///< Maximum of 64 targets.
-#define DEF_COUNT          5          ///< Number of published datagrams.
+#define DEF_COUNT          UINT64_MAX ///< Number of published datagrams.
 #define DEF_INTERVAL       1000000000 ///< One second pause between payloads.
 #define DEF_FINAL_WAIT     2000000000 ///< Two second wait time for responses.
 #define DEF_UPDATE         60000000000 ///< One minute period of name resolution update.
@@ -60,7 +60,7 @@ print_usage(void)
 
     "Options:\n"
     "  -6      Use the IPv6 protocol.\n"
-    "  -c CNT  Number of requests to issue. (def=%d)\n"
+    "  -c CNT  Limit the number of issued requests.\n"
     "  -e      Stop the process on first network error.\n"
     "  -g      Group requests at the start of each round.\n"
     "  -h      Print this help message.\n"
@@ -82,7 +82,6 @@ print_usage(void)
     NEMO_REQ_VERSION_PATCH,
     NEMO_PAYLOAD_VERSION,
     DEF_TARGET_COUNT,
-    DEF_COUNT,
     DEF_KEY,
     DEF_LENGTH,
     DEF_UDP_PORT,

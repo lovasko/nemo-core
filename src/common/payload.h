@@ -16,11 +16,11 @@
 
 // Constants.
 #define NEMO_PAYLOAD_MAGIC   0x444c
-#define NEMO_PAYLOAD_VERSION      8
+#define NEMO_PAYLOAD_VERSION      9
 
 // Memory size.
-#define NEMO_PAYLOAD_SIZE  104
-#define NEMO_HOST_NAME_SIZE 36
+#define NEMO_PAYLOAD_SIZE  128
+#define NEMO_HOST_NAME_SIZE 48
 
 // Payload.
 struct payload {
@@ -40,6 +40,7 @@ struct payload {
   uint64_t pl_mtm2;     ///< Steady time of response.
   uint64_t pl_rtm2;     ///< System time of response.
   char     pl_host[NEMO_HOST_NAME_SIZE]; ///< Host name.
+  uint8_t  pl_pad3[12]; ///< Padding(unused).
 };
 
 #endif

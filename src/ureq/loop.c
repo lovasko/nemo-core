@@ -48,6 +48,7 @@ request_loop(struct channel* ch, struct target* tg, const struct config* cf)
   bool retb;
   int reti;
   char hn[NEMO_HOST_NAME_SIZE];
+  int err;
 
   // Log the current configuration.
   log_config(cf);
@@ -56,8 +57,15 @@ request_loop(struct channel* ch, struct target* tg, const struct config* cf)
   (void)memset(hn, 0, sizeof(hn));
   reti = gethostname(hn, sizeof(hn) - 1);
   if (reti == -1) {
+    // Save the errno value so that it can be examined later.
+    err = errno;
+
     log(LL_WARN, true, "unable to obtain host name");
-    return false;
+
+    // Truncation of the host name is acceptable.
+    if (err != ENAMETOOLONG) {
+      return false;
+    }
   }
 
   // Print the CSV header of the standard output.

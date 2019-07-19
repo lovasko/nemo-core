@@ -101,6 +101,7 @@ respond_loop(struct channel* ch,
   uint64_t lim;
   uint64_t cur;
   char hn[NEMO_HOST_NAME_SIZE];
+  int err;
 
   log(LL_INFO, false, "starting the response loop");
   log_config(cf);
@@ -112,8 +113,15 @@ respond_loop(struct channel* ch,
   (void)memset(hn, 0, sizeof(hn));
   reti = gethostname(hn, sizeof(hn) - 1);
   if (reti == -1) {
+    // Save the errno value so that it can be examined later.
+    err = errno;
+
     log(LL_WARN, true, "unable to obtain host name");
-    return false;
+
+    // Truncation of the host name is acceptable.
+    if (err != ENAMETOOLONG) {
+      return false;
+    }
   }
 
   // Create the signal mask used for enabling signals during the pselect(2)

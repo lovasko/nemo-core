@@ -140,14 +140,6 @@ assign_name(struct channel* ch, const uint16_t port, const bool ipv4)
   struct sockaddr_storage ss;
   size_t len;
 
-  // Set the socket binding to be re-usable.
-  val = 1;
-  reti = setsockopt(ch->ch_sock, SOL_SOCKET, SO_REUSEADDR, &val, sizeof(val));
-  if (reti == -1) {
-    log(LL_WARN, true, "unable to set the socket address reusable");
-    return false;
-  }
-
   // Set the socket to only receive IPv6 traffic.
   if (ipv4 == false) {
     val = 1;

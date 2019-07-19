@@ -94,7 +94,7 @@ report_event(const struct payload* hpl,
   }
 
   (void)printf("%" PRIu64 ","   // key
-               "%" PRIu64 ","   // len
+               "%" PRIu16 ","   // len
                "%" PRIu64 ","   // seq_num
                "%" PRIu64 ","   // seq_len
                "%.*s,"          // host_req
